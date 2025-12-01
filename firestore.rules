@@ -1,0 +1,328 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ========== Helper Functions ==========
+    
+    // Authentication checks
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    function isTechnician() {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'technician';
+    }
+    
+    function isCustomer() {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'customer';
+    }
+    
+    // Data validation helpers
+    function isValidEmail(email) {
+      return email is string && email.matches('.*@.*\\..*');
+    }
+    
+    function isValidPhone(phone) {
+      return phone is string && phone.size() >= 10 && phone.size() <= 15;
+    }
+    
+    function isValidRole(role) {
+      return role in ['customer', 'technician', 'admin'];
+    }
+    
+    function isValidOrderStatus(status) {
+      return status in ['pending', 'confirmed', 'in_progress', 'completed', 'cancelled'];
+    }
+    
+    function isValidRating(rating) {
+      return rating is number && rating >= 1 && rating <= 5;
+    }
+
+    function isValidName(name) {
+      return name is string && name.size() >= 2 && name.size() <= 50;
+    }
+
+    function isValidDescription(desc) {
+      return desc is string && desc.size() >= 10 && desc.size() <= 1000;
+    }
+    
+    function isValidUrl(url) {
+      return url is string && (url == '' || url.matches('^https?://.*'));
+    }
+
+    function isFutureDate(date) {
+      return date is timestamp && date > request.time;
+    }
+    
+    // Field validation - only allow updating specific fields
+    function onlyUpdatesAllowedFields(allowedFields) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(allowedFields);
+    }
+
+    // ========== Users Collection ==========
+    match /users/{userId} {
+      // Anyone authenticated can read user profiles (for technician listings, booking)
+      allow read: if isAuthenticated();
+      
+      // User can create their own profile during signup
+      allow create: if isAuthenticated() 
+        && request.auth.uid == userId
+        && request.resource.data.keys().hasAll(['email', 'name', 'role', 'createdAt'])
+        && isValidEmail(request.resource.data.email)
+        && isValidName(request.resource.data.name)
+        && isValidRole(request.resource.data.role)
+        && request.resource.data.email == request.auth.token.email;
+      
+      // User can update their own profile, or admin can update any profile
+      allow update: if isOwner(userId) && (
+          // Regular users can only update these fields
+          onlyUpdatesAllowedFields(['name', 'phone', 'address', 'profileImageUrl', 'updatedAt'])
+          && isValidName(request.resource.data.name) // Name is required
+          && (request.resource.data.phone == null || isValidPhone(request.resource.data.phone))
+          && (request.resource.data.profileImageUrl == null || isValidUrl(request.resource.data.profileImageUrl))
+        )
+        || isAdmin(); // Admin can update anything
+      
+      // Only admin can delete users
+      allow delete: if isAdmin();
+    }
+
+    // ========== Services Collection ==========
+    match /services/{serviceId} {
+      // Services are publicly readable (even unauthenticated users can browse)
+      allow read: if true;
+      
+      // Only admin can create services
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasAll(['name', 'description', 'category', 'price', 'isActive', 'createdAt'])
+        && isValidName(request.resource.data.name)
+        && isValidDescription(request.resource.data.description)
+        && request.resource.data.category is string
+        && request.resource.data.price is number
+        && request.resource.data.price > 0
+        && request.resource.data.isActive is bool;
+      
+      // Only admin can update services
+      allow update: if isAdmin()
+        && isValidName(request.resource.data.name) // Required
+        && isValidDescription(request.resource.data.description) // Required
+        && request.resource.data.price is number // Required
+        && request.resource.data.price > 0;
+      
+      // Only admin can delete services
+      allow delete: if isAdmin();
+    }
+
+    // ========== Orders Collection ==========
+    match /orders/{orderId} {
+      // Users can read orders they're involved in (customer, technician, or admin)
+      allow read: if isAuthenticated() && (
+          resource.data.customerId == request.auth.uid || 
+          resource.data.technicianId == request.auth.uid || 
+          isAdmin()
+        );
+      
+      // Only customers can create orders
+      allow create: if isAuthenticated()
+        && isCustomer()
+        && request.resource.data.keys().hasAll(['serviceId', 'customerId', 'status', 'scheduledDate', 'createdAt'])
+        && request.resource.data.customerId == request.auth.uid
+        && isValidOrderStatus(request.resource.data.status)
+        && request.resource.data.status == 'pending' // New orders must start as pending
+        && isFutureDate(request.resource.data.scheduledDate);
+      
+      // Customers can update their own orders (e.g., cancel)
+      // Technicians can update orders assigned to them (e.g., status changes)
+      // Admins can update any order
+      allow update: if isAuthenticated() && (
+          // Customer can update their own order (limited fields)
+          (resource.data.customerId == request.auth.uid 
+            && onlyUpdatesAllowedFields(['status', 'updatedAt', 'notes'])
+            && isValidOrderStatus(request.resource.data.status))
+          // Technician can update assigned orders (limited fields)
+          || (resource.data.technicianId == request.auth.uid 
+            && onlyUpdatesAllowedFields(['status', 'updatedAt', 'completionNotes', 'completedAt'])
+            && isValidOrderStatus(request.resource.data.status))
+          // Admin can update anything
+          || isAdmin()
+        );
+      
+      // Only admin can delete orders
+      allow delete: if isAdmin();
+    }
+    
+    // ========== Reviews Collection ==========
+    match /reviews/{reviewId} {
+      // Anyone can read reviews (for public technician ratings)
+      allow read: if true;
+      
+      // Customers can create reviews for completed orders they placed
+      allow create: if isAuthenticated()
+        && isCustomer()
+        // Required fields validation
+        && request.resource.data.keys().hasAll(['id', 'orderId', 'customerId', 'technicianId', 'rating', 'comment', 'timestamp'])
+        // Ensure customer is the order owner
+        && request.resource.data.customerId == request.auth.uid
+        // Validate review ID matches document ID
+        && request.resource.data.id == reviewId
+        // Validate rating is between 1-5
+        && isValidRating(request.resource.data.rating)
+        // Validate comment length (required, 10-500 chars)
+        && request.resource.data.comment is string
+        && request.resource.data.comment.size() >= 10
+        && request.resource.data.comment.size() <= 500
+        // Validate optional fields
+        && (request.resource.data.get('qualityRating', null) == null || isValidRating(request.resource.data.qualityRating))
+        && (request.resource.data.get('professionalismRating', null) == null || isValidRating(request.resource.data.professionalismRating))
+        && (request.resource.data.get('punctualityRating', null) == null || isValidRating(request.resource.data.punctualityRating))
+        && (request.resource.data.get('valueRating', null) == null || isValidRating(request.resource.data.valueRating))
+        // Validate photo URLs if provided
+        && (request.resource.data.get('photoUrls', []).size() == 0 || 
+            request.resource.data.photoUrls.size() <= 5)
+        // Timestamp must be server-generated (close to current time)
+        && request.resource.data.timestamp is timestamp
+        && request.resource.data.timestamp > request.time - duration.value(1, 'm')
+        && request.resource.data.timestamp < request.time + duration.value(1, 'm');
+      
+      // Users can update their own reviews (within 24 hours of creation)
+      allow update: if isAuthenticated() 
+        && resource.data.customerId == request.auth.uid
+        // Only allow updating specific fields
+        && onlyUpdatesAllowedFields(['rating', 'comment', 'qualityRating', 'professionalismRating', 'punctualityRating', 'valueRating', 'photoUrls'])
+        // Must be within 24 hours of creation
+        && resource.data.timestamp > request.time - duration.value(24, 'h')
+        // Validate updated rating
+        && isValidRating(request.resource.data.rating)
+        // Validate updated comment
+        && request.resource.data.comment is string
+        && request.resource.data.comment.size() >= 10
+        && request.resource.data.comment.size() <= 500
+        // Validate optional ratings
+        && (request.resource.data.get('qualityRating', null) == null || isValidRating(request.resource.data.qualityRating))
+        && (request.resource.data.get('professionalismRating', null) == null || isValidRating(request.resource.data.professionalismRating))
+        && (request.resource.data.get('punctualityRating', null) == null || isValidRating(request.resource.data.punctualityRating))
+        && (request.resource.data.get('valueRating', null) == null || isValidRating(request.resource.data.valueRating));
+      
+      // Users can delete their own reviews (within 24 hours), or admin can delete any
+      allow delete: if isAuthenticated() && (
+          (resource.data.customerId == request.auth.uid 
+            && resource.data.timestamp > request.time - duration.value(24, 'h'))
+          || isAdmin()
+        );
+    }
+    
+    // ========== Notifications Collection ==========
+    match /notifications/{notificationId} {
+      // Users can only read their own notifications
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      
+      // Only server-side (Cloud Functions) should write notifications
+      // In production, this would be false, but for testing we allow authenticated writes
+      allow write: if false;
+    }
+    
+    // ========== Chat Collections ==========
+    
+    // Chat documents (conversation metadata)
+    match /chats/{chatId} {
+      // Users can read chats they're participants of
+      allow read: if isAuthenticated() && (
+          resource.data.participants.hasAny([request.auth.uid])
+          || isAdmin()
+        );
+      
+      // Users can create chats if they're a participant
+      allow create: if isAuthenticated()
+        // Must be a participant
+        && request.resource.data.participants.hasAny([request.auth.uid])
+        // Validate required fields
+        && request.resource.data.keys().hasAll(['id', 'orderId', 'participants', 'createdAt'])
+        // Chat ID must match document ID
+        && request.resource.data.id == chatId
+        // Participants must be exactly 2 users
+        && request.resource.data.participants is list
+        && request.resource.data.participants.size() == 2
+        // Order ID must be valid
+        && request.resource.data.orderId is string
+        && request.resource.data.orderId.size() > 0
+        // Timestamp validation
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.createdAt > request.time - duration.value(1, 'm')
+        && request.resource.data.createdAt < request.time + duration.value(1, 'm');
+      
+      // Participants can update chat metadata (last message, timestamps, unread counts)
+      allow update: if isAuthenticated()
+        && resource.data.participants.hasAny([request.auth.uid])
+        // Only allow updating specific fields
+        && onlyUpdatesAllowedFields(['lastMessage', 'lastMessageTime', 'unreadCount'])
+        // Validate last message if present
+        && (request.resource.data.get('lastMessage', '') is string 
+            && request.resource.data.lastMessage.size() <= 500)
+        // Validate last message time if present
+        && (request.resource.data.get('lastMessageTime', null) == null 
+            || request.resource.data.lastMessageTime is timestamp);
+      
+      // Chats are immutable (cannot be deleted)
+      allow delete: if false;
+      
+      // Messages subcollection
+      match /messages/{messageId} {
+        // Users can read messages in chats they're participants of
+        allow read: if isAuthenticated() && (
+            get(/databases/$(database)/documents/chats/$(chatId)).data.participants.hasAny([request.auth.uid])
+            || isAdmin()
+          );
+        
+        // Users can create messages in chats they're participants of
+        allow create: if isAuthenticated()
+          // Must be a participant
+          && get(/databases/$(database)/documents/chats/$(chatId)).data.participants.hasAny([request.auth.uid])
+          // Validate required fields
+          && request.resource.data.keys().hasAll(['id', 'senderId', 'text', 'timestamp', 'type', 'isRead'])
+          // Message ID must match document ID
+          && request.resource.data.id == messageId
+          // Sender must be the authenticated user
+          && request.resource.data.senderId == request.auth.uid
+          // Validate message text (required, 1-1000 chars)
+          && request.resource.data.text is string
+          && request.resource.data.text.size() >= 1
+          && request.resource.data.text.size() <= 1000
+          // Validate message type
+          && request.resource.data.type in ['text', 'image']
+          // Initial read status must be false
+          && request.resource.data.isRead == false
+          // Timestamp must be server-generated
+          && request.resource.data.timestamp is timestamp
+          && request.resource.data.timestamp > request.time - duration.value(1, 'm')
+          && request.resource.data.timestamp < request.time + duration.value(1, 'm')
+          // If type is image, imageUrl must be present and valid
+          && (request.resource.data.type != 'image' 
+              || (request.resource.data.get('imageUrl', '') is string 
+                  && request.resource.data.imageUrl.matches('^https?://.*')));
+        
+        // Messages can be updated only to mark as read
+        allow update: if isAuthenticated()
+          && get(/databases/$(database)/documents/chats/$(chatId)).data.participants.hasAny([request.auth.uid])
+          // Only read status can be updated
+          && onlyUpdatesAllowedFields(['isRead'])
+          // Can only change from false to true
+          && resource.data.isRead == false
+          && request.resource.data.isRead == true;
+        
+        // Messages are immutable (cannot be deleted)
+        allow delete: if false;
+      }
+    }
+  }
+}
