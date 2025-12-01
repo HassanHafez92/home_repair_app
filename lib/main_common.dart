@@ -25,6 +25,8 @@ import 'data/repositories/order_repository_impl.dart';
 import 'data/repositories/service_repository_impl.dart';
 import 'data/repositories/admin_repository_impl.dart';
 import 'blocs/auth/auth_bloc.dart';
+import 'blocs/auth/auth_state.dart';
+import 'models/user_model.dart';
 import 'blocs/service/service_bloc.dart';
 import 'blocs/service/service_event.dart';
 import 'blocs/order/customer_order_bloc.dart';
@@ -188,12 +190,40 @@ class MyApp extends StatelessWidget {
           final appRouter = AppRouter(context.read<AuthBloc>());
           // Set up notification tap handler
           NotificationService().onNotificationTapped = (String? payload) {
-            if (payload != null) {
+            if (payload != null && payload.isNotEmpty) {
               debugPrint('🔔 Navigating to payload: $payload');
-              // TODO: Implement specific navigation based on payload
-              // For now, we just log it. In a real app, you'd parse the payload
-              // and navigate to the specific screen, e.g.:
-              // appRouter.router.push('/orders/$payload');
+
+              // Get current user to determine navigation route
+              final authState = context.read<AuthBloc>().state;
+              if (authState is! AuthAuthenticated) {
+                debugPrint('🔔 User not authenticated, skipping navigation');
+                return;
+              }
+
+              final userRole = authState.user.role;
+
+              // Parse payload - it can be an orderId or a type:value format
+              // Format: just orderId OR "order:orderId" OR "chat:chatId"
+              if (payload.contains(':')) {
+                // Format: "type:value"
+                final parts = payload.split(':');
+                final type = parts[0];
+                final value = parts.length > 1 ? parts[1] : '';
+
+                switch (type) {
+                  case 'order':
+                    _navigateToOrder(appRouter, userRole, value);
+                    break;
+                  case 'chat':
+                    appRouter.router.push('/chat/$value');
+                    break;
+                  default:
+                    debugPrint('🔔 Unknown notification type: $type');
+                }
+              } else {
+                // Assume it's an orderId
+                _navigateToOrder(appRouter, userRole, payload);
+              }
             }
           };
           return MaterialApp.router(
@@ -212,4 +242,19 @@ class MyApp extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Helper function to navigate to order detail screen based on user role
+void _navigateToOrder(AppRouter appRouter, UserRole userRole, String orderId) {
+  if (orderId.isEmpty) {
+    debugPrint('🔔 Empty orderId, skipping navigation');
+    return;
+  }
+
+  final route = userRole == UserRole.technician
+      ? '/technician/order/$orderId'
+      : '/customer/order/$orderId';
+
+  debugPrint('🔔 Navigating to: $route');
+  appRouter.router.push(route);
 }
