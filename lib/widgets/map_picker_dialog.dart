@@ -14,7 +14,6 @@ class MapPickerDialog extends StatefulWidget {
 }
 
 class _MapPickerDialogState extends State<MapPickerDialog> {
-  GoogleMapController? _controller;
   LatLng? _selectedLocation;
   String? _selectedAreaName;
   bool _isLoading = false;
@@ -44,7 +43,6 @@ class _MapPickerDialogState extends State<MapPickerDialog> {
               target: _initialPosition,
               zoom: 12,
             ),
-            onMapCreated: (controller) => _controller = controller,
             onTap: _onMapTapped,
             markers: _selectedLocation != null
                 ? {

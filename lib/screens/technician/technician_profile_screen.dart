@@ -16,6 +16,9 @@ import 'edit_profile_screen.dart';
 import 'portfolio_screen.dart';
 import 'certifications_screen.dart';
 import 'service_areas_screen.dart';
+import 'account_settings_screen.dart';
+import 'privacy_settings_screen.dart';
+import 'notification_settings_screen.dart';
 
 class TechnicianProfileScreen extends StatefulWidget {
   const TechnicianProfileScreen({super.key});
@@ -258,9 +261,36 @@ class _TechnicianProfileScreenState extends State<TechnicianProfileScreen> {
               icon: Icons.settings_outlined,
               title: 'settings'.tr(),
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('comingSoon'.tr(args: ['settings'.tr()])),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AccountSettingsScreen(),
+                  ),
+                );
+              },
+            ),
+            _buildMenuItem(
+              context,
+              icon: Icons.notifications_outlined,
+              title: 'notifications'.tr(),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const NotificationSettingsScreen(),
+                  ),
+                );
+              },
+            ),
+            _buildMenuItem(
+              context,
+              icon: Icons.privacy_tip_outlined,
+              title: 'privacy'.tr(),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const PrivacySettingsScreen(),
                   ),
                 );
               },

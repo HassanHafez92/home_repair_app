@@ -253,18 +253,326 @@ If you must cancel:
 
 **Portfolio**:
 1. Go to **"Profile"** → **"Portfolio"**
-2. Upload photos of completed projects
-3. Add captions
-4. Customers can view your portfolio
+2. Tap **"Add Photo"** to upload completed project images
+3. **Add Captions**:
+   - Describe what was fixed
+   - Mention the service type (e.g., "Fixed leaking kitchen faucet")
+   - Keep it concise and professional
+4. **Photo Tips**:
+   - Use good lighting and clear angles
+   - Show before/after comparisons when possible
+   - Photos are automatically compressed for faster loading
+   - Maximum 10 portfolio items recommended
+5. Customers can view your portfolio when browsing technicians
+
+> **Tip**: High-quality portfolio photos increase booking rates by up to 40%
 
 ### Certifications & Licenses
 
 1. Go to **"Profile"** → **"Certifications"**
-2. Upload:
+2. Tap **"Add Certification"**
+3. Upload certificate image:
    - Professional licenses
    - Training certificates
    - Insurance documents
-3. Verified certifications boost your credibility
+   - Safety certifications
+4. **Enter Expiration Date** (if applicable):
+   - Select the date when the certificate expires
+   - The app will show warning indicators when certificates are:
+     - 🟡 Expiring within 30 days
+     - 🔴 Expired
+5. **Renewal Reminders**:
+   - You'll receive notifications 30 days before expiration
+   - Update expired certificates promptly to maintain credibility
+6. Verified certifications boost your profile visibility
+
+> **Important**: Expired certifications may affect your profile ranking
+
+---
+
+## Service Areas Management
+
+### Setting Your Service Area
+
+Define where you're willing to travel for jobs:
+
+1. Go to **"Profile"** → **"Edit Profile"** → **"Service Areas"**
+2. **Using the Map Picker**:
+   - Tap **"Set Service Area"**
+   - A map will open showing your current location
+   - **Pan and zoom** to view different areas
+   - **Tap on the map** to set your service center point
+   - Use the **radius slider** to define how far you'll travel (e.g., 10 km, 20 km)
+   - You can see the service area circle on the map
+3. **Add Multiple Areas** (if you serve different regions):
+   - Tap **"Add Another Area"**
+   - Repeat the process for each region
+4. Tap **"Save"** to update your service areas
+
+### How Service Areas Work
+
+- **Job Matching**: You'll only receive orders within your defined areas
+- **Distance Display**: Customers see if you serve their location
+- **Flexible Radius**: Adjust anytime based on your schedule
+- **Multiple Areas**: Useful if you work in different cities/districts
+
+> **Tip**: Larger service areas = more job opportunities, but consider travel time
+
+---
+
+## Notification Settings
+
+### Managing Notifications
+
+Control what notifications you receive and when:
+
+1. Go to **"Settings"** → **"Notifications"**
+2. **Toggle Notification Types**:
+   - 🔔 **New Order Alerts** - When new jobs match your services
+   - 💬 **Chat Messages** - Customer messages
+   - ⭐ **New Reviews** - When customers rate you
+   - 💰 **Payment Received** - Earnings notifications
+   - 📊 **Performance Updates** - Weekly summaries
+   - 🔄 **Order Status Changes** - Customer actions on orders
+
+### Notification Settings
+
+**Sound & Vibration**:
+- Toggle sound on/off
+- Toggle vibration on/off
+- Choose notification tone
+
+**Quiet Hours**:
+- Set times when you don't want notifications (e.g., 10 PM - 7 AM)
+- Emergency notifications may still come through
+
+**Push Notification Permissions**:
+- If not receiving notifications, check **device settings**:
+  - iOS: Settings → Notifications → Home Repair App
+  - Android: Settings → Apps → Home Repair App → Notifications
+
+> **Important**: Disable "New Order Alerts" when going offline to avoid missing opportunities
+
+---
+
+## Account Settings & Security
+
+### Update Account Information
+
+1. Go to **"Settings"** → **"Account"**
+2. Update:
+   - Email address
+   - Phone number
+   - Password
+
+### Change Password
+
+1. **"Settings"** → **"Account"** → **"Change Password"**
+2. Enter current password
+3. Enter new password (minimum 8 characters)
+4. Confirm new password
+5. Tap **"Update Password"**
+
+### Email Verification
+
+- Verify your email for account security
+- If unverified, check inbox for verification link
+- Resend verification: **"Settings"** → **"Account"** → **"Resend Verification"**
+
+### Privacy Settings
+
+**Profile Visibility**:
+- Control who can see your profile
+- Toggle **"Show in Public Directory"**
+
+**Data & Privacy**:
+- View what data is collected: **"Settings"** → **"Privacy Policy"**
+- Request data export: **"Settings"** → **"Download My Data"**
+- Delete account: **"Settings"** → **"Delete Account"** (permanent action)
+
+### Account Security Tips
+
+✅ **Do**:
+- Use a strong, unique password
+- Enable email verification
+- Log out on shared devices
+- Review login activity regularly
+
+❌ **Don't**:
+- Share your account credentials
+- Use the same password as other apps
+- Leave account logged in on public devices
+
+---
+
+## App Permissions
+
+### Required Permissions
+
+The app needs certain permissions to function properly:
+
+**📍 Location Access**:
+- **Why**: To show your location to customers and match you with nearby jobs
+- **When**: Always (to receive location-based job offers)
+- **How to Enable**:
+  - iOS: Settings → Privacy → Location Services → Home Repair App → "Always"
+  - Android: Settings → Apps → Home Repair App → Permissions → Location → "Allow all the time"
+
+**📷 Camera Access**:
+- **Why**: To take photos for portfolio, certifications, and order completion
+- **When**: Only when using camera features
+- **How to Enable**:
+  - iOS: Settings → Privacy → Camera → Home Repair App
+  - Android: Settings → Apps → Home Repair App → Permissions → Camera
+
+**🖼️ Photo Library Access**:
+- **Why**: To upload existing photos for profile and portfolio
+- **When**: Only when selecting photos
+- **How to Enable**:
+  - iOS: Settings → Privacy → Photos → Home Repair App
+  - Android: Settings → Apps → Home Repair App → Permissions → Storage
+
+**🔔 Notification Access**:
+- **Why**: To receive new order alerts and messages
+- **When**: Always (for timely job notifications)
+- **How to Enable**:
+  - iOS: Settings → Notifications → Home Repair App
+  - Android: Settings → Apps → Home Repair App → Notifications
+
+### Troubleshooting Permission Issues
+
+**"Location not available"**:
+1. Check if location services are enabled on your device
+2. Ensure app has "Always" location permission
+3. Restart the app
+
+**"Cannot upload photos"**:
+1. Check camera/photo permissions
+2. Ensure sufficient device storage
+3. Try restarting the app
+
+---
+
+## Troubleshooting
+
+### Common Issues & Solutions
+
+#### "I'm not receiving order notifications"
+
+**Check**:
+1. ✅ Your status is **Online** (not offline)
+2. ✅ Notification permissions are enabled
+3. ✅ "New Order Alerts" is toggled on in Settings
+4. ✅ Your service areas are properly set
+5. ✅ Internet connection is active
+6. ✅ Phone is not in Do Not Disturb mode
+
+**Fix**:
+- Go to **Settings** → **Notifications** and verify all settings
+- Check device notification permissions
+- Restart the app
+
+---
+
+#### "Customer can't see my location"
+
+**Check**:
+1. ✅ Location permissions set to "Always"
+2. ✅ Location services enabled on device
+3. ✅ Order status is "Traveling" or "Arrived"
+
+**Fix**:
+- Update order status to trigger location sharing
+- Check app permissions in device settings
+- Restart location services
+
+---
+
+#### "Chat messages not sending"
+
+**Check**:
+1. ✅ Active internet connection
+2. ✅ Order is still active (not completed/cancelled)
+3. ✅ No pending app updates
+
+**Fix**:
+- Check internet connection (Wi-Fi or mobile data)
+- Close and reopen the chat screen
+- Restart the app
+- Update to latest app version
+
+---
+
+#### "Photos not uploading"
+
+**Check**:
+1. ✅ Camera/photo permissions enabled
+2. ✅ Sufficient device storage space
+3. ✅ Stable internet connection
+4. ✅ Photo size not too large (max 10 MB)
+
+**Fix**:
+- Photos are automatically compressed, but very large files may fail
+- Try taking a new photo instead of uploading existing
+- Free up device storage
+- Check internet connection
+
+---
+
+#### "Payment not received"
+
+**Timeline**:
+- Payments are processed after customer approves the final price
+- Funds appear in your balance within **1-2 hours**
+- Withdrawals take **2-3 business days** to reach your bank
+
+**If Delayed**:
+1. Check if customer has approved payment
+2. Go to **"Earnings"** → **"Transaction History"**
+3. If payment is "Pending" for over 24 hours, contact support
+
+---
+
+#### "App crashes or freezes"
+
+**Try**:
+1. **Force close** the app and reopen
+2. **Restart** your device
+3. **Clear app cache** (Android: Settings → Apps → Home Repair App → Storage → Clear Cache)
+4. **Update** to the latest app version
+5. **Reinstall** the app (your data is saved in the cloud)
+
+**If persists**:
+- Contact support with details (what you were doing when it crashed)
+- Check if device meets minimum requirements (Android 6.0+ or iOS 12.0+)
+
+---
+
+#### "Cannot accept orders"
+
+**Possible Reasons**:
+1. ❌ Account is offline
+2. ❌ Profile incomplete or pending verification
+3. ❌ Too many active orders
+4. ❌ Order was already accepted by another technician
+
+**Fix**:
+- Ensure you're **Online**
+- Complete your profile setup
+- Check account status: **"Profile"** → **"Account Status"**
+
+---
+
+### Still Having Issues?
+
+If the above solutions don't work:
+1. **"Help"** → **"Report a Problem"**
+2. Include:
+   - Detailed description of the issue
+   - Screenshots (if applicable)
+   - What you were trying to do
+   - Device model and OS version
+3. Support will respond within 24 hours
 
 ---
 
@@ -360,19 +668,78 @@ Your profile ranking is based on:
 ## Frequently Asked Questions
 
 **Q: When do I get paid?**  
-A: After order completion and customer payment approval. Withdraw funds anytime.
+A: Payment is processed immediately after the customer approves your final price. Funds appear in your **Earnings** balance within 1-2 hours. You can withdraw to your bank account anytime (minimum SAR 100), and bank transfers take 2-3 business days.
 
 **Q: What if the customer doesn't pay?**  
-A: Payment is handled through the app. Contact support if there's an issue.
+A: Payment is handled securely through the app. The customer must approve payment before the order closes. If there's a dispute or delay beyond 24 hours, contact support at **"Help"** → **"Report Issue"** with the order details.
 
 **Q: Can I set my own prices?**  
-A: Visit fees and base prices are platform-set. You can adjust final price based on work complexity.
+A: Visit fees are platform-set based on service type. However, you can adjust the **final service price** based on:
+- Work complexity
+- Parts used (itemized)
+- Time spent
+- Additional services performed
+
+Always discuss pricing with the customer before starting work.
+
+**Q: What's the commission structure?**  
+A: The platform takes a **15% service fee** from each completed job. You receive 85% of the total payment. VAT is calculated separately and handled automatically.
 
 **Q: How do I handle disputes?**  
-A: Contact support immediately. Go to **"Help"** → **"Report Issue"**
+A: 
+1. Try to resolve directly with the customer via chat
+2. If unresolved, contact support: **"Help"** → **"Report Issue"**
+3. Provide evidence (photos, messages, completion notes)
+4. Support will review and mediate within 48 hours
+5. Serious disputes may require admin escalation
 
 **Q: What if I need to reschedule?**  
-A: Chat with the customer to agree on a new time, then update the order schedule.
+A: 
+1. Chat with the customer to agree on a new time
+2. Once confirmed, go to the order details
+3. Tap **"Reschedule"**
+4. Select the new date and time
+5. Customer receives a notification to approve
+6. Avoid rescheduling frequently - it affects your reliability rating
+
+**Q: Can I work outside the app?**  
+A: No. All transactions must go through the app for:
+- Payment protection
+- Insurance coverage
+- Rating system integrity
+- Platform sustainability
+
+Conducting off-platform business may result in account suspension.
+
+**Q: How do I increase my earnings?**  
+A:
+- Expand your service offerings
+- Increase your service area radius
+- Maintain high ratings (4.5+ stars)
+- Accept orders promptly
+- Build a strong portfolio
+- Collect positive reviews
+- Stay online during peak hours
+
+**Q: What if I make a mistake or damage something?**  
+A: 
+1. Inform the customer immediately
+2. Document the issue with photos
+3. Discuss resolution options
+4. Report to support: **"Help"** → **"Report Incident"**
+5. Platform insurance may cover accidental damage (terms apply)
+
+**Q: Can I refuse a job after accepting it?**  
+A: Yes, but it should be rare. If you must cancel:
+1. Go to order details → **"Cancel Order"**
+2. Select a valid reason
+3. Provide explanation
+4. Confirm cancellation
+
+**Warning**: Frequent cancellations (>10% of orders) may result in account warnings or suspension.
+
+**Q: How long does account approval take?**  
+A: Initial applications are reviewed within **24-48 hours**. You'll receive an email notification when approved. Check status in **"Profile"** → **"Account Status"**.
 
 ---
 
