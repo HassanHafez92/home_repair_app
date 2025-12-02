@@ -21,13 +21,21 @@ class TechnicianHomeScreen extends StatefulWidget {
 class _TechnicianHomeScreenState extends State<TechnicianHomeScreen> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = [
-    const TechnicianDashboard(),
-    const IncomingOrdersScreen(),
-    const ActiveJobsScreen(),
-    const EarningsScreen(),
-    const TechnicianProfileScreen(),
-  ];
+  late final List<Widget> _screens;
+
+  @override
+  void initState() {
+    super.initState();
+    _screens = [
+      TechnicianDashboard(
+        onTabChanged: (index) => setState(() => _currentIndex = index),
+      ),
+      const IncomingOrdersScreen(),
+      const ActiveJobsScreen(),
+      const EarningsScreen(),
+      const TechnicianProfileScreen(),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +75,9 @@ class _TechnicianHomeScreenState extends State<TechnicianHomeScreen> {
 }
 
 class TechnicianDashboard extends StatefulWidget {
-  const TechnicianDashboard({super.key});
+  final ValueChanged<int>? onTabChanged;
+
+  const TechnicianDashboard({super.key, this.onTabChanged});
 
   @override
   State<TechnicianDashboard> createState() => _TechnicianDashboardState();
@@ -318,7 +328,7 @@ class _TechnicianDashboardState extends State<TechnicianDashboard> {
                           'viewOrders'.tr(),
                           Icons.inbox,
                           () {
-                            // Navigate to orders tab
+                            widget.onTabChanged?.call(1);
                           },
                         ),
                       ),
@@ -328,7 +338,7 @@ class _TechnicianDashboardState extends State<TechnicianDashboard> {
                           'activeJobs'.tr(),
                           Icons.work,
                           () {
-                            // Navigate to jobs tab
+                            widget.onTabChanged?.call(2);
                           },
                         ),
                       ),

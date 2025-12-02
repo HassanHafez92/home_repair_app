@@ -95,6 +95,7 @@
     "revenue": "Revenue",
     "pendingApprovals": "Pending Approvals",
     "recentActivity": "Recent Activity",
+    "recentTransactions": "Recent Transactions",
     "newOrderCreated": "New order #{} created",
     "minutesAgo": "{} minutes ago",
     "jobs": "Jobs",
