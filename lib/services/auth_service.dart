@@ -191,6 +191,60 @@ class AuthService {
     );
   }
 
+  // Update password (requires reauthentication for security)
+  Future<void> updatePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      final user = currentUser;
+      if (user == null || user.email == null) {
+        throw Exception('No user logged in');
+      }
+
+      // Reauthenticate user before changing password
+      final credential = EmailAuthProvider.credential(
+        email: user.email!,
+        password: currentPassword,
+      );
+      await user.reauthenticateWithCredential(credential);
+
+      // Update password
+      await user.updatePassword(newPassword);
+    } on FirebaseAuthException catch (e) {
+      throw _handleAuthException(e);
+    } catch (e) {
+      throw Exception('Failed to update password: $e');
+    }
+  }
+
+  // Update email (requires reauthentication and verification)
+  Future<void> updateEmail({
+    required String currentPassword,
+    required String newEmail,
+  }) async {
+    try {
+      final user = currentUser;
+      if (user == null || user.email == null) {
+        throw Exception('No user logged in');
+      }
+
+      // Reauthenticate user before changing email
+      final credential = EmailAuthProvider.credential(
+        email: user.email!,
+        password: currentPassword,
+      );
+      await user.reauthenticateWithCredential(credential);
+
+      // Send verification to new email before updating
+      await user.verifyBeforeUpdateEmail(newEmail);
+    } on FirebaseAuthException catch (e) {
+      throw _handleAuthException(e);
+    } catch (e) {
+      throw Exception('Failed to update email: $e');
+    }
+  }
+
   // Helper to handle Firebase Auth Exceptions
   Exception _handleAuthException(FirebaseAuthException e) {
     switch (e.code) {
