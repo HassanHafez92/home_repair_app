@@ -14,7 +14,10 @@ class TechnicianModel extends UserModel {
   final String? nationalId;
   final List<String> specializations;
   final List<String> portfolioUrls;
+  final List<String> serviceAreas;
+  final List<String> certifications;
   final int yearsOfExperience;
+  final double? hourlyRate;
   final TechnicianStatus status;
   final double rating;
   final int completedJobs;
@@ -33,11 +36,14 @@ class TechnicianModel extends UserModel {
     this.nationalId,
     this.specializations = const [],
     this.portfolioUrls = const [],
+    this.serviceAreas = const [],
+    this.certifications = const [],
     this.yearsOfExperience = 0,
     this.status = TechnicianStatus.pending,
     this.rating = 0.0,
     this.completedJobs = 0,
     this.isAvailable = false,
+    this.hourlyRate,
     this.location,
   }) : super(role: UserRole.technician);
 

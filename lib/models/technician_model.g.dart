@@ -27,6 +27,16 @@ TechnicianModel _$TechnicianModelFromJson(Map<String, dynamic> json) =>
               ?.map((e) => e as String)
               .toList() ??
           const [],
+      serviceAreas:
+          (json['serviceAreas'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
+      certifications:
+          (json['certifications'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
       yearsOfExperience: (json['yearsOfExperience'] as num?)?.toInt() ?? 0,
       status:
           $enumDecodeNullable(_$TechnicianStatusEnumMap, json['status']) ??
@@ -34,6 +44,7 @@ TechnicianModel _$TechnicianModelFromJson(Map<String, dynamic> json) =>
       rating: (json['rating'] as num?)?.toDouble() ?? 0.0,
       completedJobs: (json['completedJobs'] as num?)?.toInt() ?? 0,
       isAvailable: json['isAvailable'] as bool? ?? false,
+      hourlyRate: (json['hourlyRate'] as num?)?.toDouble(),
       location: json['location'] as Map<String, dynamic>?,
     );
 
@@ -50,7 +61,10 @@ Map<String, dynamic> _$TechnicianModelToJson(TechnicianModel instance) =>
       'nationalId': instance.nationalId,
       'specializations': instance.specializations,
       'portfolioUrls': instance.portfolioUrls,
+      'serviceAreas': instance.serviceAreas,
+      'certifications': instance.certifications,
       'yearsOfExperience': instance.yearsOfExperience,
+      'hourlyRate': instance.hourlyRate,
       'status': _$TechnicianStatusEnumMap[instance.status]!,
       'rating': instance.rating,
       'completedJobs': instance.completedJobs,
