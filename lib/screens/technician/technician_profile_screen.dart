@@ -11,6 +11,11 @@ import '../../services/review_service.dart';
 import '../../models/technician_stats.dart';
 import '../../models/review_model.dart';
 import '../../widgets/custom_button.dart';
+import '../../models/technician_model.dart';
+import 'edit_profile_screen.dart';
+import 'portfolio_screen.dart';
+import 'certifications_screen.dart';
+import 'service_areas_screen.dart';
 
 class TechnicianProfileScreen extends StatefulWidget {
   const TechnicianProfileScreen({super.key});
@@ -26,6 +31,7 @@ class _TechnicianProfileScreenState extends State<TechnicianProfileScreen> {
 
   TechnicianStats? _stats;
   List<ReviewModel> _reviews = [];
+  TechnicianModel? _technician;
   bool _isLoading = true;
 
   @override
@@ -42,11 +48,15 @@ class _TechnicianProfileScreenState extends State<TechnicianProfileScreen> {
       try {
         final stats = await _firestoreService.getTechnicianStats(user.uid);
         final reviews = await _reviewService.getReviewsForTechnician(user.uid);
+        final userData = await _firestoreService.getUser(user.uid);
 
         if (mounted) {
           setState(() {
             _stats = stats;
             _reviews = reviews;
+            if (userData is TechnicianModel) {
+              _technician = userData;
+            }
             _isLoading = false;
           });
         }
@@ -68,8 +78,7 @@ class _TechnicianProfileScreenState extends State<TechnicianProfileScreen> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    // Mock specializations for now as they aren't in TechnicianModel yet
-    const specializations = ['Plumbing', 'Electrical'];
+    // Mock specializations removed
 
     return Scaffold(
       appBar: AppBar(title: Text('profile'.tr())),
@@ -165,27 +174,30 @@ class _TechnicianProfileScreenState extends State<TechnicianProfileScreen> {
             ],
 
             // Specializations
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'specializations'.tr(),
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+            if (_technician != null &&
+                _technician!.specializations.isNotEmpty) ...[
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'specializations'.tr(),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              children: specializations.map((spec) {
-                return Chip(
-                  label: Text(spec),
-                  backgroundColor: Colors.blue.withValues(alpha: 0.1),
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 32),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                children: _technician!.specializations.map((spec) {
+                  return Chip(
+                    label: Text(spec),
+                    backgroundColor: Colors.blue.withValues(alpha: 0.1),
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 32),
+            ],
 
             // Menu Items
             _buildMenuItem(
@@ -193,9 +205,10 @@ class _TechnicianProfileScreenState extends State<TechnicianProfileScreen> {
               icon: Icons.person_outline,
               title: 'editProfile'.tr(),
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('comingSoon'.tr(args: ['editProfile'.tr()])),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const EditProfileScreen(),
                   ),
                 );
               },
@@ -206,9 +219,10 @@ class _TechnicianProfileScreenState extends State<TechnicianProfileScreen> {
               icon: Icons.work_outline,
               title: 'portfolio'.tr(),
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('comingSoon'.tr(args: ['portfolio'.tr()])),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const PortfolioScreen(),
                   ),
                 );
               },
@@ -218,11 +232,10 @@ class _TechnicianProfileScreenState extends State<TechnicianProfileScreen> {
               icon: Icons.card_membership,
               title: 'certifications'.tr(),
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      'comingSoon'.tr(args: ['certifications'.tr()]),
-                    ),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CertificationsScreen(),
                   ),
                 );
               },
@@ -232,9 +245,10 @@ class _TechnicianProfileScreenState extends State<TechnicianProfileScreen> {
               icon: Icons.location_on_outlined,
               title: 'serviceAreas'.tr(),
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('comingSoon'.tr(args: ['serviceAreas'.tr()])),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ServiceAreasScreen(),
                   ),
                 );
               },
