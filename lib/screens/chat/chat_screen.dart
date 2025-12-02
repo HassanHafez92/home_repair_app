@@ -2,10 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:uuid/uuid.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'dart:io';
 
 import '../../models/message_model.dart';
 import '../../services/chat_service.dart';
 import '../../services/auth_service.dart';
+import '../../widgets/full_screen_image_view.dart';
 
 class ChatScreen extends StatefulWidget {
   final String chatId;
@@ -27,7 +31,10 @@ class _ChatScreenState extends State<ChatScreen> {
   final _messageController = TextEditingController();
   final _chatService = ChatService();
   final _scrollController = ScrollController();
+  final _imagePicker = ImagePicker();
+
   bool _isSending = false;
+  bool _isUploading = false;
 
   @override
   void initState() {
@@ -92,6 +99,82 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final XFile? pickedFile = await _imagePicker.pickImage(
+        source: source,
+        imageQuality: 70,
+      );
+
+      if (pickedFile == null) return;
+
+      if (!mounted) return;
+
+      setState(() => _isUploading = true);
+
+      final authService = Provider.of<AuthService>(context, listen: false);
+      final user = authService.currentUser;
+      if (user == null) return;
+
+      // Upload image
+      final imageUrl = await _chatService.uploadChatImage(
+        File(pickedFile.path),
+        widget.chatId,
+      );
+
+      // Send message
+      final message = MessageModel(
+        id: const Uuid().v4(),
+        senderId: user.uid,
+        text: imageUrl, // Store URL in text field for image messages
+        timestamp: DateTime.now(),
+        type: MessageType.image,
+      );
+
+      await _chatService.sendMessage(widget.chatId, message);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('failedToUploadImage'.tr())));
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isUploading = false);
+      }
+    }
+  }
+
+  void _showAttachmentOptions() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: Text('camera'.tr()),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.camera);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: Text('gallery'.tr()),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.gallery);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
   @override
   Widget build(BuildContext context) {
     final authService = Provider.of<AuthService>(context, listen: false);
@@ -182,13 +265,48 @@ class _ChatScreenState extends State<ChatScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                Text(
-                                  message.text,
-                                  style: TextStyle(
-                                    color: isMe ? Colors.white : Colors.black87,
-                                    fontSize: 16,
+                                if (message.type == MessageType.image)
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => FullScreenImageView(
+                                            imageUrl: message.text,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: CachedNetworkImage(
+                                        imageUrl: message.text,
+                                        placeholder: (context, url) =>
+                                            const SizedBox(
+                                              width: 150,
+                                              height: 150,
+                                              child: Center(
+                                                child:
+                                                    CircularProgressIndicator(),
+                                              ),
+                                            ),
+                                        errorWidget: (context, url, error) =>
+                                            const Icon(Icons.error),
+                                        width: 200,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  )
+                                else
+                                  Text(
+                                    message.text,
+                                    style: TextStyle(
+                                      color: isMe
+                                          ? Colors.white
+                                          : Colors.black87,
+                                      fontSize: 16,
+                                    ),
                                   ),
-                                ),
                                 const SizedBox(height: 4),
                                 Text(
                                   DateFormat.jm().format(message.timestamp),
@@ -226,12 +344,8 @@ class _ChatScreenState extends State<ChatScreen> {
               child: Row(
                 children: [
                   IconButton(
-                    onPressed: () {
-                      // TODO: Implement image attachment
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('comingSoon'.tr())),
-                      );
-                    },
+                    onPressed: _isUploading ? null : _showAttachmentOptions,
+
                     icon: const Icon(Icons.attach_file),
                     color: Colors.grey[600],
                   ),

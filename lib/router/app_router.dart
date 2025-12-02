@@ -107,6 +107,8 @@ class AppRouter {
         // If logged in but email not verified, redirect to verification screen
         if (isLoggedIn && !isEmailVerification) {
           final authService = AuthService();
+          // Reload user to get fresh verification status
+          authService.reloadUser();
           if (!authService.isEmailVerified) {
             debugPrint(
               'AppRouter: Email not verified, redirecting to /email-verification',

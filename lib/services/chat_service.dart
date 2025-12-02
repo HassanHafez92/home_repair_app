@@ -3,9 +3,12 @@ import 'package:uuid/uuid.dart';
 import '../models/chat_model.dart';
 import '../models/message_model.dart';
 import '../utils/exceptions.dart';
+import 'dart:io';
+import 'storage_service.dart';
 
 class ChatService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final StorageService _storageService = StorageService();
 
   // Collection references
   CollectionReference<Map<String, dynamic>> get _chatsCollection =>
@@ -82,6 +85,18 @@ class ChatService {
       });
     } catch (e) {
       throw FirestoreException('Failed to send message', originalError: e);
+    }
+  }
+
+  // Upload chat image
+  Future<String> uploadChatImage(File imageFile, String chatId) async {
+    try {
+      final String fileName =
+          '${DateTime.now().millisecondsSinceEpoch}_${imageFile.path.split('/').last}';
+      final String storagePath = 'chat_images/$chatId/$fileName';
+      return await _storageService.uploadFile(storagePath, imageFile);
+    } catch (e) {
+      throw FirestoreException('Failed to upload chat image', originalError: e);
     }
   }
 

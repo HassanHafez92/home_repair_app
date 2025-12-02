@@ -73,7 +73,7 @@ flutter run
 ### Core Documentation
 - **[Architecture Guide](ARCHITECTURE.md)** - BLoC pattern, data flow, design decisions
 - **[Firestore Schema](FIRESTORE_SCHEMA.md)** - Complete database structure and security rules
-- **[API Reference](docs/api/)** - Service layer and data models documentation
+- **[API Reference](docs/API_REFERENCE.md)** - Service layer and data models documentation
 
 ### Developer Guides
 - **[Onboarding](docs/guides/developer_onboarding.md)** - Environment setup and first-time configuration

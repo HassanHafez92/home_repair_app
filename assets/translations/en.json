@@ -336,5 +336,14 @@
     "confirmLocation": "Confirm Location",
     "navigateToCustomer": "Navigate to Customer",
     "unableToMakeCall": "Unable to make call",
-    "unableToLaunchWhatsApp": "Unable to launch WhatsApp"
+    "unableToLaunchWhatsApp": "Unable to launch WhatsApp",
+    "verifyEmail": "Verify Email",
+    "signOut": "Sign Out",
+    "verifyYourEmail": "Verify Your Email",
+    "verificationEmailDescription": "We've sent a verification email to your address. Please check your inbox and click the verification link to continue.",
+    "resendEmail": "Resend Email",
+    "alreadyVerified": "Already Verified?",
+    "emailVerificationHelp": "If you didn't receive the email, check your spam folder or click 'Resend Email'.",
+    "checkingVerification": "Checking verification status...",
+    "emailVerifiedSuccess": "Email verified successfully!"
 }

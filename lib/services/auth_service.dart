@@ -8,15 +8,17 @@ import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  GoogleSignIn? _googleSignIn;
+  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
+  bool _isGoogleSignInInitialized = false;
 
   // Initialize GoogleSignIn instance
   Future<void> _ensureGoogleSignInInitialized() async {
-    if (_googleSignIn == null) {
-      final instance = GoogleSignIn.instance;
-      // Note: In version 7.x, scopes are requested through authorizationClient
-      await instance.initialize();
-      _googleSignIn = instance;
+    if (!_isGoogleSignInInitialized) {
+      // Initialize GoogleSignIn
+      // Note: serverClientId is usually configured in google-services.json or Info.plist.
+      // If needed, check if initialize() supports it or use other configuration methods.
+      await _googleSignIn.initialize();
+      _isGoogleSignInInitialized = true;
     }
   }
 
@@ -73,27 +75,16 @@ class AuthService {
       await _ensureGoogleSignInInitialized();
 
       // Try lightweight authentication first
-      GoogleSignInAccount? googleUser = await _googleSignIn!
+      GoogleSignInAccount? googleUser = await _googleSignIn
           .attemptLightweightAuthentication();
 
       // If lightweight auth fails, use interactive authentication
-      if (googleUser == null) {
-        if (_googleSignIn!.supportsAuthenticate()) {
-          googleUser = await _googleSignIn!.authenticate();
-        } else {
-          // Fallback for platforms that don't support authenticate()
-          throw Exception(
-            'Interactive sign-in not supported on this platform. Please use platform-specific UI.',
-          );
-        }
-      }
+      googleUser ??= await _googleSignIn.authenticate();
 
       // Obtain the auth details from the request
-      // Note: In version 7.x, authentication is a property, not a method
       final GoogleSignInAuthentication googleAuth = googleUser.authentication;
 
       // Create a new credential
-      // Note: In version 7.x, only idToken is available (no accessToken)
       final OAuthCredential credential = GoogleAuthProvider.credential(
         idToken: googleAuth.idToken,
       );
@@ -137,8 +128,8 @@ class AuthService {
       final futures = <Future>[_auth.signOut(), FacebookAuth.instance.logOut()];
 
       // Only sign out from Google if it was initialized
-      if (_googleSignIn != null) {
-        futures.add(_googleSignIn!.signOut());
+      if (_isGoogleSignInInitialized) {
+        futures.add(_googleSignIn.signOut());
       }
 
       await Future.wait(futures);

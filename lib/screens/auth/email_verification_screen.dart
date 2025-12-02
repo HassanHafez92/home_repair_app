@@ -68,7 +68,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('emailVerifiedSuccess'.tr()),
+              content: Text('email Verified Success'.tr()),
               backgroundColor: Theme.of(context).colorScheme.primary,
               behavior: SnackBarBehavior.floating,
             ),
@@ -102,7 +102,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('verificationEmailSent'.tr()),
+            content: Text('verification Email Sent'.tr()),
             backgroundColor: Colors.green,
             behavior: SnackBarBehavior.floating,
           ),
@@ -112,7 +112,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('failedToSendEmail'.tr()),
+            content: Text('failed To Send Email'.tr()),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
           ),
@@ -135,7 +135,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('failedToSignOut'.tr()),
+            content: Text('failed To Sign Out'.tr()),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
           ),
@@ -150,12 +150,12 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('verifyEmail'.tr()),
+        title: Text('verify Email'.tr()),
         actions: [
           TextButton.icon(
             onPressed: _signOut,
             icon: const Icon(Icons.logout),
-            label: Text('signOut'.tr()),
+            label: Text('sign Out'.tr()),
           ),
         ],
       ),
@@ -183,7 +183,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
 
               // Title
               Text(
-                'verifyYourEmail'.tr(),
+                'verify Your Email'.tr(),
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -194,7 +194,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
 
               // Description
               Text(
-                'verificationEmailDescription'.tr(args: [user?.email ?? '']),
+                'verification Email Description'.tr(args: [user?.email ?? '']),
                 style: Theme.of(context).textTheme.bodyLarge,
                 textAlign: TextAlign.center,
               ),
@@ -214,7 +214,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       ),
                       const SizedBox(width: 12),
-                      Text('checkingVerification'.tr()),
+                      Text('checking Verification'.tr()),
                     ],
                   ),
                 ),
@@ -229,7 +229,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.send),
-                label: Text('resendEmail'.tr()),
+                label: Text('resend Email'.tr()),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 32,
@@ -244,7 +244,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
               TextButton.icon(
                 onPressed: _isChecking ? null : _checkEmailVerified,
                 icon: const Icon(Icons.refresh),
-                label: Text('alreadyVerified'.tr()),
+                label: Text('already Verified'.tr()),
               ),
 
               const SizedBox(height: 32),
@@ -264,7 +264,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'emailVerificationHelp'.tr(),
+                      'email Verification Help'.tr(),
                       style: Theme.of(context).textTheme.bodySmall,
                       textAlign: TextAlign.center,
                     ),
