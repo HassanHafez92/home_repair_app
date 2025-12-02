@@ -16,6 +16,30 @@ class PrivacySettingsScreen extends StatelessWidget {
       appBar: AppBar(title: Text('privacySettings'.tr())),
       body: ListView(
         children: [
+          // Profile Visibility Section
+          _buildSectionHeader('profileVisibility'.tr()),
+
+          FutureBuilder<bool>(
+            future: _getProfileVisibility(context),
+            builder: (context, snapshot) {
+              final isVisible = snapshot.data ?? true;
+              return SwitchListTile(
+                secondary: const Icon(
+                  Icons.visibility_outlined,
+                  color: Colors.blue,
+                ),
+                title: Text('profileVisibility'.tr()),
+                subtitle: Text('showProfileInSearch'.tr()),
+                value: isVisible,
+                onChanged: snapshot.hasData
+                    ? (value) => _updateProfileVisibility(context, value)
+                    : null,
+              );
+            },
+          ),
+
+          const Divider(height: 32),
+
           // Data Management Section
           _buildSectionHeader('dataManagement'.tr()),
 
@@ -571,6 +595,56 @@ For questions about these terms, contact support@homerepair.com
       // Close loading if still open
       if (context.mounted) Navigator.pop(context);
 
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('${'error'.tr()}: $e')));
+      }
+    }
+  }
+
+  Future<bool> _getProfileVisibility(BuildContext context) async {
+    try {
+      final authService = Provider.of<AuthService>(context, listen: false);
+      final user = authService.currentUser;
+
+      if (user == null) return true;
+
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      return doc.data()?['profileVisible'] ?? true;
+    } catch (e) {
+      return true; // Default to visible if error
+    }
+  }
+
+  Future<void> _updateProfileVisibility(
+    BuildContext context,
+    bool isVisible,
+  ) async {
+    try {
+      final authService = Provider.of<AuthService>(context, listen: false);
+      final user = authService.currentUser;
+
+      if (user == null) return;
+
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).update(
+        {'profileVisible': isVisible},
+      );
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              isVisible ? 'profileNowVisible'.tr() : 'profileNowHidden'.tr(),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,
