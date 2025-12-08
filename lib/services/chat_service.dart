@@ -211,8 +211,7 @@ class ChatService {
       final messagesRef = chatRef.collection('messages');
 
       await _firestore.runTransaction((transaction) async {
-        transaction.set(messagesRef.doc(message.id), message.toJson());
-
+        // IMPORTANT: All reads must happen before any writes in Firestore transactions
         final chatDoc = await transaction.get(chatRef);
         if (!chatDoc.exists) throw Exception('Support chat not found');
 
@@ -244,6 +243,8 @@ class ChatService {
           updates['status'] = 'inProgress';
         }
 
+        // Now perform all writes
+        transaction.set(messagesRef.doc(message.id), message.toJson());
         transaction.update(chatRef, updates);
       });
     } catch (e) {
