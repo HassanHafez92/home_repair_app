@@ -53,13 +53,16 @@ class _ServiceAreasScreenState extends State<ServiceAreasScreen> {
     }
   }
 
-  Future<void> _pickOnMap() async {
+  Future<void> _pickAreaFromMap() async {
     final selectedArea = await Navigator.push<String>(
       context,
-      MaterialPageRoute(builder: (context) => const MapPickerDialog()),
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (context) => const MapPickerDialog(),
+      ),
     );
 
-    if (selectedArea != null && selectedArea.isNotEmpty) {
+    if (selectedArea != null && selectedArea.isNotEmpty && mounted) {
       _areaController.text = selectedArea;
       await _addArea();
     }
@@ -176,6 +179,15 @@ class _ServiceAreasScreenState extends State<ServiceAreasScreen> {
                                 size: 32,
                                 color: Colors.blue,
                               ),
+                      ),
+                      IconButton(
+                        onPressed: _isUpdating ? null : _pickAreaFromMap,
+                        icon: const Icon(
+                          Icons.map,
+                          size: 32,
+                          color: Colors.green,
+                        ),
+                        tooltip: 'pickFromMap'.tr(),
                       ),
                     ],
                   ),

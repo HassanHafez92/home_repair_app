@@ -1,15 +1,123 @@
 rules_version = '2';
+
+// Firebase Storage Security Rules
+// Purpose: Secure file storage with path-specific, ownership-validated access control.
+// 
+// IMPORTANT: Deploy these rules to Firebase after any changes:
+//   firebase deploy --only storage
+
 service firebase.storage {
   match /b/{bucket}/o {
-    // Allow access to profile pictures
-    match /profile_pictures/{fileName} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null;
+    
+    // ========== Helper Functions ==========
+    
+    // Check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
     }
     
-    // Default rule
+    // Check if requesting user is the owner
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Validate file is an image
+    function isImage() {
+      return request.resource.contentType.matches('image/.*');
+    }
+    
+    // Validate file size (max 5MB)
+    function isValidSize() {
+      return request.resource.size < 5 * 1024 * 1024;
+    }
+    
+    // Validate file for upload (image + size check)
+    function isValidImageUpload() {
+      return isImage() && isValidSize();
+    }
+    
+    // ========== Profile Pictures ==========
+    // Path: /profile_pictures/{userId}/{fileName}
+    // - Read: Any authenticated user (for displaying profiles)
+    // - Write: Only the profile owner, must be valid image
+    
+    match /profile_pictures/{userId}/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(userId) && isValidImageUpload();
+    }
+    
+    // Legacy path without userId (for backwards compatibility)
+    // TODO: Migrate existing files and remove this rule
+    match /profile_pictures/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isValidImageUpload();
+    }
+    
+    // ========== Order Photos ==========
+    // Path: /orders/{orderId}/{fileName}
+    // - Read/Write: Authenticated users (order access validated by Firestore rules)
+    // Note: Full order participant validation would require Cloud Functions
+    
+    match /orders/{orderId}/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isValidImageUpload();
+    }
+    
+    // ========== Review Photos ==========
+    // Path: /reviews/{reviewId}/{fileName}
+    // - Read: Public (reviews are publicly visible)
+    // - Write: Authenticated users, must be valid image
+    
+    match /reviews/{reviewId}/{fileName} {
+      allow read: if true;
+      allow write: if isAuthenticated() && isValidImageUpload();
+    }
+    
+    // ========== Chat Images ==========
+    // Path: /chats/{chatId}/{fileName}
+    // - Read/Write: Authenticated users (chat access validated by Firestore rules)
+    
+    match /chats/{chatId}/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isValidImageUpload();
+    }
+    
+    // ========== Technician Portfolio ==========
+    // Path: /portfolio/{userId}/{fileName}
+    // - Read: Public (portfolio is publicly visible)
+    // - Write: Only the portfolio owner
+    
+    match /portfolio/{userId}/{fileName} {
+      allow read: if true;
+      allow write: if isOwner(userId) && isValidImageUpload();
+    }
+    
+    // ========== Technician Certifications ==========
+    // Path: /certifications/{userId}/{fileName}
+    // - Read: Authenticated users
+    // - Write: Only the certification owner
+    
+    match /certifications/{userId}/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(userId) && isValidImageUpload();
+    }
+    
+    // ========== Service Icons ==========
+    // Path: /services/{serviceId}/{fileName}
+    // - Read: Public (service images are publicly visible)
+    // - Write: Deny (admin uploads via Firebase Console or Cloud Functions)
+    
+    match /services/{serviceId}/{fileName} {
+      allow read: if true;
+      allow write: if false; // Admin only via Console/Functions
+    }
+    
+    // ========== Default Rule ==========
+    // Deny all other paths by default (secure by default)
+    // This replaces the previous overly-permissive catch-all rule
+    
     match /{allPaths=**} {
-      allow read, write: if request.auth != null;
+      allow read, write: if false;
     }
   }
 }

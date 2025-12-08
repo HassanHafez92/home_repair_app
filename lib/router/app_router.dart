@@ -35,6 +35,7 @@ import '../services/firestore_service.dart';
 import '../models/order_model.dart';
 import '../screens/chat/chat_list_screen.dart';
 import '../screens/chat/chat_screen.dart';
+import '../widgets/async_data_screen.dart';
 
 // Helper class to convert BLoC stream to ChangeNotifier for GoRouter
 class GoRouterRefreshStream extends ChangeNotifier {
@@ -196,9 +197,11 @@ class AppRouter {
               context,
               listen: false,
             );
-            return OrderDetailsScreenWrapper(
-              orderId: orderId,
-              firestoreService: firestoreService,
+            return AsyncDataScreen<OrderModel>(
+              future: firestoreService.getOrder(orderId),
+              builder: (order) => OrderDetailsScreen(order: order),
+              errorTitle: 'Error',
+              errorMessage: 'Order not found',
             );
           },
         ),
@@ -216,9 +219,11 @@ class AppRouter {
               context,
               listen: false,
             );
-            return TechnicianOrderDetailScreenWrapper(
-              orderId: orderId,
-              firestoreService: firestoreService,
+            return AsyncDataScreen<OrderModel>(
+              future: firestoreService.getOrder(orderId),
+              builder: (order) => OrderDetailScreen(order: order),
+              errorTitle: 'Error',
+              errorMessage: 'Order not found',
             );
           },
         ),
@@ -249,71 +254,6 @@ class AppRouter {
           },
         ),
       ],
-    );
-  }
-}
-
-// Wrapper to fetch order with proper Provider context
-class OrderDetailsScreenWrapper extends StatelessWidget {
-  final String orderId;
-  final FirestoreService firestoreService;
-
-  const OrderDetailsScreenWrapper({
-    super.key,
-    required this.orderId,
-    required this.firestoreService,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<OrderModel?>(
-      future: firestoreService.getOrder(orderId),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
-        if (snapshot.hasError || !snapshot.hasData) {
-          return Scaffold(
-            appBar: AppBar(title: const Text('Error')),
-            body: const Center(child: Text('Order not found')),
-          );
-        }
-        return OrderDetailsScreen(order: snapshot.data!);
-      },
-    );
-  }
-}
-
-class TechnicianOrderDetailScreenWrapper extends StatelessWidget {
-  final String orderId;
-  final FirestoreService firestoreService;
-
-  const TechnicianOrderDetailScreenWrapper({
-    super.key,
-    required this.orderId,
-    required this.firestoreService,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<OrderModel?>(
-      future: firestoreService.getOrder(orderId),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
-        if (snapshot.hasError || !snapshot.hasData) {
-          return Scaffold(
-            appBar: AppBar(title: const Text('Error')),
-            body: const Center(child: Text('Order not found')),
-          );
-        }
-        return OrderDetailScreen(order: snapshot.data!);
-      },
     );
   }
 }
