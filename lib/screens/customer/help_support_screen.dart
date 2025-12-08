@@ -1,9 +1,13 @@
 // File: lib/screens/customer/help_support_screen.dart
-// Purpose: Help & Support screen with FAQ, contact options, and live chat placeholder.
+// Purpose: Help & Support screen with FAQ, contact options, and live chat.
 
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:uuid/uuid.dart';
+import '../../services/chat_service.dart';
+import '../../services/auth_service.dart';
+import '../../models/message_model.dart';
 
 class HelpSupportScreen extends StatefulWidget {
   const HelpSupportScreen({super.key});
@@ -16,17 +20,105 @@ class _HelpSupportScreenState extends State<HelpSupportScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final _messageController = TextEditingController();
+  final _scrollController = ScrollController();
+  final ChatService _chatService = ChatService();
+  final AuthService _authService = AuthService();
+
+  String? _supportChatId;
+  bool _isLoading = false;
+  bool _isSending = false;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _tabController.addListener(_onTabChanged);
+  }
+
+  void _onTabChanged() {
+    // Initialize support chat when user switches to chat tab
+    if (_tabController.index == 2 && _supportChatId == null) {
+      _initializeSupportChat();
+    }
+  }
+
+  Future<void> _initializeSupportChat() async {
+    final user = _authService.currentUser;
+    if (user == null) return;
+
+    setState(() => _isLoading = true);
+
+    try {
+      final chatId = await _chatService.getOrCreateSupportChat(
+        customerId: user.uid,
+        customerName: user.displayName ?? 'Customer',
+      );
+      if (mounted) {
+        setState(() {
+          _supportChatId = chatId;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('errorConnectingToSupport'.tr())),
+        );
+      }
+    }
+  }
+
+  Future<void> _sendMessage() async {
+    final text = _messageController.text.trim();
+    if (text.isEmpty || _supportChatId == null || _isSending) return;
+
+    final user = _authService.currentUser;
+    if (user == null) return;
+
+    setState(() => _isSending = true);
+    _messageController.clear();
+
+    try {
+      final message = MessageModel(
+        id: const Uuid().v4(),
+        senderId: user.uid,
+        text: text,
+        timestamp: DateTime.now(),
+        type: MessageType.text,
+      );
+
+      await _chatService.sendSupportMessage(_supportChatId!, message);
+
+      // Scroll to bottom after sending
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scrollController.hasClients) {
+          _scrollController.animateTo(
+            _scrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOut,
+          );
+        }
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('errorSendingMessage'.tr())));
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSending = false);
+      }
+    }
   }
 
   @override
   void dispose() {
+    _tabController.removeListener(_onTabChanged);
     _tabController.dispose();
     _messageController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -219,70 +311,263 @@ class _HelpSupportScreenState extends State<HelpSupportScreen>
   }
 
   Widget _buildChatTab() {
+    final user = _authService.currentUser;
+    if (user == null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.login, size: 64, color: Colors.grey[400]),
+            const SizedBox(height: 16),
+            Text('pleaseLogin'.tr(), style: TextStyle(color: Colors.grey[600])),
+          ],
+        ),
+      );
+    }
+
+    if (_isLoading) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            Text(
+              'connectingToSupport'.tr(),
+              style: TextStyle(color: Colors.grey[600]),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_supportChatId == null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.chat_bubble_outline, size: 64, color: Colors.grey[400]),
+            const SizedBox(height: 16),
+            Text(
+              'tapToStartChat'.tr(),
+              style: TextStyle(color: Colors.grey[600]),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: _initializeSupportChat,
+              icon: const Icon(Icons.chat),
+              label: Text('startChat'.tr()),
+            ),
+          ],
+        ),
+      );
+    }
+
     return Column(
       children: [
+        // Chat header
+        Container(
+          padding: const EdgeInsets.all(12),
+          color: Colors.blue[50],
+          child: Row(
+            children: [
+              CircleAvatar(
+                backgroundColor: Colors.blue,
+                child: const Icon(Icons.support_agent, color: Colors.white),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'supportTeam'.tr(),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      'typicallyRepliesWithin'.tr(),
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // Messages
         Expanded(
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+          child: StreamBuilder<List<MessageModel>>(
+            stream: _chatService.streamSupportMessages(_supportChatId!),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              final messages = snapshot.data ?? [];
+
+              if (messages.isEmpty) {
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.waving_hand,
+                          size: 48,
+                          color: Colors.amber[600],
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'welcomeToSupport'.tr(),
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'howCanWeHelp'.tr(),
+                          style: TextStyle(color: Colors.grey[600]),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+
+              // Mark messages as read
+              _chatService.markSupportMessagesAsRead(_supportChatId!, user.uid);
+
+              return ListView.builder(
+                controller: _scrollController,
+                padding: const EdgeInsets.all(16),
+                itemCount: messages.length,
+                itemBuilder: (context, index) {
+                  final message = messages[index];
+                  final isMe = message.senderId == user.uid;
+
+                  return Align(
+                    alignment: isMe
+                        ? Alignment.centerRight
+                        : Alignment.centerLeft,
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 10,
+                      ),
+                      constraints: BoxConstraints(
+                        maxWidth: MediaQuery.of(context).size.width * 0.75,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isMe ? Colors.blue : Colors.grey[200],
+                        borderRadius: BorderRadius.only(
+                          topLeft: const Radius.circular(16),
+                          topRight: const Radius.circular(16),
+                          bottomLeft: Radius.circular(isMe ? 16 : 4),
+                          bottomRight: Radius.circular(isMe ? 4 : 16),
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            message.text,
+                            style: TextStyle(
+                              color: isMe ? Colors.white : Colors.black87,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            _formatTime(message.timestamp),
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: isMe ? Colors.white70 : Colors.grey[500],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+
+        // Message input
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 10,
+                offset: const Offset(0, -2),
+              ),
+            ],
+          ),
+          child: SafeArea(
+            child: Row(
               children: [
-                Icon(
-                  Icons.chat_bubble_outline,
-                  size: 64,
-                  color: Colors.grey[400],
+                Expanded(
+                  child: TextField(
+                    controller: _messageController,
+                    decoration: InputDecoration(
+                      hintText: 'typeMessage'.tr(),
+                      filled: true,
+                      fillColor: Colors.grey[100],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(24),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 10,
+                      ),
+                    ),
+                    textInputAction: TextInputAction.send,
+                    onSubmitted: (_) => _sendMessage(),
+                  ),
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  'liveChatPlaceholder'.tr(),
-                  style: TextStyle(color: Colors.grey[600]),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'liveChatComingSoon'.tr(),
-                  style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                const SizedBox(width: 8),
+                CircleAvatar(
+                  backgroundColor: _isSending ? Colors.grey : Colors.blue,
+                  child: IconButton(
+                    icon: _isSending
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Icon(Icons.send, color: Colors.white),
+                    onPressed: _isSending ? null : _sendMessage,
+                  ),
                 ),
               ],
             ),
           ),
         ),
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.grey[100],
-            border: Border(top: BorderSide(color: Colors.grey[300]!)),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _messageController,
-                  decoration: InputDecoration(
-                    hintText: 'typeMessage'.tr(),
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(24),
-                      borderSide: BorderSide.none,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                  ),
-                  enabled: false,
-                ),
-              ),
-              const SizedBox(width: 8),
-              CircleAvatar(
-                backgroundColor: Colors.grey[400],
-                child: const Icon(Icons.send, color: Colors.white),
-              ),
-            ],
-          ),
-        ),
       ],
     );
+  }
+
+  String _formatTime(DateTime time) {
+    final now = DateTime.now();
+    if (now.day == time.day &&
+        now.month == time.month &&
+        now.year == time.year) {
+      return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+    }
+    return '${time.day}/${time.month} ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
   }
 
   @override

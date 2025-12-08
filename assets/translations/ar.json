@@ -364,5 +364,14 @@
     "supportHoursDesc": "فريقنا متاح من الأحد إلى الخميس، 9 صباحاً - 6 مساءً",
     "liveChatPlaceholder": "ميزة المحادثة المباشرة قريباً!",
     "liveChatComingSoon": "المحادثة المباشرة قريباً. حالياً، يرجى استخدام واتساب أو البريد الإلكتروني.",
-    "typeMessage": "اكتب رسالة..."
+    "typeMessage": "اكتب رسالة...",
+    "connectingToSupport": "جاري الاتصال بالدعم...",
+    "errorConnectingToSupport": "تعذر الاتصال بالدعم. يرجى المحاولة مرة أخرى.",
+    "errorSendingMessage": "فشل إرسال الرسالة. يرجى المحاولة مرة أخرى.",
+    "tapToStartChat": "انقر لبدء محادثة مع فريق الدعم",
+    "supportTeam": "فريق الدعم",
+    "typicallyRepliesWithin": "عادة يرد خلال ساعات قليلة",
+    "welcomeToSupport": "مرحباً بك في الدعم!",
+    "howCanWeHelp": "كيف يمكننا مساعدتك اليوم؟ أرسل لنا رسالة وسنرد عليك في أقرب وقت ممكن.",
+    "couldNotLaunch": "تعذر فتح {}"
 }
