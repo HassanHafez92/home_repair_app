@@ -317,6 +317,18 @@ class ChatService {
         });
   }
 
+  /// Stream all closed support chats (for admin dashboard).
+  Stream<List<Map<String, dynamic>>> streamClosedSupportChats() {
+    return _supportChatsCollection
+        .where('status', isEqualTo: 'closed')
+        .orderBy('createdAt', descending: true)
+        .limit(50)
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs.map((doc) => doc.data()).toList();
+        });
+  }
+
   /// Assign an admin to a support chat.
   Future<void> assignAdminToSupportChat({
     required String chatId,

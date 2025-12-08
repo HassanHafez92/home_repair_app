@@ -490,5 +490,21 @@
     "typicallyRepliesWithin": "Typically replies within a few hours",
     "welcomeToSupport": "Welcome to Support!",
     "howCanWeHelp": "How can we help you today? Send us a message and we'll get back to you as soon as possible.",
-    "couldNotLaunch": "Could not open {}"
+    "couldNotLaunch": "Could not open {}",
+    "openChats": "Open Chats",
+    "resolvedChats": "Resolved",
+    "noOpenChats": "No open support chats",
+    "noResolvedChats": "No resolved chats",
+    "inProgress": "In Progress",
+    "resolved": "Resolved",
+    "new": "New",
+    "supportChat": "Support Chat",
+    "markAsResolved": "Mark as Resolved",
+    "confirmCloseChat": "Are you sure you want to mark this chat as resolved?",
+    "chatMarkedAsResolved": "Chat marked as resolved",
+    "errorClosingChat": "Failed to close chat",
+    "noMessagesYet": "No messages yet",
+    "customer": "Customer",
+    "supportResponse": "Support Response",
+    "newMessageFromSupport": "New message from support"
 }
