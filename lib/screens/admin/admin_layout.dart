@@ -9,6 +9,7 @@ import 'user_management_screen.dart';
 import 'service_management_screen.dart';
 import 'admin_orders_screen.dart';
 import 'seed_data_screen.dart';
+import 'admin_support_inbox_screen.dart';
 
 class AdminLayout extends StatefulWidget {
   const AdminLayout({super.key});
@@ -25,6 +26,7 @@ class _AdminLayoutState extends State<AdminLayout> {
     const UserManagementScreen(),
     const ServiceManagementScreen(),
     const AdminOrdersScreen(),
+    const AdminSupportInboxScreen(),
     const SeedDataScreen(),
   ];
 
@@ -33,6 +35,7 @@ class _AdminLayoutState extends State<AdminLayout> {
     'User Management',
     'Services',
     'Orders',
+    'Support',
     'Seed Data',
   ];
 
@@ -78,6 +81,11 @@ class _AdminLayoutState extends State<AdminLayout> {
                 icon: Icon(Icons.shopping_bag_outlined),
                 selectedIcon: Icon(Icons.shopping_bag),
                 label: Text('Orders'),
+              ),
+              NavigationRailDestination(
+                icon: Icon(Icons.support_agent_outlined),
+                selectedIcon: Icon(Icons.support_agent),
+                label: Text('Support'),
               ),
               NavigationRailDestination(
                 icon: Icon(Icons.eco_outlined),
