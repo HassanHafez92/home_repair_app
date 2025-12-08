@@ -481,5 +481,14 @@
     "supportHoursDesc": "Our team is available Sunday to Thursday, 9 AM - 6 PM",
     "liveChatPlaceholder": "Live chat feature coming soon!",
     "liveChatComingSoon": "Live chat is coming soon. For now, please use WhatsApp or email.",
-    "typeMessage": "Type a message..."
+    "typeMessage": "Type a message...",
+    "connectingToSupport": "Connecting to support...",
+    "errorConnectingToSupport": "Could not connect to support. Please try again.",
+    "errorSendingMessage": "Failed to send message. Please try again.",
+    "tapToStartChat": "Tap to start a conversation with our support team",
+    "supportTeam": "Support Team",
+    "typicallyRepliesWithin": "Typically replies within a few hours",
+    "welcomeToSupport": "Welcome to Support!",
+    "howCanWeHelp": "How can we help you today? Send us a message and we'll get back to you as soon as possible.",
+    "couldNotLaunch": "Could not open {}"
 }
