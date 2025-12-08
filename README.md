@@ -3,6 +3,7 @@
 A Flutter mobile application connecting homeowners with repair service technicians. Supports customers booking services and technicians managing jobs.
 
 [![Flutter Version](https://img.shields.io/badge/Flutter-3.9.2+-blue.svg)](https://flutter.dev/)
+[![CI](https://github.com/HassanHafez92/home_repair_app/actions/workflows/ci.yml/badge.svg)](https://github.com/HassanHafez92/home_repair_app/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/License-Private-red.svg)]()
 
 ## 📱 Quick Start

@@ -1,17 +1,25 @@
 // File: lib/widgets/empty_state.dart
 // Purpose: Standardized empty or error state display.
+// @deprecated Use EmptyState from loading_states.dart instead.
 
 import 'package:flutter/material.dart';
 import 'custom_button.dart';
 
-class EmptyState extends StatelessWidget {
+/// A widget for displaying empty or error states.
+///
+/// @deprecated Use [EmptyState] from `loading_states.dart` instead.
+/// This widget is a duplicate and will be removed in a future version.
+@Deprecated(
+  'Use EmptyState from loading_states.dart instead. This duplicate will be removed.',
+)
+class EmptyStateWidget extends StatelessWidget {
   final IconData icon;
   final String title;
   final String message;
   final String? actionText;
   final VoidCallback? onAction;
 
-  const EmptyState({
+  const EmptyStateWidget({
     super.key,
     this.icon = Icons.inbox_outlined,
     required this.title,
@@ -42,19 +50,12 @@ class EmptyState extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               message,
-              style: const TextStyle(
-                fontSize: 16,
-                color: Colors.grey,
-              ),
+              style: const TextStyle(fontSize: 16, color: Colors.grey),
               textAlign: TextAlign.center,
             ),
             if (actionText != null && onAction != null) ...[
               const SizedBox(height: 32),
-              CustomButton(
-                text: actionText!,
-                onPressed: onAction!,
-                width: 200,
-              ),
+              CustomButton(text: actionText!, onPressed: onAction!, width: 200),
             ],
           ],
         ),
@@ -62,3 +63,7 @@ class EmptyState extends StatelessWidget {
     );
   }
 }
+
+// Re-export the original class name for backwards compatibility
+// ignore: deprecated_member_use_from_same_package
+typedef EmptyState = EmptyStateWidget;

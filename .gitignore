@@ -12,6 +12,12 @@
 .swiftpm/
 migrate_working_dir/
 
+# Environment files (secrets)
+*.env
+sendgrid.env
+.env.local
+.env.*.local
+
 # IntelliJ related
 *.iml
 *.ipr

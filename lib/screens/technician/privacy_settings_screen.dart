@@ -199,7 +199,8 @@ class PrivacySettingsScreen extends StatelessWidget {
           .where('technicianId', isEqualTo: user.uid)
           .get();
 
-      // Create export data object
+      // Create export data object (will be used when file download is implemented)
+      // ignore: unused_local_variable
       final exportData = {
         'exportDate': DateTime.now().toIso8601String(),
         'userId': user.uid,
