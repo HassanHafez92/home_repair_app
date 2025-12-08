@@ -3,7 +3,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:intl/intl.dart';
 import '../../services/chat_service.dart';
 import 'admin_support_chat_screen.dart';
 

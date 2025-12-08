@@ -288,3 +288,115 @@ export const onUserCreated = onDocumentCreated("users/{userId}", async (event) =
         );
     }
 });
+
+/**
+ * Send push notification when admin responds to support chat
+ * Triggered when a new message is created in support_chats/{chatId}/messages
+ */
+export const onSupportMessageCreated = onDocumentCreated(
+    "support_chats/{chatId}/messages/{messageId}",
+    async (event) => {
+        const snapshot = event.data;
+        if (!snapshot) {
+            return;
+        }
+
+        const message = snapshot.data();
+        const chatId = event.params.chatId;
+
+        if (!message) {
+            logger.warn("No message data found");
+            return;
+        }
+
+        const db = admin.firestore();
+
+        try {
+            // Get the support chat to find the customer
+            const chatDoc = await db
+                .collection("support_chats")
+                .doc(chatId)
+                .get();
+
+            if (!chatDoc.exists) {
+                logger.warn(`Support chat ${chatId} not found`);
+                return;
+            }
+
+            const chat = chatDoc.data();
+            if (!chat) return;
+
+            const customerId = chat.customerId;
+            const senderId = message.senderId;
+
+            // Only send notification if admin sent the message (not customer)
+            if (senderId === customerId) {
+                logger.info("Message from customer, no notification needed");
+                return;
+            }
+
+            // Get customer's FCM token from users collection
+            const userDoc = await db.collection("users").doc(customerId).get();
+
+            if (!userDoc.exists) {
+                logger.warn(`Customer ${customerId} not found`);
+                return;
+            }
+
+            const userData = userDoc.data();
+            const fcmToken = userData?.fcmToken;
+
+            if (!fcmToken) {
+                logger.info(
+                    `Customer ${customerId} has no FCM token, skipping notification`
+                );
+                return;
+            }
+
+            // Send FCM notification
+            const notificationPayload: admin.messaging.Message = {
+                token: fcmToken,
+                notification: {
+                    title: "Support Response",
+                    body: message.text?.substring(0, 100) || "New message from support",
+                },
+                data: {
+                    type: "support_chat",
+                    chatId: chatId,
+                    click_action: "FLUTTER_NOTIFICATION_CLICK",
+                },
+                android: {
+                    priority: "high",
+                    notification: {
+                        channelId: "support_channel",
+                        icon: "ic_notification",
+                    },
+                },
+                apns: {
+                    payload: {
+                        aps: {
+                            badge: 1,
+                            sound: "default",
+                        },
+                    },
+                },
+            };
+
+            await admin.messaging().send(notificationPayload);
+            logger.info(
+                `Push notification sent to customer ${customerId} for support chat ${chatId}`
+            );
+
+            // Log the notification
+            await db.collection("notification_logs").add({
+                userId: customerId,
+                type: "support_response",
+                chatId: chatId,
+                sentAt: admin.firestore.FieldValue.serverTimestamp(),
+                status: "sent",
+            });
+        } catch (error) {
+            logger.error("Error sending support notification:", error);
+        }
+    }
+);

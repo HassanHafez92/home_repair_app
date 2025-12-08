@@ -373,5 +373,21 @@
     "typicallyRepliesWithin": "عادة يرد خلال ساعات قليلة",
     "welcomeToSupport": "مرحباً بك في الدعم!",
     "howCanWeHelp": "كيف يمكننا مساعدتك اليوم؟ أرسل لنا رسالة وسنرد عليك في أقرب وقت ممكن.",
-    "couldNotLaunch": "تعذر فتح {}"
+    "couldNotLaunch": "تعذر فتح {}",
+    "openChats": "المحادثات المفتوحة",
+    "resolvedChats": "المحلولة",
+    "noOpenChats": "لا توجد محادثات دعم مفتوحة",
+    "noResolvedChats": "لا توجد محادثات محلولة",
+    "inProgress": "قيد التنفيذ",
+    "resolved": "محلول",
+    "new": "جديد",
+    "supportChat": "محادثة الدعم",
+    "markAsResolved": "تعيين كمحلول",
+    "confirmCloseChat": "هل أنت متأكد من تعيين هذه المحادثة كمحلولة؟",
+    "chatMarkedAsResolved": "تم تعيين المحادثة كمحلولة",
+    "errorClosingChat": "فشل في إغلاق المحادثة",
+    "noMessagesYet": "لا توجد رسائل بعد",
+    "customer": "العميل",
+    "supportResponse": "رد الدعم",
+    "newMessageFromSupport": "رسالة جديدة من الدعم"
 }
