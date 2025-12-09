@@ -2,7 +2,7 @@
 // Purpose: Privacy and data management settings for technicians
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../services/auth_service.dart';
@@ -170,7 +170,7 @@ class PrivacySettingsScreen extends StatelessWidget {
   }
 
   Future<void> _exportUserData(BuildContext context) async {
-    final authService = Provider.of<AuthService>(context, listen: false);
+    final authService = context.read<AuthService>();
     final user = authService.currentUser;
 
     if (user == null) return;
@@ -533,7 +533,7 @@ For questions about these terms, contact support@homerepair.com
   }
 
   Future<void> _deleteAccount(BuildContext context, String password) async {
-    final authService = Provider.of<AuthService>(context, listen: false);
+    final authService = context.read<AuthService>();
     final user = authService.currentUser;
 
     if (user == null) return;
@@ -606,7 +606,7 @@ For questions about these terms, contact support@homerepair.com
 
   Future<bool> _getProfileVisibility(BuildContext context) async {
     try {
-      final authService = Provider.of<AuthService>(context, listen: false);
+      final authService = context.read<AuthService>();
       final user = authService.currentUser;
 
       if (user == null) return true;
@@ -627,7 +627,7 @@ For questions about these terms, contact support@homerepair.com
     bool isVisible,
   ) async {
     try {
-      final authService = Provider.of<AuthService>(context, listen: false);
+      final authService = context.read<AuthService>();
       final user = authService.currentUser;
 
       if (user == null) return;

@@ -5,7 +5,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../blocs/auth/auth_bloc.dart';
 import '../blocs/auth/auth_state.dart';
@@ -193,10 +193,7 @@ class AppRouter {
           path: '/customer/order/:orderId',
           builder: (context, state) {
             final orderId = state.pathParameters['orderId']!;
-            final firestoreService = Provider.of<FirestoreService>(
-              context,
-              listen: false,
-            );
+            final firestoreService = context.read<FirestoreService>();
             return AsyncDataScreen<OrderModel>(
               future: firestoreService.getOrder(orderId),
               builder: (order) => OrderDetailsScreen(order: order),
@@ -215,10 +212,7 @@ class AppRouter {
           path: '/technician/order/:orderId',
           builder: (context, state) {
             final orderId = state.pathParameters['orderId']!;
-            final firestoreService = Provider.of<FirestoreService>(
-              context,
-              listen: false,
-            );
+            final firestoreService = context.read<FirestoreService>();
             return AsyncDataScreen<OrderModel>(
               future: firestoreService.getOrder(orderId),
               builder: (order) => OrderDetailScreen(order: order),

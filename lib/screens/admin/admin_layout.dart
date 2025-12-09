@@ -2,7 +2,7 @@
 // Purpose: Admin dashboard layout with sidebar navigation.
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../services/auth_service.dart';
 import 'admin_dashboard_screen.dart';
 import 'user_management_screen.dart';
@@ -101,10 +101,7 @@ class _AdminLayoutState extends State<AdminLayout> {
                   child: IconButton(
                     icon: const Icon(Icons.logout),
                     onPressed: () async {
-                      await Provider.of<AuthService>(
-                        context,
-                        listen: false,
-                      ).signOut();
+                      await context.read<AuthService>().signOut();
                       if (context.mounted) {
                         Navigator.popUntil(context, (route) => route.isFirst);
                       }

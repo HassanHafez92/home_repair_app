@@ -2,7 +2,7 @@
 // Purpose: Detailed view of a single order with status tracking.
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/order_model.dart';
@@ -39,10 +39,10 @@ class OrderDetailsScreen extends StatelessWidget {
 
     if (confirmed == true && context.mounted) {
       try {
-        await Provider.of<FirestoreService>(
-          context,
-          listen: false,
-        ).updateOrderStatus(order.id, OrderStatus.cancelled);
+        await context.read<FirestoreService>().updateOrderStatus(
+          order.id,
+          OrderStatus.cancelled,
+        );
 
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -132,10 +132,7 @@ class OrderDetailsScreen extends StatelessWidget {
                     if (order.technicianId == null) return;
 
                     final chatService = ChatService();
-                    final authService = Provider.of<AuthService>(
-                      context,
-                      listen: false,
-                    );
+                    final authService = context.read<AuthService>();
                     final currentUser = authService.currentUser;
 
                     if (currentUser == null) return;

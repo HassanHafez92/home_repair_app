@@ -2,7 +2,7 @@
 // Purpose: Technician profile with professional details and settings.
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../../services/auth_service.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
@@ -44,7 +44,7 @@ class _TechnicianProfileScreenState extends State<TechnicianProfileScreen> {
   }
 
   Future<void> _loadData() async {
-    final authService = Provider.of<AuthService>(context, listen: false);
+    final authService = context.read<AuthService>();
     final user = authService.currentUser;
 
     if (user != null) {
@@ -74,7 +74,7 @@ class _TechnicianProfileScreenState extends State<TechnicianProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authService = Provider.of<AuthService>(context, listen: false);
+    final authService = context.read<AuthService>();
     final user = authService.currentUser;
 
     if (_isLoading) {

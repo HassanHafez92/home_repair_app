@@ -2,7 +2,7 @@
 // Purpose: Allow technicians to manage their account and security settings
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../../services/auth_service.dart';
 import '../../widgets/custom_text_field.dart';
@@ -12,7 +12,7 @@ class AccountSettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final authService = Provider.of<AuthService>(context, listen: false);
+    final authService = context.read<AuthService>();
     final user = authService.currentUser;
 
     return Scaffold(
@@ -115,7 +115,7 @@ class AccountSettingsScreen extends StatelessWidget {
   }
 
   Future<void> _resendVerificationEmail(BuildContext context) async {
-    final authService = Provider.of<AuthService>(context, listen: false);
+    final authService = context.read<AuthService>();
 
     try {
       await authService.sendEmailVerification();
@@ -252,7 +252,7 @@ class AccountSettingsScreen extends StatelessWidget {
     String currentPassword,
     String newPassword,
   ) async {
-    final authService = Provider.of<AuthService>(context, listen: false);
+    final authService = context.read<AuthService>();
 
     try {
       await authService.updatePassword(
@@ -363,7 +363,7 @@ class AccountSettingsScreen extends StatelessWidget {
     String password,
     String newEmail,
   ) async {
-    final authService = Provider.of<AuthService>(context, listen: false);
+    final authService = context.read<AuthService>();
 
     try {
       await authService.updateEmail(

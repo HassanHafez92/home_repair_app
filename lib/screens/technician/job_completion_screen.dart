@@ -2,7 +2,7 @@
 // Purpose: Complete job with final price, photos, and notes.
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../../models/order_model.dart';
 import '../../services/firestore_service.dart';
@@ -87,10 +87,7 @@ class _JobCompletionScreenState extends State<JobCompletionScreen> {
     setState(() => _isSubmitting = true);
 
     try {
-      final firestoreService = Provider.of<FirestoreService>(
-        context,
-        listen: false,
-      );
+      final firestoreService = context.read<FirestoreService>();
 
       // In a real app, upload images to Firebase Storage here and get URLs
       // List<String> photoUrls = await _uploadPhotos();
