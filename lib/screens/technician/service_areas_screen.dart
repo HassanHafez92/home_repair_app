@@ -2,7 +2,7 @@
 // Purpose: Allow technicians to manage their service areas.
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../services/auth_service.dart';
@@ -39,7 +39,7 @@ class _ServiceAreasScreenState extends State<ServiceAreasScreen> {
   }
 
   Future<void> _loadServiceAreas() async {
-    final user = Provider.of<AuthService>(context, listen: false).currentUser;
+    final user = context.read<AuthService>().currentUser;
     if (user != null) {
       final userData = await _firestoreService.getUser(user.uid);
       if (userData is TechnicianModel && mounted) {
@@ -82,7 +82,7 @@ class _ServiceAreasScreenState extends State<ServiceAreasScreen> {
     setState(() => _isUpdating = true);
 
     try {
-      final user = Provider.of<AuthService>(context, listen: false).currentUser;
+      final user = context.read<AuthService>().currentUser;
       if (user == null) return;
 
       final newAreas = [..._serviceAreas, area];
@@ -115,7 +115,7 @@ class _ServiceAreasScreenState extends State<ServiceAreasScreen> {
     setState(() => _isUpdating = true);
 
     try {
-      final user = Provider.of<AuthService>(context, listen: false).currentUser;
+      final user = context.read<AuthService>().currentUser;
       if (user == null) return;
 
       final newAreas = List<String>.from(_serviceAreas)..remove(area);

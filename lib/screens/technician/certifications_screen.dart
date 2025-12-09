@@ -3,7 +3,7 @@
 
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -39,7 +39,7 @@ class _CertificationsScreenState extends State<CertificationsScreen> {
   }
 
   Future<void> _loadCertifications() async {
-    final user = Provider.of<AuthService>(context, listen: false).currentUser;
+    final user = context.read<AuthService>().currentUser;
     if (user != null) {
       final userData = await _firestoreService.getUser(user.uid);
       if (userData is TechnicianModel && mounted) {
@@ -64,7 +64,7 @@ class _CertificationsScreenState extends State<CertificationsScreen> {
 
   Future<void> _pickAndUploadCertificate() async {
     try {
-      final user = Provider.of<AuthService>(context, listen: false).currentUser;
+      final user = context.read<AuthService>().currentUser;
       if (user == null) return;
 
       final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
@@ -142,7 +142,7 @@ class _CertificationsScreenState extends State<CertificationsScreen> {
 
   Future<void> _deleteCertificate(CertificationModel cert) async {
     try {
-      final user = Provider.of<AuthService>(context, listen: false).currentUser;
+      final user = context.read<AuthService>().currentUser;
       if (user == null) return;
 
       setState(() => _isLoading = true);

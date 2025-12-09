@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:uuid/uuid.dart';
 import 'package:image_picker/image_picker.dart';
@@ -40,7 +40,7 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
     // Mark messages as read when entering screen
-    final authService = Provider.of<AuthService>(context, listen: false);
+    final authService = context.read<AuthService>();
     if (authService.currentUser != null) {
       _chatService.markMessagesAsRead(
         widget.chatId,
@@ -60,7 +60,7 @@ class _ChatScreenState extends State<ChatScreen> {
     final text = _messageController.text.trim();
     if (text.isEmpty) return;
 
-    final authService = Provider.of<AuthService>(context, listen: false);
+    final authService = context.read<AuthService>();
     final user = authService.currentUser;
     if (user == null) return;
 
@@ -112,7 +112,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
       setState(() => _isUploading = true);
 
-      final authService = Provider.of<AuthService>(context, listen: false);
+      final authService = context.read<AuthService>();
       final user = authService.currentUser;
       if (user == null) return;
 
@@ -177,7 +177,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   @override
   Widget build(BuildContext context) {
-    final authService = Provider.of<AuthService>(context, listen: false);
+    final authService = context.read<AuthService>();
     final user = authService.currentUser;
 
     if (user == null) return const SizedBox.shrink();

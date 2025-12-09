@@ -2,7 +2,7 @@
 // Purpose: Manage users and approve pending technicians.
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../services/firestore_service.dart';
 import '../../models/technician_model.dart';
 import '../../widgets/custom_button.dart';
@@ -58,10 +58,7 @@ class _UserManagementScreenState extends State<UserManagementScreen>
   }
 
   Widget _buildPendingTechniciansList() {
-    final firestoreService = Provider.of<FirestoreService>(
-      context,
-      listen: false,
-    );
+    final firestoreService = context.read<FirestoreService>();
 
     return StreamBuilder<List<TechnicianModel>>(
       stream: firestoreService.streamPendingTechnicians(),

@@ -2,7 +2,7 @@
 // Purpose: Detailed order view for technician to accept/reject with estimate.
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../../models/order_model.dart';
 import '../../services/auth_service.dart';
@@ -41,7 +41,7 @@ class _OrderActionScreenState extends State<OrderActionScreen> {
     setState(() => _isSubmitting = true);
 
     try {
-      final authService = Provider.of<AuthService>(context, listen: false);
+      final authService = context.read<AuthService>();
       final technicianId = authService.currentUser?.uid;
 
       if (technicianId == null) throw Exception('Not logged in');

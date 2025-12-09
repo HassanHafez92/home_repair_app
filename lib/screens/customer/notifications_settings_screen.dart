@@ -2,10 +2,11 @@
 // Purpose: Manage notification preferences and settings.
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../../services/firestore_service.dart';
-import '../../providers/user_provider.dart';
+import '../../blocs/auth/auth_bloc.dart';
+import '../../blocs/auth/auth_state.dart';
 
 class NotificationsSettingsScreen extends StatefulWidget {
   const NotificationsSettingsScreen({super.key});
@@ -36,16 +37,11 @@ class _NotificationsSettingsScreenState
     });
 
     try {
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
-      final firestoreService = Provider.of<FirestoreService>(
-        context,
-        listen: false,
-      );
+      final authState = context.read<AuthBloc>().state;
+      final firestoreService = context.read<FirestoreService>();
 
-      if (userProvider.currentUser != null) {
-        final userDoc = await firestoreService.getUserDoc(
-          userProvider.currentUser!.id,
-        );
+      if (authState is AuthAuthenticated) {
+        final userDoc = await firestoreService.getUserDoc(authState.user.id);
 
         if (userDoc.exists && userDoc.data() != null) {
           final prefs =
@@ -81,14 +77,11 @@ class _NotificationsSettingsScreenState
 
   Future<void> _savePreferences() async {
     try {
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
-      final firestoreService = Provider.of<FirestoreService>(
-        context,
-        listen: false,
-      );
+      final authState = context.read<AuthBloc>().state;
+      final firestoreService = context.read<FirestoreService>();
 
-      if (userProvider.currentUser != null) {
-        await firestoreService.updateUserFields(userProvider.currentUser!.id, {
+      if (authState is AuthAuthenticated) {
+        await firestoreService.updateUserFields(authState.user.id, {
           'notificationPreferences': {
             'orderUpdates': _orderUpdates,
             'promotions': _promotions,

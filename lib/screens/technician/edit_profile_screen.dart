@@ -2,7 +2,7 @@
 // Purpose: Allow technicians to edit their profile details.
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../services/auth_service.dart';
@@ -40,7 +40,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   void initState() {
     super.initState();
-    final user = Provider.of<AuthService>(context, listen: false).currentUser;
+    final user = context.read<AuthService>().currentUser;
     // Cast to TechnicianModel if possible, or just use UserModel fields
     // Since we are in Technician flow, we expect it to be TechnicianModel eventually
     // But AuthService might return UserModel. We need to fetch full technician data if needed.
@@ -56,7 +56,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Future<void> _loadTechnicianData() async {
-    final user = Provider.of<AuthService>(context, listen: false).currentUser;
+    final user = context.read<AuthService>().currentUser;
     if (user != null) {
       final userData = await _firestoreService.getUser(user.uid);
       if (userData is TechnicianModel && mounted) {
@@ -87,7 +87,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       if (!mounted) return;
       setState(() => _isLoading = true);
 
-      final user = Provider.of<AuthService>(context, listen: false).currentUser;
+      final user = context.read<AuthService>().currentUser;
       if (user == null) {
         if (mounted) setState(() => _isLoading = false);
         return;
@@ -143,7 +143,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final authService = Provider.of<AuthService>(context, listen: false);
+      final authService = context.read<AuthService>();
       final user = authService.currentUser;
 
       if (user != null) {

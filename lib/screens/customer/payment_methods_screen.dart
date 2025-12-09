@@ -3,10 +3,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../../services/firestore_service.dart';
-import '../../providers/user_provider.dart';
+import '../../blocs/auth/auth_bloc.dart';
+import '../../blocs/auth/auth_state.dart';
 import '../../models/payment_method_model.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text_field.dart';
@@ -34,16 +35,11 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
     });
 
     try {
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
-      final firestoreService = Provider.of<FirestoreService>(
-        context,
-        listen: false,
-      );
+      final authState = context.read<AuthBloc>().state;
+      final firestoreService = context.read<FirestoreService>();
 
-      if (userProvider.currentUser != null) {
-        final userDoc = await firestoreService.getUserDoc(
-          userProvider.currentUser!.id,
-        );
+      if (authState is AuthAuthenticated) {
+        final userDoc = await firestoreService.getUserDoc(authState.user.id);
 
         if (userDoc.exists && userDoc.data() != null) {
           final paymentMethodsData =
@@ -73,14 +69,11 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
 
   Future<void> _savePaymentMethods() async {
     try {
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
-      final firestoreService = Provider.of<FirestoreService>(
-        context,
-        listen: false,
-      );
+      final authState = context.read<AuthBloc>().state;
+      final firestoreService = context.read<FirestoreService>();
 
-      if (userProvider.currentUser != null) {
-        await firestoreService.updateUserFields(userProvider.currentUser!.id, {
+      if (authState is AuthAuthenticated) {
+        await firestoreService.updateUserFields(authState.user.id, {
           'paymentMethods': _paymentMethods.map((p) => p.toJson()).toList(),
         });
       }

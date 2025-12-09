@@ -2,7 +2,7 @@
 // Purpose: Allow technicians to manage their notification preferences
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../services/auth_service.dart';
@@ -30,7 +30,7 @@ class _NotificationSettingsScreenState
   }
 
   Future<void> _loadPreferences() async {
-    final user = Provider.of<AuthService>(context, listen: false).currentUser;
+    final user = context.read<AuthService>().currentUser;
     if (user == null) return;
 
     try {
@@ -67,7 +67,7 @@ class _NotificationSettingsScreenState
   Future<void> _savePreferences() async {
     if (_preferences == null) return;
 
-    final user = Provider.of<AuthService>(context, listen: false).currentUser;
+    final user = context.read<AuthService>().currentUser;
     if (user == null) return;
 
     setState(() => _isSaving = true);

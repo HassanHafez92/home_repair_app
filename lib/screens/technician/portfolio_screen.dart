@@ -3,7 +3,7 @@
 
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -40,7 +40,7 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
   }
 
   Future<void> _loadPortfolio() async {
-    final user = Provider.of<AuthService>(context, listen: false).currentUser;
+    final user = context.read<AuthService>().currentUser;
     if (user != null) {
       final userData = await _firestoreService.getUser(user.uid);
       if (userData is TechnicianModel && mounted) {
@@ -66,7 +66,7 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
 
   Future<void> _pickAndUploadImage() async {
     try {
-      final user = Provider.of<AuthService>(context, listen: false).currentUser;
+      final user = context.read<AuthService>().currentUser;
       if (user == null) return;
 
       final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
@@ -139,7 +139,7 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
 
   Future<void> _deleteImage(PortfolioItem item) async {
     try {
-      final user = Provider.of<AuthService>(context, listen: false).currentUser;
+      final user = context.read<AuthService>().currentUser;
       if (user == null) return;
 
       setState(() => _isLoading = true);
