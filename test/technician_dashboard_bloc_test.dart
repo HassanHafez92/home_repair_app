@@ -2,12 +2,13 @@
 // Purpose: Unit tests for TechnicianDashboardBloc
 
 import 'package:bloc_test/bloc_test.dart';
+import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:home_repair_app/blocs/technician_dashboard/technician_dashboard_bloc.dart';
+import 'package:home_repair_app/presentation/blocs/technician_dashboard/technician_dashboard_bloc.dart';
 import 'package:home_repair_app/domain/repositories/i_user_repository.dart';
-import 'package:home_repair_app/models/technician_stats.dart';
+import 'package:home_repair_app/domain/usecases/user/get_technician_stats.dart';
 
 import 'technician_dashboard_bloc_test.mocks.dart';
 
@@ -33,7 +34,7 @@ void main() {
     });
 
     group('LoadTechnicianDashboard', () {
-      final mockStats = TechnicianStats(
+      final mockStats = TechnicianStatsEntity(
         todayEarnings: 500.0,
         completedJobsToday: 3,
         completedJobsTotal: 150,
@@ -90,7 +91,7 @@ void main() {
               testTechnicianId,
               true,
             ),
-          ).thenAnswer((_) async => {});
+          ).thenAnswer((_) async => const Right(null));
           return bloc;
         },
         act: (bloc) => bloc.add(
@@ -111,7 +112,7 @@ void main() {
     });
 
     group('RefreshDashboardStats', () {
-      final mockStats = TechnicianStats(
+      final mockStats = TechnicianStatsEntity(
         todayEarnings: 600.0,
         completedJobsToday: 4,
         completedJobsTotal: 151,
@@ -126,12 +127,12 @@ void main() {
         build: () {
           when(
             mockUserRepository.getTechnicianStats(testTechnicianId),
-          ).thenAnswer((_) async => mockStats);
+          ).thenAnswer((_) async => Right(mockStats));
           return bloc;
         },
         seed: () => TechnicianDashboardState(
           status: TechnicianDashboardStatus.success,
-          stats: TechnicianStats.empty(),
+          stats: TechnicianStatsEntity.empty(),
         ),
         act: (bloc) => bloc.add(const RefreshDashboardStats(testTechnicianId)),
         expect: () => [

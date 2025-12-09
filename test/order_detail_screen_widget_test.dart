@@ -4,15 +4,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:easy_localization/easy_localization.dart' as ez;
-import 'package:home_repair_app/screens/technician/order_detail_screen.dart';
-import 'package:home_repair_app/models/order_model.dart';
+import 'package:home_repair_app/presentation/screens/technician/order_detail_screen.dart';
+import 'package:home_repair_app/domain/entities/order_entity.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   SharedPreferences.setMockInitialValues({});
   await ez.EasyLocalization.ensureInitialized();
 
-  Widget createTestWidget(OrderModel order) {
+  Widget createTestWidget(OrderEntity order) {
     return ez.EasyLocalization(
       supportedLocales: const [Locale('en')],
       path: 'assets/translations',
@@ -21,7 +21,7 @@ void main() async {
     );
   }
 
-  final testOrder = OrderModel(
+  final testOrder = OrderEntity(
     id: 'test-order-id',
     customerId: 'customer-123',
     serviceId: 'service-456',
@@ -100,7 +100,7 @@ void main() async {
     testWidgets('shows unknown service when serviceName is null', (
       WidgetTester tester,
     ) async {
-      final orderWithoutServiceName = OrderModel(
+      final orderWithoutServiceName = OrderEntity(
         id: 'test-order-id',
         customerId: 'customer-123',
         serviceId: 'service-456',
@@ -128,7 +128,7 @@ void main() async {
     testWidgets('shows unknown customer when customerName is null', (
       WidgetTester tester,
     ) async {
-      final orderWithoutCustomerName = OrderModel(
+      final orderWithoutCustomerName = OrderEntity(
         id: 'test-order-id',
         customerId: 'customer-123',
         serviceId: 'service-456',

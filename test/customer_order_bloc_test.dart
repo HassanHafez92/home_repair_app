@@ -2,11 +2,12 @@
 // Purpose: Unit tests for CustomerOrderBloc
 
 import 'package:bloc_test/bloc_test.dart';
+import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:home_repair_app/blocs/order/customer_order_bloc.dart';
+import 'package:home_repair_app/core/error/failures.dart';
+import 'package:home_repair_app/presentation/blocs/order/customer_order_bloc.dart';
+import 'package:home_repair_app/domain/entities/order_entity.dart';
 import 'package:home_repair_app/domain/repositories/i_order_repository.dart';
-import 'package:home_repair_app/models/order_model.dart';
-import 'package:home_repair_app/models/paginated_result.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
@@ -20,7 +21,7 @@ void main() {
     late CustomerOrderBloc customerOrderBloc;
 
     // Test data
-    final testOrder = OrderModel(
+    final testOrder = OrderEntity(
       id: 'order-1',
       customerId: 'customer-1',
       serviceId: 'service-1',
@@ -36,7 +37,7 @@ void main() {
       updatedAt: DateTime(2025, 1, 1),
     );
 
-    final testPaginatedResult = PaginatedResult<OrderModel>(
+    final testPaginatedResult = PaginatedResult<OrderEntity>(
       items: [testOrder],
       hasMore: false,
       nextCursor: null,
@@ -69,7 +70,7 @@ void main() {
             limit: 20,
             statusFilter: null,
           ),
-        ).thenAnswer((_) async => testPaginatedResult);
+        ).thenAnswer((_) async => Right(testPaginatedResult));
       },
       build: () => customerOrderBloc,
       act: (bloc) => bloc.add(const LoadCustomerOrders(userId: 'customer-1')),
@@ -91,7 +92,7 @@ void main() {
             limit: 20,
             statusFilter: null,
           ),
-        ).thenThrow(Exception('Failed to load orders'));
+        ).thenAnswer((_) async => Left(ServerFailure('Failed to load orders')));
       },
       build: () => customerOrderBloc,
       act: (bloc) => bloc.add(const LoadCustomerOrders(userId: 'customer-1')),
@@ -115,7 +116,7 @@ void main() {
             'order-1',
             OrderStatus.cancelled,
           ),
-        ).thenThrow(Exception('Failed to cancel'));
+        ).thenAnswer((_) async => Left(ServerFailure('Failed to cancel')));
       },
       build: () => customerOrderBloc,
       act: (bloc) => bloc.add(const CancelOrder('order-1')),

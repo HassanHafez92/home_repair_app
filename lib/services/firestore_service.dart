@@ -7,11 +7,12 @@ import '../models/user_model.dart';
 import '../models/customer_model.dart';
 import '../models/technician_model.dart';
 import '../models/service_model.dart';
-import '../models/order_model.dart';
+import '../models/order_model.dart' hide OrderStatus;
 import '../models/notification_model.dart';
 import '../models/dashboard_stats.dart';
 import '../models/technician_stats.dart';
 import '../models/paginated_result.dart';
+import '../domain/entities/order_entity.dart' show OrderStatus;
 import 'cache_service.dart';
 
 class FirestoreService {

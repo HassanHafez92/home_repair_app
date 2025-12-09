@@ -1,25 +1,52 @@
-import 'package:home_repair_app/models/user_model.dart';
-import 'package:home_repair_app/models/technician_model.dart';
-import 'package:home_repair_app/models/technician_stats.dart';
+/// User repository interface for Clean Architecture.
 
+import 'package:dartz/dartz.dart';
+
+import '../../core/error/failures.dart';
+import '../entities/user_entity.dart';
+import '../entities/technician_entity.dart';
+import '../usecases/user/get_technician_stats.dart';
+
+/// Repository interface for user operations.
 abstract class IUserRepository {
-  Future<void> createUser(UserModel user);
+  /// Creates a new user.
+  Future<Either<Failure, void>> createUser(UserEntity user);
 
-  Future<UserModel?> getUser(String uid);
+  /// Gets a user by their ID.
+  Future<Either<Failure, UserEntity?>> getUser(String uid);
 
-  Future<void> updateUser(UserModel user);
+  /// Updates a user.
+  Future<Either<Failure, void>> updateUser(UserEntity user);
 
-  Future<void> updateUserFields(String uid, Map<String, dynamic> fields);
+  /// Updates specific fields of a user.
+  Future<Either<Failure, void>> updateUserFields(
+    String uid,
+    Map<String, dynamic> fields,
+  );
 
-  Stream<List<TechnicianModel>> streamPendingTechnicians();
+  /// Streams pending technicians awaiting approval.
+  Stream<List<TechnicianEntity>> streamPendingTechnicians();
 
-  Future<void> updateTechnicianStatus(String uid, TechnicianStatus status);
+  /// Updates technician approval status.
+  Future<Either<Failure, void>> updateTechnicianStatus(
+    String uid,
+    TechnicianStatus status,
+  );
 
-  Future<void> updateTechnicianAvailability(String uid, bool isAvailable);
+  /// Updates technician availability.
+  Future<Either<Failure, void>> updateTechnicianAvailability(
+    String uid,
+    bool isAvailable,
+  );
 
+  /// Streams technician availability.
   Stream<bool> streamTechnicianAvailability(String uid);
 
-  Future<TechnicianStats> getTechnicianStats(String technicianId);
+  /// Gets technician statistics.
+  Future<Either<Failure, TechnicianStatsEntity>> getTechnicianStats(
+    String technicianId,
+  );
 
-  Stream<TechnicianStats> streamTechnicianStats(String technicianId);
+  /// Streams technician statistics.
+  Stream<TechnicianStatsEntity> streamTechnicianStats(String technicianId);
 }
