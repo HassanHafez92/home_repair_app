@@ -88,6 +88,7 @@ dependencies:
   # Diagnostics
   connectivity_plus: ^6.1.2
   package_info_plus: ^8.1.2
+  dartz: ^0.10.1
 
 
 dev_dependencies:

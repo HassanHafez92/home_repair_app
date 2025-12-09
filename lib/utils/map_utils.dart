@@ -6,7 +6,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:geolocator/geolocator.dart';
 import 'dart:math' show cos, sqrt, asin;
-import '../models/order_model.dart';
+import '../domain/entities/order_entity.dart';
 
 class MapUtils {
   /// Opens Google Maps for navigation to the specified coordinates

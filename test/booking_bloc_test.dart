@@ -3,10 +3,10 @@
 
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:home_repair_app/blocs/booking/booking_bloc.dart';
-import 'package:home_repair_app/blocs/booking/booking_event.dart';
-import 'package:home_repair_app/blocs/booking/booking_state.dart';
-import 'package:home_repair_app/models/service_model.dart';
+import 'package:home_repair_app/presentation/blocs/booking/booking_bloc.dart';
+import 'package:home_repair_app/presentation/blocs/booking/booking_event.dart';
+import 'package:home_repair_app/presentation/blocs/booking/booking_state.dart';
+import 'package:home_repair_app/domain/entities/service_entity.dart';
 import 'package:home_repair_app/domain/repositories/i_order_repository.dart';
 import 'package:mockito/annotations.dart';
 
@@ -18,7 +18,7 @@ void main() {
     late IOrderRepository mockOrderRepository;
     late BookingBloc bookingBloc;
 
-    final mockService = ServiceModel(
+    final mockService = ServiceEntity(
       id: '1',
       name: 'Plumbing Service',
       description: 'Fix leaks',

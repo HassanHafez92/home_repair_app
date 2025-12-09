@@ -1,36 +1,72 @@
-import 'package:home_repair_app/models/order_model.dart';
-import 'package:home_repair_app/models/paginated_result.dart';
+/// Order repository interface for Clean Architecture.
 
+import 'package:dartz/dartz.dart';
+
+import '../../core/error/failures.dart';
+import '../entities/order_entity.dart';
+
+/// Paginated result wrapper.
+class PaginatedResult<T> {
+  final List<T> items;
+  final String? nextCursor;
+  final bool hasMore;
+
+  const PaginatedResult({
+    required this.items,
+    this.nextCursor,
+    this.hasMore = false,
+  });
+}
+
+/// Repository interface for order operations.
 abstract class IOrderRepository {
-  Future<OrderModel?> getOrder(String orderId);
+  /// Gets an order by ID.
+  Future<Either<Failure, OrderEntity?>> getOrder(String orderId);
 
-  Future<String> createOrder(OrderModel order);
+  /// Creates a new order and returns the order ID.
+  Future<Either<Failure, String>> createOrder(OrderEntity order);
 
-  Future<void> assignTechnicianToOrder(
+  /// Assigns a technician to an order.
+  Future<Either<Failure, void>> assignTechnicianToOrder(
     String orderId,
     String technicianId,
     double estimate,
   );
 
-  Future<void> completeOrder(String orderId, double finalPrice, String? notes);
+  /// Completes an order.
+  Future<Either<Failure, void>> completeOrder(
+    String orderId,
+    double finalPrice,
+    String? notes,
+  );
 
-  Future<void> rejectOrder(String orderId, String reason);
+  /// Rejects an order.
+  Future<Either<Failure, void>> rejectOrder(String orderId, String reason);
 
-  Future<PaginatedResult<OrderModel>> getCustomerOrdersPaginated({
+  /// Gets paginated customer orders.
+  Future<Either<Failure, PaginatedResult<OrderEntity>>>
+  getCustomerOrdersPaginated({
     required String customerId,
     String? startAfterCursor,
     int limit = 20,
     OrderStatus? statusFilter,
   });
 
-  Future<void> updateOrderStatus(String orderId, OrderStatus status);
+  /// Updates order status.
+  Future<Either<Failure, void>> updateOrderStatus(
+    String orderId,
+    OrderStatus status,
+  );
 
-  Stream<List<OrderModel>> getUserOrders(
+  /// Streams orders for a user.
+  Stream<List<OrderEntity>> getUserOrders(
     String userId, {
     bool isTechnician = false,
   });
 
-  Stream<List<OrderModel>> streamPendingOrdersForTechnician();
+  /// Streams pending orders for technicians.
+  Stream<List<OrderEntity>> streamPendingOrdersForTechnician();
 
-  Stream<List<OrderModel>> streamAllOrders();
+  /// Streams all orders (for admin).
+  Stream<List<OrderEntity>> streamAllOrders();
 }

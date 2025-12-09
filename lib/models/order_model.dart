@@ -4,6 +4,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:equatable/equatable.dart';
+import 'package:home_repair_app/domain/entities/order_entity.dart' as entity;
 
 part 'order_model.g.dart';
 
@@ -169,6 +170,38 @@ class OrderModel extends Equatable {
 
   // Helper getters for UI display
   double get totalPrice => finalPrice ?? initialEstimate ?? 0.0;
+
+  /// Convert to OrderEntity for use in presentation layer
+  entity.OrderEntity toEntity() {
+    return entity.OrderEntity(
+      id: id,
+      customerId: customerId,
+      technicianId: technicianId,
+      serviceId: serviceId,
+      description: description,
+      photoUrls: photoUrls,
+      location: location,
+      address: address,
+      dateRequested: dateRequested,
+      dateScheduled: dateScheduled,
+      status: entity.OrderStatus.values.firstWhere(
+        (e) => e.name == status.name,
+        orElse: () => entity.OrderStatus.pending,
+      ),
+      initialEstimate: initialEstimate,
+      finalPrice: finalPrice,
+      visitFee: visitFee,
+      vat: vat,
+      paymentMethod: paymentMethod,
+      paymentStatus: paymentStatus,
+      notes: notes,
+      serviceName: serviceName,
+      customerName: customerName,
+      customerPhoneNumber: customerPhoneNumber,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+    );
+  }
 }
 
 DateTime _timestampFromJson(dynamic timestamp) {

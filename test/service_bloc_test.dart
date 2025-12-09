@@ -3,10 +3,10 @@
 
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:home_repair_app/blocs/service/service_bloc.dart';
-import 'package:home_repair_app/blocs/service/service_event.dart';
-import 'package:home_repair_app/blocs/service/service_state.dart';
-import 'package:home_repair_app/models/service_model.dart';
+import 'package:home_repair_app/presentation/blocs/service/service_bloc.dart';
+import 'package:home_repair_app/presentation/blocs/service/service_event.dart';
+import 'package:home_repair_app/presentation/blocs/service/service_state.dart';
+import 'package:home_repair_app/domain/entities/service_entity.dart';
 import 'package:home_repair_app/domain/repositories/i_service_repository.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
@@ -21,7 +21,7 @@ void main() {
 
     final fixedDate = DateTime(2023, 1, 1);
     final mockServices = [
-      ServiceModel(
+      ServiceEntity(
         id: '1',
         name: 'Plumbing Service',
         description: 'Fix leaks',
@@ -34,7 +34,7 @@ void main() {
         avgCompletionTimeMinutes: 60,
         createdAt: fixedDate,
       ),
-      ServiceModel(
+      ServiceEntity(
         id: '2',
         name: 'Electrical Service',
         description: 'Fix wiring',

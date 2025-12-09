@@ -7,35 +7,35 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../blocs/auth/auth_bloc.dart';
-import '../blocs/auth/auth_state.dart';
-import '../models/user_model.dart';
+import '../presentation/blocs/auth/auth_bloc.dart';
+import '../presentation/blocs/auth/auth_state.dart';
+import '../domain/entities/user_entity.dart';
 
 // Screens
-import '../screens/auth/splash_screen.dart';
-import '../screens/auth/welcome_screen.dart';
-import '../screens/auth/login_screen.dart';
-import '../screens/auth/signup_screen.dart';
-import '../screens/auth/technician_signup_screen.dart';
-import '../screens/customer/home_screen.dart';
-import '../screens/customer/edit_profile_screen.dart';
-import '../screens/customer/saved_addresses_screen.dart';
-import '../screens/customer/payment_methods_screen.dart';
-import '../screens/customer/notifications_settings_screen.dart';
-import '../screens/customer/help_support_screen.dart';
-import '../screens/customer/about_screen.dart';
-import '../screens/customer/notifications_screen.dart';
-import '../screens/customer/order_details_screen.dart';
-import '../screens/auth/email_verification_screen.dart';
-import '../screens/technician/technician_home_screen.dart';
-import '../screens/technician/order_detail_screen.dart';
-import '../screens/admin/admin_layout.dart';
+import '../presentation/screens/auth/splash_screen.dart';
+import '../presentation/screens/auth/welcome_screen.dart';
+import '../presentation/screens/auth/login_screen.dart';
+import '../presentation/screens/auth/signup_screen.dart';
+import '../presentation/screens/auth/technician_signup_screen.dart';
+import '../presentation/screens/customer/home_screen.dart';
+import '../presentation/screens/customer/edit_profile_screen.dart';
+import '../presentation/screens/customer/saved_addresses_screen.dart';
+import '../presentation/screens/customer/payment_methods_screen.dart';
+import '../presentation/screens/customer/notifications_settings_screen.dart';
+import '../presentation/screens/customer/help_support_screen.dart';
+import '../presentation/screens/customer/about_screen.dart';
+import '../presentation/screens/customer/notifications_screen.dart';
+import '../presentation/screens/customer/order_details_screen.dart';
+import '../presentation/screens/auth/email_verification_screen.dart';
+import '../presentation/screens/technician/technician_home_screen.dart';
+import '../presentation/screens/technician/order_detail_screen.dart';
+import '../presentation/screens/admin/admin_layout.dart';
 import '../services/auth_service.dart';
 import '../services/firestore_service.dart';
 import '../models/order_model.dart';
-import '../screens/chat/chat_list_screen.dart';
-import '../screens/chat/chat_screen.dart';
-import '../widgets/async_data_screen.dart';
+import '../presentation/screens/chat/chat_list_screen.dart';
+import '../presentation/screens/chat/chat_screen.dart';
+import '../presentation/widgets/async_data_screen.dart';
 
 // Helper class to convert BLoC stream to ChangeNotifier for GoRouter
 class GoRouterRefreshStream extends ChangeNotifier {
@@ -196,7 +196,7 @@ class AppRouter {
             final firestoreService = context.read<FirestoreService>();
             return AsyncDataScreen<OrderModel>(
               future: firestoreService.getOrder(orderId),
-              builder: (order) => OrderDetailsScreen(order: order),
+              builder: (order) => OrderDetailsScreen(order: order.toEntity()),
               errorTitle: 'Error',
               errorMessage: 'Order not found',
             );
@@ -215,7 +215,7 @@ class AppRouter {
             final firestoreService = context.read<FirestoreService>();
             return AsyncDataScreen<OrderModel>(
               future: firestoreService.getOrder(orderId),
-              builder: (order) => OrderDetailScreen(order: order),
+              builder: (order) => OrderDetailScreen(order: order.toEntity()),
               errorTitle: 'Error',
               errorMessage: 'Order not found',
             );

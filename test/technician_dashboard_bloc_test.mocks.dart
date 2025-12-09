@@ -5,11 +5,14 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i4;
 
+import 'package:dartz/dartz.dart' as _i2;
+import 'package:home_repair_app/core/error/failures.dart' as _i5;
+import 'package:home_repair_app/domain/entities/technician_entity.dart' as _i7;
+import 'package:home_repair_app/domain/entities/user_entity.dart' as _i6;
 import 'package:home_repair_app/domain/repositories/i_user_repository.dart'
     as _i3;
-import 'package:home_repair_app/models/technician_model.dart' as _i6;
-import 'package:home_repair_app/models/technician_stats.dart' as _i2;
-import 'package:home_repair_app/models/user_model.dart' as _i5;
+import 'package:home_repair_app/domain/usecases/user/get_technician_stats.dart'
+    as _i8;
 import 'package:mockito/mockito.dart' as _i1;
 
 // ignore_for_file: type=lint
@@ -26,9 +29,8 @@ import 'package:mockito/mockito.dart' as _i1;
 // ignore_for_file: camel_case_types
 // ignore_for_file: subtype_of_sealed_class
 
-class _FakeTechnicianStats_0 extends _i1.SmartFake
-    implements _i2.TechnicianStats {
-  _FakeTechnicianStats_0(Object parent, Invocation parentInvocation)
+class _FakeEither_0<L, R> extends _i1.SmartFake implements _i2.Either<L, R> {
+  _FakeEither_0(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
@@ -41,65 +43,87 @@ class MockIUserRepository extends _i1.Mock implements _i3.IUserRepository {
   }
 
   @override
-  _i4.Future<void> createUser(_i5.UserModel? user) =>
+  _i4.Future<_i2.Either<_i5.Failure, void>> createUser(_i6.UserEntity? user) =>
       (super.noSuchMethod(
             Invocation.method(#createUser, [user]),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i4.Future<_i2.Either<_i5.Failure, void>>.value(
+              _FakeEither_0<_i5.Failure, void>(
+                this,
+                Invocation.method(#createUser, [user]),
+              ),
+            ),
           )
-          as _i4.Future<void>);
+          as _i4.Future<_i2.Either<_i5.Failure, void>>);
 
   @override
-  _i4.Future<_i5.UserModel?> getUser(String? uid) =>
+  _i4.Future<_i2.Either<_i5.Failure, _i6.UserEntity?>> getUser(String? uid) =>
       (super.noSuchMethod(
             Invocation.method(#getUser, [uid]),
-            returnValue: _i4.Future<_i5.UserModel?>.value(),
+            returnValue:
+                _i4.Future<_i2.Either<_i5.Failure, _i6.UserEntity?>>.value(
+                  _FakeEither_0<_i5.Failure, _i6.UserEntity?>(
+                    this,
+                    Invocation.method(#getUser, [uid]),
+                  ),
+                ),
           )
-          as _i4.Future<_i5.UserModel?>);
+          as _i4.Future<_i2.Either<_i5.Failure, _i6.UserEntity?>>);
 
   @override
-  _i4.Future<void> updateUser(_i5.UserModel? user) =>
+  _i4.Future<_i2.Either<_i5.Failure, void>> updateUser(_i6.UserEntity? user) =>
       (super.noSuchMethod(
             Invocation.method(#updateUser, [user]),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i4.Future<_i2.Either<_i5.Failure, void>>.value(
+              _FakeEither_0<_i5.Failure, void>(
+                this,
+                Invocation.method(#updateUser, [user]),
+              ),
+            ),
           )
-          as _i4.Future<void>);
+          as _i4.Future<_i2.Either<_i5.Failure, void>>);
 
   @override
-  _i4.Future<void> updateUserFields(
+  _i4.Future<_i2.Either<_i5.Failure, void>> updateUserFields(
     String? uid,
     Map<String, dynamic>? fields,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#updateUserFields, [uid, fields]),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i4.Future<_i2.Either<_i5.Failure, void>>.value(
+              _FakeEither_0<_i5.Failure, void>(
+                this,
+                Invocation.method(#updateUserFields, [uid, fields]),
+              ),
+            ),
           )
-          as _i4.Future<void>);
+          as _i4.Future<_i2.Either<_i5.Failure, void>>);
 
   @override
-  _i4.Stream<List<_i6.TechnicianModel>> streamPendingTechnicians() =>
+  _i4.Stream<List<_i7.TechnicianEntity>> streamPendingTechnicians() =>
       (super.noSuchMethod(
             Invocation.method(#streamPendingTechnicians, []),
-            returnValue: _i4.Stream<List<_i6.TechnicianModel>>.empty(),
+            returnValue: _i4.Stream<List<_i7.TechnicianEntity>>.empty(),
           )
-          as _i4.Stream<List<_i6.TechnicianModel>>);
+          as _i4.Stream<List<_i7.TechnicianEntity>>);
 
   @override
-  _i4.Future<void> updateTechnicianStatus(
+  _i4.Future<_i2.Either<_i5.Failure, void>> updateTechnicianStatus(
     String? uid,
-    _i6.TechnicianStatus? status,
+    _i7.TechnicianStatus? status,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#updateTechnicianStatus, [uid, status]),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i4.Future<_i2.Either<_i5.Failure, void>>.value(
+              _FakeEither_0<_i5.Failure, void>(
+                this,
+                Invocation.method(#updateTechnicianStatus, [uid, status]),
+              ),
+            ),
           )
-          as _i4.Future<void>);
+          as _i4.Future<_i2.Either<_i5.Failure, void>>);
 
   @override
-  _i4.Future<void> updateTechnicianAvailability(
+  _i4.Future<_i2.Either<_i5.Failure, void>> updateTechnicianAvailability(
     String? uid,
     bool? isAvailable,
   ) =>
@@ -108,10 +132,17 @@ class MockIUserRepository extends _i1.Mock implements _i3.IUserRepository {
               uid,
               isAvailable,
             ]),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i4.Future<_i2.Either<_i5.Failure, void>>.value(
+              _FakeEither_0<_i5.Failure, void>(
+                this,
+                Invocation.method(#updateTechnicianAvailability, [
+                  uid,
+                  isAvailable,
+                ]),
+              ),
+            ),
           )
-          as _i4.Future<void>);
+          as _i4.Future<_i2.Either<_i5.Failure, void>>);
 
   @override
   _i4.Stream<bool> streamTechnicianAvailability(String? uid) =>
@@ -122,23 +153,29 @@ class MockIUserRepository extends _i1.Mock implements _i3.IUserRepository {
           as _i4.Stream<bool>);
 
   @override
-  _i4.Future<_i2.TechnicianStats> getTechnicianStats(String? technicianId) =>
+  _i4.Future<_i2.Either<_i5.Failure, _i8.TechnicianStatsEntity>>
+  getTechnicianStats(String? technicianId) =>
       (super.noSuchMethod(
             Invocation.method(#getTechnicianStats, [technicianId]),
-            returnValue: _i4.Future<_i2.TechnicianStats>.value(
-              _FakeTechnicianStats_0(
-                this,
-                Invocation.method(#getTechnicianStats, [technicianId]),
-              ),
-            ),
+            returnValue:
+                _i4.Future<
+                  _i2.Either<_i5.Failure, _i8.TechnicianStatsEntity>
+                >.value(
+                  _FakeEither_0<_i5.Failure, _i8.TechnicianStatsEntity>(
+                    this,
+                    Invocation.method(#getTechnicianStats, [technicianId]),
+                  ),
+                ),
           )
-          as _i4.Future<_i2.TechnicianStats>);
+          as _i4.Future<_i2.Either<_i5.Failure, _i8.TechnicianStatsEntity>>);
 
   @override
-  _i4.Stream<_i2.TechnicianStats> streamTechnicianStats(String? technicianId) =>
+  _i4.Stream<_i8.TechnicianStatsEntity> streamTechnicianStats(
+    String? technicianId,
+  ) =>
       (super.noSuchMethod(
             Invocation.method(#streamTechnicianStats, [technicianId]),
-            returnValue: _i4.Stream<_i2.TechnicianStats>.empty(),
+            returnValue: _i4.Stream<_i8.TechnicianStatsEntity>.empty(),
           )
-          as _i4.Stream<_i2.TechnicianStats>);
+          as _i4.Stream<_i8.TechnicianStatsEntity>);
 }

@@ -5,12 +5,12 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i4;
 
+import 'package:dartz/dartz.dart' as _i2;
+import 'package:home_repair_app/core/error/failures.dart' as _i5;
+import 'package:home_repair_app/domain/entities/order_entity.dart' as _i6;
 import 'package:home_repair_app/domain/repositories/i_order_repository.dart'
     as _i3;
-import 'package:home_repair_app/models/order_model.dart' as _i5;
-import 'package:home_repair_app/models/paginated_result.dart' as _i2;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mockito/src/dummies.dart' as _i6;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -26,9 +26,8 @@ import 'package:mockito/src/dummies.dart' as _i6;
 // ignore_for_file: camel_case_types
 // ignore_for_file: subtype_of_sealed_class
 
-class _FakePaginatedResult_0<T> extends _i1.SmartFake
-    implements _i2.PaginatedResult<T> {
-  _FakePaginatedResult_0(Object parent, Invocation parentInvocation)
+class _FakeEither_0<L, R> extends _i1.SmartFake implements _i2.Either<L, R> {
+  _FakeEither_0(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
@@ -37,35 +36,52 @@ class _FakePaginatedResult_0<T> extends _i1.SmartFake
 /// See the documentation for Mockito's code generation for more information.
 class MockIOrderRepository extends _i1.Mock implements _i3.IOrderRepository {
   @override
-  _i4.Future<_i5.OrderModel?> getOrder(String? orderId) =>
+  _i4.Future<_i2.Either<_i5.Failure, _i6.OrderEntity?>> getOrder(
+    String? orderId,
+  ) =>
       (super.noSuchMethod(
             Invocation.method(#getOrder, [orderId]),
-            returnValue: _i4.Future<_i5.OrderModel?>.value(),
-            returnValueForMissingStub: _i4.Future<_i5.OrderModel?>.value(),
+            returnValue:
+                _i4.Future<_i2.Either<_i5.Failure, _i6.OrderEntity?>>.value(
+                  _FakeEither_0<_i5.Failure, _i6.OrderEntity?>(
+                    this,
+                    Invocation.method(#getOrder, [orderId]),
+                  ),
+                ),
+            returnValueForMissingStub:
+                _i4.Future<_i2.Either<_i5.Failure, _i6.OrderEntity?>>.value(
+                  _FakeEither_0<_i5.Failure, _i6.OrderEntity?>(
+                    this,
+                    Invocation.method(#getOrder, [orderId]),
+                  ),
+                ),
           )
-          as _i4.Future<_i5.OrderModel?>);
+          as _i4.Future<_i2.Either<_i5.Failure, _i6.OrderEntity?>>);
 
   @override
-  _i4.Future<String> createOrder(_i5.OrderModel? order) =>
+  _i4.Future<_i2.Either<_i5.Failure, String>> createOrder(
+    _i6.OrderEntity? order,
+  ) =>
       (super.noSuchMethod(
             Invocation.method(#createOrder, [order]),
-            returnValue: _i4.Future<String>.value(
-              _i6.dummyValue<String>(
+            returnValue: _i4.Future<_i2.Either<_i5.Failure, String>>.value(
+              _FakeEither_0<_i5.Failure, String>(
                 this,
                 Invocation.method(#createOrder, [order]),
               ),
             ),
-            returnValueForMissingStub: _i4.Future<String>.value(
-              _i6.dummyValue<String>(
-                this,
-                Invocation.method(#createOrder, [order]),
-              ),
-            ),
+            returnValueForMissingStub:
+                _i4.Future<_i2.Either<_i5.Failure, String>>.value(
+                  _FakeEither_0<_i5.Failure, String>(
+                    this,
+                    Invocation.method(#createOrder, [order]),
+                  ),
+                ),
           )
-          as _i4.Future<String>);
+          as _i4.Future<_i2.Either<_i5.Failure, String>>);
 
   @override
-  _i4.Future<void> assignTechnicianToOrder(
+  _i4.Future<_i2.Either<_i5.Failure, void>> assignTechnicianToOrder(
     String? orderId,
     String? technicianId,
     double? estimate,
@@ -76,39 +92,88 @@ class MockIOrderRepository extends _i1.Mock implements _i3.IOrderRepository {
               technicianId,
               estimate,
             ]),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i4.Future<_i2.Either<_i5.Failure, void>>.value(
+              _FakeEither_0<_i5.Failure, void>(
+                this,
+                Invocation.method(#assignTechnicianToOrder, [
+                  orderId,
+                  technicianId,
+                  estimate,
+                ]),
+              ),
+            ),
+            returnValueForMissingStub:
+                _i4.Future<_i2.Either<_i5.Failure, void>>.value(
+                  _FakeEither_0<_i5.Failure, void>(
+                    this,
+                    Invocation.method(#assignTechnicianToOrder, [
+                      orderId,
+                      technicianId,
+                      estimate,
+                    ]),
+                  ),
+                ),
           )
-          as _i4.Future<void>);
+          as _i4.Future<_i2.Either<_i5.Failure, void>>);
 
   @override
-  _i4.Future<void> completeOrder(
+  _i4.Future<_i2.Either<_i5.Failure, void>> completeOrder(
     String? orderId,
     double? finalPrice,
     String? notes,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#completeOrder, [orderId, finalPrice, notes]),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i4.Future<_i2.Either<_i5.Failure, void>>.value(
+              _FakeEither_0<_i5.Failure, void>(
+                this,
+                Invocation.method(#completeOrder, [orderId, finalPrice, notes]),
+              ),
+            ),
+            returnValueForMissingStub:
+                _i4.Future<_i2.Either<_i5.Failure, void>>.value(
+                  _FakeEither_0<_i5.Failure, void>(
+                    this,
+                    Invocation.method(#completeOrder, [
+                      orderId,
+                      finalPrice,
+                      notes,
+                    ]),
+                  ),
+                ),
           )
-          as _i4.Future<void>);
+          as _i4.Future<_i2.Either<_i5.Failure, void>>);
 
   @override
-  _i4.Future<void> rejectOrder(String? orderId, String? reason) =>
+  _i4.Future<_i2.Either<_i5.Failure, void>> rejectOrder(
+    String? orderId,
+    String? reason,
+  ) =>
       (super.noSuchMethod(
             Invocation.method(#rejectOrder, [orderId, reason]),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i4.Future<_i2.Either<_i5.Failure, void>>.value(
+              _FakeEither_0<_i5.Failure, void>(
+                this,
+                Invocation.method(#rejectOrder, [orderId, reason]),
+              ),
+            ),
+            returnValueForMissingStub:
+                _i4.Future<_i2.Either<_i5.Failure, void>>.value(
+                  _FakeEither_0<_i5.Failure, void>(
+                    this,
+                    Invocation.method(#rejectOrder, [orderId, reason]),
+                  ),
+                ),
           )
-          as _i4.Future<void>);
+          as _i4.Future<_i2.Either<_i5.Failure, void>>);
 
   @override
-  _i4.Future<_i2.PaginatedResult<_i5.OrderModel>> getCustomerOrdersPaginated({
+  _i4.Future<_i2.Either<_i5.Failure, _i3.PaginatedResult<_i6.OrderEntity>>>
+  getCustomerOrdersPaginated({
     required String? customerId,
     String? startAfterCursor,
     int? limit = 20,
-    _i5.OrderStatus? statusFilter,
+    _i6.OrderStatus? statusFilter,
   }) =>
       (super.noSuchMethod(
             Invocation.method(#getCustomerOrdersPaginated, [], {
@@ -117,20 +182,31 @@ class MockIOrderRepository extends _i1.Mock implements _i3.IOrderRepository {
               #limit: limit,
               #statusFilter: statusFilter,
             }),
-            returnValue: _i4.Future<_i2.PaginatedResult<_i5.OrderModel>>.value(
-              _FakePaginatedResult_0<_i5.OrderModel>(
-                this,
-                Invocation.method(#getCustomerOrdersPaginated, [], {
-                  #customerId: customerId,
-                  #startAfterCursor: startAfterCursor,
-                  #limit: limit,
-                  #statusFilter: statusFilter,
-                }),
-              ),
-            ),
+            returnValue:
+                _i4.Future<
+                  _i2.Either<_i5.Failure, _i3.PaginatedResult<_i6.OrderEntity>>
+                >.value(
+                  _FakeEither_0<
+                    _i5.Failure,
+                    _i3.PaginatedResult<_i6.OrderEntity>
+                  >(
+                    this,
+                    Invocation.method(#getCustomerOrdersPaginated, [], {
+                      #customerId: customerId,
+                      #startAfterCursor: startAfterCursor,
+                      #limit: limit,
+                      #statusFilter: statusFilter,
+                    }),
+                  ),
+                ),
             returnValueForMissingStub:
-                _i4.Future<_i2.PaginatedResult<_i5.OrderModel>>.value(
-                  _FakePaginatedResult_0<_i5.OrderModel>(
+                _i4.Future<
+                  _i2.Either<_i5.Failure, _i3.PaginatedResult<_i6.OrderEntity>>
+                >.value(
+                  _FakeEither_0<
+                    _i5.Failure,
+                    _i3.PaginatedResult<_i6.OrderEntity>
+                  >(
                     this,
                     Invocation.method(#getCustomerOrdersPaginated, [], {
                       #customerId: customerId,
@@ -141,22 +217,35 @@ class MockIOrderRepository extends _i1.Mock implements _i3.IOrderRepository {
                   ),
                 ),
           )
-          as _i4.Future<_i2.PaginatedResult<_i5.OrderModel>>);
+          as _i4.Future<
+            _i2.Either<_i5.Failure, _i3.PaginatedResult<_i6.OrderEntity>>
+          >);
 
   @override
-  _i4.Future<void> updateOrderStatus(
+  _i4.Future<_i2.Either<_i5.Failure, void>> updateOrderStatus(
     String? orderId,
-    _i5.OrderStatus? status,
+    _i6.OrderStatus? status,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#updateOrderStatus, [orderId, status]),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i4.Future<_i2.Either<_i5.Failure, void>>.value(
+              _FakeEither_0<_i5.Failure, void>(
+                this,
+                Invocation.method(#updateOrderStatus, [orderId, status]),
+              ),
+            ),
+            returnValueForMissingStub:
+                _i4.Future<_i2.Either<_i5.Failure, void>>.value(
+                  _FakeEither_0<_i5.Failure, void>(
+                    this,
+                    Invocation.method(#updateOrderStatus, [orderId, status]),
+                  ),
+                ),
           )
-          as _i4.Future<void>);
+          as _i4.Future<_i2.Either<_i5.Failure, void>>);
 
   @override
-  _i4.Stream<List<_i5.OrderModel>> getUserOrders(
+  _i4.Stream<List<_i6.OrderEntity>> getUserOrders(
     String? userId, {
     bool? isTechnician = false,
   }) =>
@@ -166,26 +255,29 @@ class MockIOrderRepository extends _i1.Mock implements _i3.IOrderRepository {
               [userId],
               {#isTechnician: isTechnician},
             ),
-            returnValue: _i4.Stream<List<_i5.OrderModel>>.empty(),
-            returnValueForMissingStub: _i4.Stream<List<_i5.OrderModel>>.empty(),
+            returnValue: _i4.Stream<List<_i6.OrderEntity>>.empty(),
+            returnValueForMissingStub:
+                _i4.Stream<List<_i6.OrderEntity>>.empty(),
           )
-          as _i4.Stream<List<_i5.OrderModel>>);
+          as _i4.Stream<List<_i6.OrderEntity>>);
 
   @override
-  _i4.Stream<List<_i5.OrderModel>> streamPendingOrdersForTechnician() =>
+  _i4.Stream<List<_i6.OrderEntity>> streamPendingOrdersForTechnician() =>
       (super.noSuchMethod(
             Invocation.method(#streamPendingOrdersForTechnician, []),
-            returnValue: _i4.Stream<List<_i5.OrderModel>>.empty(),
-            returnValueForMissingStub: _i4.Stream<List<_i5.OrderModel>>.empty(),
+            returnValue: _i4.Stream<List<_i6.OrderEntity>>.empty(),
+            returnValueForMissingStub:
+                _i4.Stream<List<_i6.OrderEntity>>.empty(),
           )
-          as _i4.Stream<List<_i5.OrderModel>>);
+          as _i4.Stream<List<_i6.OrderEntity>>);
 
   @override
-  _i4.Stream<List<_i5.OrderModel>> streamAllOrders() =>
+  _i4.Stream<List<_i6.OrderEntity>> streamAllOrders() =>
       (super.noSuchMethod(
             Invocation.method(#streamAllOrders, []),
-            returnValue: _i4.Stream<List<_i5.OrderModel>>.empty(),
-            returnValueForMissingStub: _i4.Stream<List<_i5.OrderModel>>.empty(),
+            returnValue: _i4.Stream<List<_i6.OrderEntity>>.empty(),
+            returnValueForMissingStub:
+                _i4.Stream<List<_i6.OrderEntity>>.empty(),
           )
-          as _i4.Stream<List<_i5.OrderModel>>);
+          as _i4.Stream<List<_i6.OrderEntity>>);
 }

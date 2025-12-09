@@ -5,10 +5,13 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i4;
 
+import 'package:dartz/dartz.dart' as _i2;
+import 'package:home_repair_app/core/error/failures.dart' as _i6;
+import 'package:home_repair_app/domain/entities/service_entity.dart' as _i5;
+import 'package:home_repair_app/domain/repositories/i_order_repository.dart'
+    as _i7;
 import 'package:home_repair_app/domain/repositories/i_service_repository.dart'
     as _i3;
-import 'package:home_repair_app/models/paginated_result.dart' as _i2;
-import 'package:home_repair_app/models/service_model.dart' as _i5;
 import 'package:mockito/mockito.dart' as _i1;
 
 // ignore_for_file: type=lint
@@ -25,9 +28,8 @@ import 'package:mockito/mockito.dart' as _i1;
 // ignore_for_file: camel_case_types
 // ignore_for_file: subtype_of_sealed_class
 
-class _FakePaginatedResult_0<T> extends _i1.SmartFake
-    implements _i2.PaginatedResult<T> {
-  _FakePaginatedResult_0(Object parent, Invocation parentInvocation)
+class _FakeEither_0<L, R> extends _i1.SmartFake implements _i2.Either<L, R> {
+  _FakeEither_0(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
@@ -37,17 +39,18 @@ class _FakePaginatedResult_0<T> extends _i1.SmartFake
 class MockIServiceRepository extends _i1.Mock
     implements _i3.IServiceRepository {
   @override
-  _i4.Stream<List<_i5.ServiceModel>> getServices() =>
+  _i4.Stream<List<_i5.ServiceEntity>> getServices() =>
       (super.noSuchMethod(
             Invocation.method(#getServices, []),
-            returnValue: _i4.Stream<List<_i5.ServiceModel>>.empty(),
+            returnValue: _i4.Stream<List<_i5.ServiceEntity>>.empty(),
             returnValueForMissingStub:
-                _i4.Stream<List<_i5.ServiceModel>>.empty(),
+                _i4.Stream<List<_i5.ServiceEntity>>.empty(),
           )
-          as _i4.Stream<List<_i5.ServiceModel>>);
+          as _i4.Stream<List<_i5.ServiceEntity>>);
 
   @override
-  _i4.Future<_i2.PaginatedResult<_i5.ServiceModel>> getServicesPaginated({
+  _i4.Future<_i2.Either<_i6.Failure, _i7.PaginatedResult<_i5.ServiceEntity>>>
+  getServicesPaginated({
     String? startAfterCursor,
     int? limit = 20,
     String? category,
@@ -61,8 +64,16 @@ class MockIServiceRepository extends _i1.Mock
               #searchQuery: searchQuery,
             }),
             returnValue:
-                _i4.Future<_i2.PaginatedResult<_i5.ServiceModel>>.value(
-                  _FakePaginatedResult_0<_i5.ServiceModel>(
+                _i4.Future<
+                  _i2.Either<
+                    _i6.Failure,
+                    _i7.PaginatedResult<_i5.ServiceEntity>
+                  >
+                >.value(
+                  _FakeEither_0<
+                    _i6.Failure,
+                    _i7.PaginatedResult<_i5.ServiceEntity>
+                  >(
                     this,
                     Invocation.method(#getServicesPaginated, [], {
                       #startAfterCursor: startAfterCursor,
@@ -73,8 +84,16 @@ class MockIServiceRepository extends _i1.Mock
                   ),
                 ),
             returnValueForMissingStub:
-                _i4.Future<_i2.PaginatedResult<_i5.ServiceModel>>.value(
-                  _FakePaginatedResult_0<_i5.ServiceModel>(
+                _i4.Future<
+                  _i2.Either<
+                    _i6.Failure,
+                    _i7.PaginatedResult<_i5.ServiceEntity>
+                  >
+                >.value(
+                  _FakeEither_0<
+                    _i6.Failure,
+                    _i7.PaginatedResult<_i5.ServiceEntity>
+                  >(
                     this,
                     Invocation.method(#getServicesPaginated, [], {
                       #startAfterCursor: startAfterCursor,
@@ -85,49 +104,103 @@ class MockIServiceRepository extends _i1.Mock
                   ),
                 ),
           )
-          as _i4.Future<_i2.PaginatedResult<_i5.ServiceModel>>);
+          as _i4.Future<
+            _i2.Either<_i6.Failure, _i7.PaginatedResult<_i5.ServiceEntity>>
+          >);
 
   @override
-  _i4.Future<List<_i5.ServiceModel>> getServicesWithCache({
-    bool? forceRefresh = false,
-  }) =>
+  _i4.Future<_i2.Either<_i6.Failure, List<_i5.ServiceEntity>>>
+  getServicesWithCache({bool? forceRefresh = false}) =>
       (super.noSuchMethod(
             Invocation.method(#getServicesWithCache, [], {
               #forceRefresh: forceRefresh,
             }),
-            returnValue: _i4.Future<List<_i5.ServiceModel>>.value(
-              <_i5.ServiceModel>[],
-            ),
-            returnValueForMissingStub: _i4.Future<List<_i5.ServiceModel>>.value(
-              <_i5.ServiceModel>[],
-            ),
+            returnValue:
+                _i4.Future<
+                  _i2.Either<_i6.Failure, List<_i5.ServiceEntity>>
+                >.value(
+                  _FakeEither_0<_i6.Failure, List<_i5.ServiceEntity>>(
+                    this,
+                    Invocation.method(#getServicesWithCache, [], {
+                      #forceRefresh: forceRefresh,
+                    }),
+                  ),
+                ),
+            returnValueForMissingStub:
+                _i4.Future<
+                  _i2.Either<_i6.Failure, List<_i5.ServiceEntity>>
+                >.value(
+                  _FakeEither_0<_i6.Failure, List<_i5.ServiceEntity>>(
+                    this,
+                    Invocation.method(#getServicesWithCache, [], {
+                      #forceRefresh: forceRefresh,
+                    }),
+                  ),
+                ),
           )
-          as _i4.Future<List<_i5.ServiceModel>>);
+          as _i4.Future<_i2.Either<_i6.Failure, List<_i5.ServiceEntity>>>);
 
   @override
-  _i4.Future<void> addService(_i5.ServiceModel? service) =>
+  _i4.Future<_i2.Either<_i6.Failure, void>> addService(
+    _i5.ServiceEntity? service,
+  ) =>
       (super.noSuchMethod(
             Invocation.method(#addService, [service]),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i4.Future<_i2.Either<_i6.Failure, void>>.value(
+              _FakeEither_0<_i6.Failure, void>(
+                this,
+                Invocation.method(#addService, [service]),
+              ),
+            ),
+            returnValueForMissingStub:
+                _i4.Future<_i2.Either<_i6.Failure, void>>.value(
+                  _FakeEither_0<_i6.Failure, void>(
+                    this,
+                    Invocation.method(#addService, [service]),
+                  ),
+                ),
           )
-          as _i4.Future<void>);
+          as _i4.Future<_i2.Either<_i6.Failure, void>>);
 
   @override
-  _i4.Future<void> updateService(_i5.ServiceModel? service) =>
+  _i4.Future<_i2.Either<_i6.Failure, void>> updateService(
+    _i5.ServiceEntity? service,
+  ) =>
       (super.noSuchMethod(
             Invocation.method(#updateService, [service]),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i4.Future<_i2.Either<_i6.Failure, void>>.value(
+              _FakeEither_0<_i6.Failure, void>(
+                this,
+                Invocation.method(#updateService, [service]),
+              ),
+            ),
+            returnValueForMissingStub:
+                _i4.Future<_i2.Either<_i6.Failure, void>>.value(
+                  _FakeEither_0<_i6.Failure, void>(
+                    this,
+                    Invocation.method(#updateService, [service]),
+                  ),
+                ),
           )
-          as _i4.Future<void>);
+          as _i4.Future<_i2.Either<_i6.Failure, void>>);
 
   @override
-  _i4.Future<void> deleteService(String? serviceId) =>
+  _i4.Future<_i2.Either<_i6.Failure, void>> deleteService(String? serviceId) =>
       (super.noSuchMethod(
             Invocation.method(#deleteService, [serviceId]),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i4.Future<_i2.Either<_i6.Failure, void>>.value(
+              _FakeEither_0<_i6.Failure, void>(
+                this,
+                Invocation.method(#deleteService, [serviceId]),
+              ),
+            ),
+            returnValueForMissingStub:
+                _i4.Future<_i2.Either<_i6.Failure, void>>.value(
+                  _FakeEither_0<_i6.Failure, void>(
+                    this,
+                    Invocation.method(#deleteService, [serviceId]),
+                  ),
+                ),
           )
-          as _i4.Future<void>);
+          as _i4.Future<_i2.Either<_i6.Failure, void>>);
 }
