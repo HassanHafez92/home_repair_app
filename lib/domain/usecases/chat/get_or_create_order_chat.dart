@@ -1,4 +1,4 @@
-/// Use case for getting or creating an order chat.
+// Use case for getting or creating an order chat.
 
 import 'package:dartz/dartz.dart';
 import '../../../core/error/failures.dart';

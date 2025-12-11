@@ -11,13 +11,24 @@ import 'package:home_repair_app/domain/repositories/i_order_repository.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
+import 'package:home_repair_app/domain/usecases/order/create_order.dart'
+    as usecase;
+import 'package:home_repair_app/domain/usecases/order/update_order_status.dart'
+    as usecase;
+
 // Generate mocks
-@GenerateNiceMocks([MockSpec<IOrderRepository>()])
+@GenerateNiceMocks([
+  MockSpec<IOrderRepository>(),
+  MockSpec<usecase.CreateOrder>(),
+  MockSpec<usecase.UpdateOrderStatus>(),
+])
 import 'customer_order_bloc_test.mocks.dart';
 
 void main() {
   group('CustomerOrderBloc', () {
-    late IOrderRepository mockOrderRepository;
+    late MockIOrderRepository mockOrderRepository;
+    late MockCreateOrder mockCreateOrder;
+    late MockUpdateOrderStatus mockUpdateOrderStatus;
     late CustomerOrderBloc customerOrderBloc;
 
     // Test data
@@ -45,8 +56,13 @@ void main() {
 
     setUp(() {
       mockOrderRepository = MockIOrderRepository();
+      mockCreateOrder = MockCreateOrder();
+      mockUpdateOrderStatus = MockUpdateOrderStatus();
+
       customerOrderBloc = CustomerOrderBloc(
         orderRepository: mockOrderRepository,
+        createOrder: mockCreateOrder,
+        updateOrderStatus: mockUpdateOrderStatus,
       );
     });
 
@@ -111,11 +127,9 @@ void main() {
     blocTest<CustomerOrderBloc, CustomerOrderState>(
       'emits [failure] when CancelOrder fails',
       setUp: () {
+        // Now stubbing the use case instead of the repository
         when(
-          mockOrderRepository.updateOrderStatus(
-            'order-1',
-            OrderStatus.cancelled,
-          ),
+          mockUpdateOrderStatus.call(any),
         ).thenAnswer((_) async => Left(ServerFailure('Failed to cancel')));
       },
       build: () => customerOrderBloc,

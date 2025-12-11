@@ -8,7 +8,8 @@ import 'package:go_router/go_router.dart';
 import '../../blocs/profile/profile_bloc.dart';
 import '../../blocs/profile/profile_event.dart';
 import '../../blocs/profile/profile_state.dart';
-import 'package:home_repair_app/services/auth_service.dart';
+import '../../blocs/auth/auth_bloc.dart';
+import '../../blocs/auth/auth_event.dart';
 import '../../widgets/custom_button.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -136,9 +137,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 CustomButton(
                   text: 'logout'.tr(),
                   variant: ButtonVariant.outline,
-                  onPressed: () async {
-                    final authService = context.read<AuthService>();
-                    await authService.signOut();
+                  onPressed: () {
+                    context.read<AuthBloc>().add(const AuthLogoutRequested());
                     // AppRouter redirect should handle navigation to /welcome
                   },
                 ),
@@ -174,6 +174,3 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 }
-
-
-

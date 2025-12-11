@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:uuid/uuid.dart';
 import 'package:image_picker/image_picker.dart';
@@ -8,7 +7,7 @@ import 'dart:io';
 
 import 'package:home_repair_app/models/message_model.dart';
 import 'package:home_repair_app/services/chat_service.dart';
-import 'package:home_repair_app/services/auth_service.dart';
+import '../../helpers/auth_helper.dart';
 import '../../widgets/full_screen_image_view.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -40,12 +39,9 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
     // Mark messages as read when entering screen
-    final authService = context.read<AuthService>();
-    if (authService.currentUser != null) {
-      _chatService.markMessagesAsRead(
-        widget.chatId,
-        authService.currentUser!.uid,
-      );
+    final userId = context.userId;
+    if (userId != null) {
+      _chatService.markMessagesAsRead(widget.chatId, userId);
     }
   }
 
@@ -60,9 +56,8 @@ class _ChatScreenState extends State<ChatScreen> {
     final text = _messageController.text.trim();
     if (text.isEmpty) return;
 
-    final authService = context.read<AuthService>();
-    final user = authService.currentUser;
-    if (user == null) return;
+    final userId = context.userId;
+    if (userId == null) return;
 
     setState(() => _isSending = true);
     _messageController.clear();
@@ -70,7 +65,7 @@ class _ChatScreenState extends State<ChatScreen> {
     try {
       final message = MessageModel(
         id: const Uuid().v4(),
-        senderId: user.uid,
+        senderId: userId,
         text: text,
         timestamp: DateTime.now(),
         type: MessageType.text,
@@ -112,9 +107,8 @@ class _ChatScreenState extends State<ChatScreen> {
 
       setState(() => _isUploading = true);
 
-      final authService = context.read<AuthService>();
-      final user = authService.currentUser;
-      if (user == null) return;
+      final userId = context.userId;
+      if (userId == null) return;
 
       // Upload image
       final imageUrl = await _chatService.uploadChatImage(
@@ -125,7 +119,7 @@ class _ChatScreenState extends State<ChatScreen> {
       // Send message
       final message = MessageModel(
         id: const Uuid().v4(),
-        senderId: user.uid,
+        senderId: userId,
         text: imageUrl, // Store URL in text field for image messages
         timestamp: DateTime.now(),
         type: MessageType.image,
@@ -177,10 +171,9 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   @override
   Widget build(BuildContext context) {
-    final authService = context.read<AuthService>();
-    final user = authService.currentUser;
+    final userId = context.userId;
 
-    if (user == null) return const SizedBox.shrink();
+    if (userId == null) return const SizedBox.shrink();
 
     return Scaffold(
       appBar: AppBar(title: Text(widget.otherUserName)),
@@ -212,7 +205,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
                     final message = messages[index];
-                    final isMe = message.senderId == user.uid;
+                    final isMe = message.senderId == userId;
                     final showDate =
                         index == messages.length - 1 ||
                         !_isSameDay(
@@ -397,6 +390,3 @@ class _ChatScreenState extends State<ChatScreen> {
         date1.day == date2.day;
   }
 }
-
-
-

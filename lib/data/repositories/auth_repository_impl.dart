@@ -1,117 +1,68 @@
-/// Auth repository implementation using Firebase Auth.
-///
-/// This implementation handles all Firebase Auth interactions and
-/// returns Either types for Clean Architecture error handling.
+// Auth repository implementation using data sources.
+//
+// This implementation delegates to data sources and handles
+// exception-to-failure conversion for Clean Architecture.
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 
+import 'package:flutter/foundation.dart';
+
+import '../../core/error/exceptions.dart';
 import '../../core/error/failures.dart';
+import '../../core/network/network_info.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/i_auth_repository.dart';
+import '../../models/user_model.dart' as models;
+import '../datasources/remote/i_auth_remote_data_source.dart';
+import '../datasources/remote/i_user_remote_data_source.dart';
 
-/// Implementation of [IAuthRepository] using Firebase Auth.
+/// Implementation of [IAuthRepository] using data sources.
 class AuthRepositoryImpl implements IAuthRepository {
-  final FirebaseAuth _auth;
-  final FirebaseFirestore _firestore;
-  GoogleSignIn? _googleSignIn;
+  final IAuthRemoteDataSource _authRemoteDataSource;
+  final IUserRemoteDataSource _userRemoteDataSource;
+  final INetworkInfo _networkInfo;
 
-  AuthRepositoryImpl({FirebaseAuth? auth, FirebaseFirestore? firestore})
-    : _auth = auth ?? FirebaseAuth.instance,
-      _firestore = firestore ?? FirebaseFirestore.instance;
-
-  Future<void> _ensureGoogleSignInInitialized() async {
-    if (_googleSignIn == null) {
-      final instance = GoogleSignIn.instance;
-      await instance.initialize();
-      _googleSignIn = instance;
-    }
-  }
+  AuthRepositoryImpl({
+    required IAuthRemoteDataSource authRemoteDataSource,
+    required IUserRemoteDataSource userRemoteDataSource,
+    required INetworkInfo networkInfo,
+  }) : _authRemoteDataSource = authRemoteDataSource,
+       _userRemoteDataSource = userRemoteDataSource,
+       _networkInfo = networkInfo;
 
   @override
   Stream<UserEntity?> get authStateChanges {
-    return _auth.authStateChanges().asyncMap((user) async {
-      if (user == null) return null;
-      return await _getUserEntity(user.uid);
+    return _authRemoteDataSource.authStateChanges.asyncMap((uid) async {
+      if (uid == null) return null;
+      try {
+        final userModel = await _userRemoteDataSource.getUser(uid);
+        return _mapToUserEntity(userModel);
+      } catch (e) {
+        debugPrint('Error fetching user entity: $e');
+        return null;
+      }
     });
   }
 
   @override
   UserEntity? get currentUser {
-    // This is synchronous, so we can't fetch from Firestore here
-    // Return a minimal entity based on Firebase User
-    final user = _auth.currentUser;
-    if (user == null) return null;
+    final uid = _authRemoteDataSource.currentUserId;
+    if (uid == null) return null;
+    // Return minimal entity - full data loaded async via authStateChanges
     return UserEntity(
-      id: user.uid,
-      email: user.email ?? '',
-      fullName: user.displayName ?? '',
-      profilePhoto: user.photoURL,
-      role: UserRole.customer, // Default, actual role retrieved async
-      createdAt: user.metadata.creationTime ?? DateTime.now(),
+      id: uid,
+      email: '',
+      fullName: '',
+      role: UserRole.customer,
+      createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
       lastActive: DateTime.now(),
-      emailVerified: user.emailVerified,
+      emailVerified: _authRemoteDataSource.isEmailVerified,
     );
   }
 
   @override
-  bool get isEmailVerified => _auth.currentUser?.emailVerified ?? false;
-
-  Future<UserEntity?> _getUserEntity(String uid) async {
-    try {
-      final doc = await _firestore.collection('users').doc(uid).get();
-      if (!doc.exists) return null;
-      final data = doc.data()!;
-      return _mapToUserEntity(uid, data);
-    } catch (e) {
-      debugPrint('Error fetching user entity: $e');
-      return null;
-    }
-  }
-
-  UserEntity _mapToUserEntity(String uid, Map<String, dynamic> data) {
-    return UserEntity(
-      id: uid,
-      email: data['email'] ?? '',
-      phoneNumber: data['phoneNumber'],
-      fullName: data['fullName'] ?? '',
-      profilePhoto: data['profilePhoto'],
-      role: _parseRole(data['role']),
-      createdAt: _parseTimestamp(data['createdAt']),
-      updatedAt: _parseTimestamp(data['updatedAt']),
-      lastActive: _parseTimestamp(data['lastActive']),
-      emailVerified: data['emailVerified'],
-    );
-  }
-
-  UserRole _parseRole(dynamic role) {
-    if (role == null) return UserRole.customer;
-    if (role is String) {
-      switch (role) {
-        case 'admin':
-          return UserRole.admin;
-        case 'technician':
-          return UserRole.technician;
-        default:
-          return UserRole.customer;
-      }
-    }
-    return UserRole.customer;
-  }
-
-  DateTime _parseTimestamp(dynamic timestamp) {
-    if (timestamp is Timestamp) {
-      return timestamp.toDate();
-    } else if (timestamp is String) {
-      return DateTime.tryParse(timestamp) ?? DateTime.now();
-    }
-    return DateTime.now();
-  }
+  bool get isEmailVerified => _authRemoteDataSource.isEmailVerified;
 
   @override
   Future<Either<Failure, UserEntity>> signUpWithEmail({
@@ -120,54 +71,40 @@ class AuthRepositoryImpl implements IAuthRepository {
     required String fullName,
     String? phoneNumber,
   }) async {
+    if (!await _networkInfo.isConnected) {
+      return const Left(NetworkFailure());
+    }
+
     try {
-      final credential = await _auth.createUserWithEmailAndPassword(
+      // Create auth account
+      final authData = await _authRemoteDataSource.signUpWithEmail(
         email: email,
         password: password,
       );
 
-      if (credential.user == null) {
-        return const Left(AuthFailure('Failed to create user account'));
-      }
-
+      final uid = authData['uid'] as String;
       final now = DateTime.now();
-      final userData = {
-        'id': credential.user!.uid,
-        'email': email,
-        'fullName': fullName,
-        'phoneNumber': phoneNumber,
-        'role': 'customer',
-        'createdAt': Timestamp.fromDate(now),
-        'updatedAt': Timestamp.fromDate(now),
-        'lastActive': Timestamp.fromDate(now),
-        'emailVerified': false,
-        'savedAddresses': [],
-        'savedPaymentMethods': [],
-      };
 
-      await _firestore
-          .collection('users')
-          .doc(credential.user!.uid)
-          .set(userData);
-
-      // Send email verification
-      await credential.user!.sendEmailVerification();
-
-      return Right(
-        UserEntity(
-          id: credential.user!.uid,
-          email: email,
-          phoneNumber: phoneNumber,
-          fullName: fullName,
-          role: UserRole.customer,
-          createdAt: now,
-          updatedAt: now,
-          lastActive: now,
-          emailVerified: false,
-        ),
+      // Create user document in Firestore
+      final userEntity = UserEntity(
+        id: uid,
+        email: email,
+        phoneNumber: phoneNumber,
+        fullName: fullName,
+        role: UserRole.customer,
+        createdAt: now,
+        updatedAt: now,
+        lastActive: now,
+        emailVerified: false,
       );
-    } on FirebaseAuthException catch (e) {
-      return Left(AuthFailure(_mapFirebaseError(e)));
+
+      await _createUserDocument(uid, userEntity, phoneNumber);
+
+      return Right(userEntity);
+    } on AuthException catch (e) {
+      return Left(AuthFailure(e.message, e.code));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message, e.code));
     } catch (e) {
       return Left(AuthFailure('An error occurred during sign up: $e'));
     }
@@ -178,24 +115,24 @@ class AuthRepositoryImpl implements IAuthRepository {
     required String email,
     required String password,
   }) async {
+    if (!await _networkInfo.isConnected) {
+      return const Left(NetworkFailure());
+    }
+
     try {
-      final credential = await _auth.signInWithEmailAndPassword(
+      final uid = await _authRemoteDataSource.signInWithEmail(
         email: email,
         password: password,
       );
 
-      if (credential.user == null) {
-        return const Left(AuthFailure('Failed to sign in'));
-      }
-
-      final userEntity = await _getUserEntity(credential.user!.uid);
-      if (userEntity == null) {
-        return const Left(AuthFailure('User data not found'));
-      }
-
-      return Right(userEntity);
-    } on FirebaseAuthException catch (e) {
-      return Left(AuthFailure(_mapFirebaseError(e)));
+      final userModel = await _userRemoteDataSource.getUser(uid);
+      return Right(_mapToUserEntity(userModel));
+    } on AuthException catch (e) {
+      return Left(AuthFailure(e.message, e.code));
+    } on NotFoundException catch (e) {
+      return Left(NotFoundFailure(e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message, e.code));
     } catch (e) {
       return Left(AuthFailure('An error occurred during sign in: $e'));
     }
@@ -203,59 +140,48 @@ class AuthRepositoryImpl implements IAuthRepository {
 
   @override
   Future<Either<Failure, UserEntity?>> signInWithGoogle() async {
+    if (!await _networkInfo.isConnected) {
+      return const Left(NetworkFailure());
+    }
+
     try {
-      await _ensureGoogleSignInInitialized();
-      GoogleSignInAccount? googleUser = await _googleSignIn!
-          .attemptLightweightAuthentication();
-
-      if (googleUser == null) {
-        if (_googleSignIn!.supportsAuthenticate()) {
-          googleUser = await _googleSignIn!.authenticate();
-        } else {
-          return const Left(
-            AuthFailure('Interactive sign-in not supported on this platform'),
-          );
-        }
+      final authData = await _authRemoteDataSource.signInWithGoogle();
+      if (authData == null) {
+        return const Right(null); // User cancelled
       }
 
-      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
-      final OAuthCredential credential = GoogleAuthProvider.credential(
-        idToken: googleAuth.idToken,
-      );
+      final uid = authData['uid'] as String;
+      final isNewUser = authData['isNewUser'] as bool? ?? false;
 
-      final userCredential = await _auth.signInWithCredential(credential);
-      if (userCredential.user == null) {
-        return const Right(null);
+      if (isNewUser) {
+        // Create new user document
+        final now = DateTime.now();
+        final userEntity = UserEntity(
+          id: uid,
+          email: authData['email'] as String? ?? '',
+          fullName: authData['displayName'] as String? ?? '',
+          profilePhoto: authData['photoURL'] as String?,
+          role: UserRole.customer,
+          createdAt: now,
+          updatedAt: now,
+          lastActive: now,
+          emailVerified: authData['emailVerified'] as bool? ?? false,
+        );
+
+        await _createUserDocument(uid, userEntity, null);
+        return Right(userEntity);
       }
 
-      // Check if user exists in Firestore, if not create them
-      final existingUser = await _getUserEntity(userCredential.user!.uid);
-      if (existingUser != null) {
-        return Right(existingUser);
-      }
-
-      // Create new user in Firestore
-      final now = DateTime.now();
-      final userData = {
-        'id': userCredential.user!.uid,
-        'email': userCredential.user!.email ?? '',
-        'fullName': userCredential.user!.displayName ?? '',
-        'profilePhoto': userCredential.user!.photoURL,
-        'role': 'customer',
-        'createdAt': Timestamp.fromDate(now),
-        'updatedAt': Timestamp.fromDate(now),
-        'lastActive': Timestamp.fromDate(now),
-        'emailVerified': userCredential.user!.emailVerified,
-      };
-
-      await _firestore
-          .collection('users')
-          .doc(userCredential.user!.uid)
-          .set(userData);
-
-      return Right(_mapToUserEntity(userCredential.user!.uid, userData));
-    } on FirebaseAuthException catch (e) {
-      return Left(AuthFailure(_mapFirebaseError(e)));
+      // Existing user - fetch from Firestore
+      final userModel = await _userRemoteDataSource.getUser(uid);
+      return Right(_mapToUserEntity(userModel));
+    } on AuthException catch (e) {
+      return Left(AuthFailure(e.message, e.code));
+    } on NotFoundException {
+      // User exists in auth but not in Firestore - rare edge case
+      return const Left(NotFoundFailure('User data not found'));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message, e.code));
     } catch (e) {
       if (kDebugMode) print('Google Sign In Error: $e');
       return Left(AuthFailure('Google Sign In failed: $e'));
@@ -264,51 +190,45 @@ class AuthRepositoryImpl implements IAuthRepository {
 
   @override
   Future<Either<Failure, UserEntity?>> signInWithFacebook() async {
+    if (!await _networkInfo.isConnected) {
+      return const Left(NetworkFailure());
+    }
+
     try {
-      final LoginResult result = await FacebookAuth.instance.login();
-      if (result.status == LoginStatus.success) {
-        final accessToken = result.accessToken;
-        if (accessToken != null) {
-          final OAuthCredential credential = FacebookAuthProvider.credential(
-            accessToken.tokenString,
-          );
-          final userCredential = await _auth.signInWithCredential(credential);
-
-          if (userCredential.user == null) {
-            return const Right(null);
-          }
-
-          // Check if user exists in Firestore, if not create them
-          final existingUser = await _getUserEntity(userCredential.user!.uid);
-          if (existingUser != null) {
-            return Right(existingUser);
-          }
-
-          // Create new user in Firestore
-          final now = DateTime.now();
-          final userData = {
-            'id': userCredential.user!.uid,
-            'email': userCredential.user!.email ?? '',
-            'fullName': userCredential.user!.displayName ?? '',
-            'profilePhoto': userCredential.user!.photoURL,
-            'role': 'customer',
-            'createdAt': Timestamp.fromDate(now),
-            'updatedAt': Timestamp.fromDate(now),
-            'lastActive': Timestamp.fromDate(now),
-            'emailVerified': userCredential.user!.emailVerified,
-          };
-
-          await _firestore
-              .collection('users')
-              .doc(userCredential.user!.uid)
-              .set(userData);
-
-          return Right(_mapToUserEntity(userCredential.user!.uid, userData));
-        }
+      final authData = await _authRemoteDataSource.signInWithFacebook();
+      if (authData == null) {
+        return const Right(null); // User cancelled
       }
-      return const Right(null);
-    } on FirebaseAuthException catch (e) {
-      return Left(AuthFailure(_mapFirebaseError(e)));
+
+      final uid = authData['uid'] as String;
+      final isNewUser = authData['isNewUser'] as bool? ?? false;
+
+      if (isNewUser) {
+        final now = DateTime.now();
+        final userEntity = UserEntity(
+          id: uid,
+          email: authData['email'] as String? ?? '',
+          fullName: authData['displayName'] as String? ?? '',
+          profilePhoto: authData['photoURL'] as String?,
+          role: UserRole.customer,
+          createdAt: now,
+          updatedAt: now,
+          lastActive: now,
+          emailVerified: authData['emailVerified'] as bool? ?? false,
+        );
+
+        await _createUserDocument(uid, userEntity, null);
+        return Right(userEntity);
+      }
+
+      final userModel = await _userRemoteDataSource.getUser(uid);
+      return Right(_mapToUserEntity(userModel));
+    } on AuthException catch (e) {
+      return Left(AuthFailure(e.message, e.code));
+    } on NotFoundException {
+      return const Left(NotFoundFailure('User data not found'));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message, e.code));
     } catch (e) {
       if (kDebugMode) print('Facebook Sign In Error: $e');
       return Left(AuthFailure('Facebook Sign In failed: $e'));
@@ -318,12 +238,10 @@ class AuthRepositoryImpl implements IAuthRepository {
   @override
   Future<Either<Failure, void>> signOut() async {
     try {
-      final futures = <Future>[_auth.signOut(), FacebookAuth.instance.logOut()];
-      if (_googleSignIn != null) {
-        futures.add(_googleSignIn!.signOut());
-      }
-      await Future.wait(futures);
+      await _authRemoteDataSource.signOut();
       return const Right(null);
+    } on AuthException catch (e) {
+      return Left(AuthFailure(e.message, e.code));
     } catch (e) {
       return Left(AuthFailure('Error signing out: $e'));
     }
@@ -331,11 +249,15 @@ class AuthRepositoryImpl implements IAuthRepository {
 
   @override
   Future<Either<Failure, void>> sendPasswordResetEmail(String email) async {
+    if (!await _networkInfo.isConnected) {
+      return const Left(NetworkFailure());
+    }
+
     try {
-      await _auth.sendPasswordResetEmail(email: email);
+      await _authRemoteDataSource.sendPasswordResetEmail(email);
       return const Right(null);
-    } on FirebaseAuthException catch (e) {
-      return Left(AuthFailure(_mapFirebaseError(e)));
+    } on AuthException catch (e) {
+      return Left(AuthFailure(e.message, e.code));
     } catch (e) {
       return Left(AuthFailure('Error sending password reset email: $e'));
     }
@@ -344,13 +266,10 @@ class AuthRepositoryImpl implements IAuthRepository {
   @override
   Future<Either<Failure, void>> sendEmailVerification() async {
     try {
-      final user = _auth.currentUser;
-      if (user != null && !user.emailVerified) {
-        await user.sendEmailVerification();
-      }
+      await _authRemoteDataSource.sendEmailVerification();
       return const Right(null);
-    } on FirebaseAuthException catch (e) {
-      return Left(AuthFailure(_mapFirebaseError(e)));
+    } on AuthException catch (e) {
+      return Left(AuthFailure(e.message, e.code));
     } catch (e) {
       return Left(AuthFailure('Error sending email verification: $e'));
     }
@@ -359,28 +278,64 @@ class AuthRepositoryImpl implements IAuthRepository {
   @override
   Future<Either<Failure, void>> reloadUser() async {
     try {
-      await _auth.currentUser?.reload();
+      await _authRemoteDataSource.reloadUser();
       return const Right(null);
+    } on AuthException catch (e) {
+      return Left(AuthFailure(e.message, e.code));
     } catch (e) {
       if (kDebugMode) print('Error reloading user: $e');
       return Left(AuthFailure('Error reloading user: $e'));
     }
   }
 
-  String _mapFirebaseError(FirebaseAuthException e) {
-    switch (e.code) {
-      case 'user-not-found':
-        return 'No user found for that email.';
-      case 'wrong-password':
-        return 'Wrong password provided for that user.';
-      case 'email-already-in-use':
-        return 'The account already exists for that email.';
-      case 'weak-password':
-        return 'The password provided is too weak.';
-      case 'invalid-email':
-        return 'The email address is not valid.';
+  // Helper methods
+
+  Future<void> _createUserDocument(
+    String uid,
+    UserEntity entity,
+    String? phoneNumber,
+  ) async {
+    final userModel = models.UserModel(
+      id: uid,
+      email: entity.email,
+      fullName: entity.fullName,
+      phoneNumber: phoneNumber,
+      profilePhoto: entity.profilePhoto,
+      role: models.UserRole.customer,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+      lastActive: entity.lastActive,
+      emailVerified: entity.emailVerified,
+    );
+
+    await _userRemoteDataSource.createUser(userModel);
+  }
+
+  UserEntity _mapToUserEntity(dynamic userModel) {
+    return UserEntity(
+      id: userModel.id,
+      email: userModel.email,
+      phoneNumber: userModel.phoneNumber,
+      fullName: userModel.fullName,
+      profilePhoto: userModel.profilePhoto,
+      role: _parseRole(userModel.role),
+      createdAt: userModel.createdAt,
+      updatedAt: userModel.updatedAt,
+      lastActive: userModel.lastActive,
+      emailVerified: userModel.emailVerified,
+    );
+  }
+
+  UserRole _parseRole(dynamic role) {
+    if (role == null) return UserRole.customer;
+    final roleName = role.toString().split('.').last;
+    switch (roleName) {
+      case 'admin':
+        return UserRole.admin;
+      case 'technician':
+        return UserRole.technician;
       default:
-        return e.message ?? 'An authentication error occurred.';
+        return UserRole.customer;
     }
   }
 }

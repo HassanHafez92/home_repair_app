@@ -1,4 +1,4 @@
-/// Service repository interface for Clean Architecture.
+// Service repository interface for Clean Architecture.
 
 import 'package:dartz/dartz.dart';
 

@@ -2,20 +2,36 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:home_repair_app/domain/entities/order_entity.dart';
 import 'package:home_repair_app/domain/repositories/i_order_repository.dart';
+import 'package:home_repair_app/domain/usecases/order/create_order.dart'
+    as usecase;
+import 'package:home_repair_app/domain/usecases/order/update_order_status.dart'
+    as usecase;
 import 'customer_order_event.dart';
 import 'customer_order_state.dart';
 
 export 'customer_order_event.dart';
 export 'customer_order_state.dart';
 
+/// CustomerOrderBloc using Clean Architecture Use Cases.
+///
+/// Delegates business logic to use cases where applicable, while
+/// using repository directly for pagination/querying operations.
 class CustomerOrderBloc extends Bloc<CustomerOrderEvent, CustomerOrderState> {
   final IOrderRepository _orderRepository;
+  final usecase.CreateOrder _createOrder;
+  final usecase.UpdateOrderStatus _updateOrderStatus;
+
   String? _currentUserId;
   OrderStatus? _currentStatusFilter;
 
-  CustomerOrderBloc({required IOrderRepository orderRepository})
-    : _orderRepository = orderRepository,
-      super(const CustomerOrderState()) {
+  CustomerOrderBloc({
+    required IOrderRepository orderRepository,
+    required usecase.CreateOrder createOrder,
+    required usecase.UpdateOrderStatus updateOrderStatus,
+  }) : _orderRepository = orderRepository,
+       _createOrder = createOrder,
+       _updateOrderStatus = updateOrderStatus,
+       super(const CustomerOrderState()) {
     on<LoadCustomerOrders>(_onLoadCustomerOrders);
     on<LoadMoreCustomerOrders>(_onLoadMoreCustomerOrders);
     on<CreateOrder>(_onCreateOrder);
@@ -100,7 +116,10 @@ class CustomerOrderBloc extends Bloc<CustomerOrderEvent, CustomerOrderState> {
     CreateOrder event,
     Emitter<CustomerOrderState> emit,
   ) async {
-    final result = await _orderRepository.createOrder(event.order);
+    // Use the CreateOrder use case
+    final result = await _createOrder(
+      usecase.CreateOrderParams(order: event.order),
+    );
 
     result.fold(
       (failure) => emit(
@@ -122,9 +141,12 @@ class CustomerOrderBloc extends Bloc<CustomerOrderEvent, CustomerOrderState> {
     CancelOrder event,
     Emitter<CustomerOrderState> emit,
   ) async {
-    final result = await _orderRepository.updateOrderStatus(
-      event.orderId,
-      OrderStatus.cancelled,
+    // Use the UpdateOrderStatus use case
+    final result = await _updateOrderStatus(
+      usecase.UpdateOrderStatusParams(
+        orderId: event.orderId,
+        status: OrderStatus.cancelled,
+      ),
     );
 
     result.fold(

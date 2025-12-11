@@ -1,7 +1,7 @@
-/// Domain entity representing a chat conversation.
-///
-/// This is a pure Dart class with no framework dependencies.
-/// Use models in the data layer for Firestore/JSON serialization.
+// Domain entity representing a chat conversation.
+//
+// This is a pure Dart class with no framework dependencies.
+// Use models in the data layer for Firestore/JSON serialization.
 
 import 'package:equatable/equatable.dart';
 

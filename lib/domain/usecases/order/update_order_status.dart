@@ -1,4 +1,4 @@
-/// Update order status use case.
+// Update order status use case.
 
 import 'package:dartz/dartz.dart';
 

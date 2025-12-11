@@ -5,7 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 
 import 'package:home_repair_app/models/chat_model.dart';
 import 'package:home_repair_app/services/chat_service.dart';
-import 'package:home_repair_app/services/auth_service.dart';
+import '../../helpers/auth_helper.dart';
 import 'package:home_repair_app/services/firestore_service.dart';
 
 class ChatListScreen extends StatelessWidget {
@@ -13,17 +13,16 @@ class ChatListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final authService = context.read<AuthService>();
-    final user = authService.currentUser;
+    final userId = context.userId;
     final chatService = ChatService();
     final firestoreService = context.read<FirestoreService>();
 
-    if (user == null) return const SizedBox.shrink();
+    if (userId == null) return const SizedBox.shrink();
 
     return Scaffold(
       appBar: AppBar(title: Text('messages'.tr())),
       body: StreamBuilder<List<ChatModel>>(
-        stream: chatService.streamUserChats(user.uid),
+        stream: chatService.streamUserChats(userId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -57,9 +56,9 @@ class ChatListScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               final chat = chats[index];
               final otherUserId = chat.participants.firstWhere(
-                (id) => id != user.uid,
+                (id) => id != userId,
               );
-              final unreadCount = chat.unreadCounts[user.uid] ?? 0;
+              final unreadCount = chat.unreadCounts[userId] ?? 0;
 
               return FutureBuilder(
                 future: firestoreService.getUserDoc(otherUserId),
@@ -165,6 +164,3 @@ class ChatListScreen extends StatelessWidget {
     }
   }
 }
-
-
-

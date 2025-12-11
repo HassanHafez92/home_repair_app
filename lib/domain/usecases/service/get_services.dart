@@ -1,4 +1,4 @@
-/// Get services use case.
+// Get services use case.
 
 import 'package:dartz/dartz.dart';
 

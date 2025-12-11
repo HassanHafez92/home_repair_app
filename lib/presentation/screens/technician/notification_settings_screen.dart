@@ -2,10 +2,9 @@
 // Purpose: Allow technicians to manage their notification preferences
 
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:home_repair_app/services/auth_service.dart';
+import '../../helpers/auth_helper.dart';
 import 'package:home_repair_app/models/notification_preferences_model.dart';
 
 class NotificationSettingsScreen extends StatefulWidget {
@@ -30,13 +29,13 @@ class _NotificationSettingsScreenState
   }
 
   Future<void> _loadPreferences() async {
-    final user = context.read<AuthService>().currentUser;
-    if (user == null) return;
+    final userId = context.userId;
+    if (userId == null) return;
 
     try {
       final doc = await _firestore
           .collection('users')
-          .doc(user.uid)
+          .doc(userId)
           .collection('settings')
           .doc('notifications')
           .get();
@@ -67,15 +66,15 @@ class _NotificationSettingsScreenState
   Future<void> _savePreferences() async {
     if (_preferences == null) return;
 
-    final user = context.read<AuthService>().currentUser;
-    if (user == null) return;
+    final userId = context.userId;
+    if (userId == null) return;
 
     setState(() => _isSaving = true);
 
     try {
       await _firestore
           .collection('users')
-          .doc(user.uid)
+          .doc(userId)
           .collection('settings')
           .doc('notifications')
           .set(_preferences!.toFirestore());
@@ -322,6 +321,3 @@ class _NotificationSettingsScreenState
     );
   }
 }
-
-
-

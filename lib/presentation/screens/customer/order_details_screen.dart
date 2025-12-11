@@ -2,14 +2,14 @@
 // Purpose: Detailed view of a single order with status tracking.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
 import 'package:home_repair_app/domain/entities/order_entity.dart';
 import '../../widgets/custom_button.dart';
-import 'package:home_repair_app/services/firestore_service.dart';
+import 'package:home_repair_app/domain/repositories/i_order_repository.dart';
+import 'package:home_repair_app/core/di/injection_container.dart';
 import 'package:home_repair_app/services/chat_service.dart';
-import 'package:home_repair_app/services/auth_service.dart';
+import '../../helpers/auth_helper.dart';
 import 'add_review_screen.dart';
 
 class OrderDetailsScreen extends StatelessWidget {
@@ -39,17 +39,33 @@ class OrderDetailsScreen extends StatelessWidget {
 
     if (confirmed == true && context.mounted) {
       try {
-        await context.read<FirestoreService>().updateOrderStatus(
+        final orderRepository = sl<IOrderRepository>();
+        final result = await orderRepository.updateOrderStatus(
           order.id,
           OrderStatus.cancelled,
         );
 
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('orderCancelledSuccessfully'.tr())),
-          );
-          Navigator.pop(context);
-        }
+        result.fold(
+          (failure) {
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'errorCancellingOrder'.tr(args: [failure.message]),
+                  ),
+                ),
+              );
+            }
+          },
+          (_) {
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('orderCancelledSuccessfully'.tr())),
+              );
+              Navigator.pop(context);
+            }
+          },
+        );
       } catch (e) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -132,15 +148,14 @@ class OrderDetailsScreen extends StatelessWidget {
                     if (order.technicianId == null) return;
 
                     final chatService = ChatService();
-                    final authService = context.read<AuthService>();
-                    final currentUser = authService.currentUser;
+                    final userId = context.userId;
 
-                    if (currentUser == null) return;
+                    if (userId == null) return;
 
                     try {
                       final chatId = await chatService.getChatIdForOrder(
                         order.id,
-                        [currentUser.uid, order.technicianId!],
+                        [userId, order.technicianId!],
                       );
 
                       if (context.mounted) {

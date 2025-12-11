@@ -1,33 +1,43 @@
-/// Service repository implementation using Firestore.
+// Service repository implementation using data sources.
+//
+// Implements offline-first pattern using local and remote data sources.
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../core/error/exceptions.dart';
 import '../../core/error/failures.dart';
+import '../../core/network/network_info.dart';
 import '../../domain/entities/service_entity.dart';
 import '../../domain/repositories/i_order_repository.dart'; // For PaginatedResult
 import '../../domain/repositories/i_service_repository.dart';
-import '../../services/cache_service.dart';
+import '../../models/service_model.dart';
+import '../datasources/local/service_local_data_source.dart';
+import '../datasources/remote/i_service_remote_data_source.dart';
 
-/// Implementation of [IServiceRepository] using Firestore.
+/// Implementation of [IServiceRepository] using data sources.
 class ServiceRepositoryImpl implements IServiceRepository {
+  final IServiceRemoteDataSource _remoteDataSource;
+  final IServiceLocalDataSource _localDataSource;
+  final INetworkInfo _networkInfo;
   final FirebaseFirestore _db;
 
-  ServiceRepositoryImpl({FirebaseFirestore? db})
-    : _db = db ?? FirebaseFirestore.instance;
+  ServiceRepositoryImpl({
+    required IServiceRemoteDataSource remoteDataSource,
+    required IServiceLocalDataSource localDataSource,
+    required INetworkInfo networkInfo,
+    FirebaseFirestore? db,
+  }) : _remoteDataSource = remoteDataSource,
+       _localDataSource = localDataSource,
+       _networkInfo = networkInfo,
+       _db = db ?? FirebaseFirestore.instance;
 
   @override
   Stream<List<ServiceEntity>> getServices() {
-    return _db
-        .collection('services')
-        .where('isActive', isEqualTo: true)
-        .snapshots()
-        .map(
-          (snapshot) => snapshot.docs
-              .map((doc) => _mapToServiceEntity(doc.id, doc.data()))
-              .toList(),
-        );
+    return _remoteDataSource.watchServices().map(
+      (models) => models.map(_modelToEntity).toList(),
+    );
   }
 
   @override
@@ -38,43 +48,29 @@ class ServiceRepositoryImpl implements IServiceRepository {
     String? searchQuery,
   }) async {
     try {
-      Query query = _db
-          .collection('services')
-          .where('isActive', isEqualTo: true);
+      List<ServiceModel> services;
 
       if (category != null && category.isNotEmpty) {
-        query = query.where('category', isEqualTo: category);
+        services = await _remoteDataSource.getServicesByCategory(category);
+      } else if (searchQuery != null && searchQuery.isNotEmpty) {
+        services = await _remoteDataSource.searchServices(searchQuery);
+      } else {
+        services = await _remoteDataSource.getAllServices();
       }
 
-      query = query.orderBy('name');
-      query = query.limit(limit + 1);
-
+      // Apply pagination manually since data source returns all
+      int startIndex = 0;
       if (startAfterCursor != null && startAfterCursor.isNotEmpty) {
-        final startAfterDoc = await _db
-            .collection('services')
-            .doc(startAfterCursor)
-            .get();
-        if (startAfterDoc.exists) {
-          query = query.startAfterDocument(startAfterDoc);
-        }
+        startIndex = services.indexWhere((s) => s.id == startAfterCursor) + 1;
+        if (startIndex < 0) startIndex = 0;
       }
 
-      final snapshot = await query.get();
-      final docs = snapshot.docs;
-      final hasMore = docs.length > limit;
-      var items = docs.take(limit).map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
-        return _mapToServiceEntity(doc.id, data);
-      }).toList();
-
-      if (searchQuery != null && searchQuery.isNotEmpty) {
-        final lowerQuery = searchQuery.toLowerCase();
-        items = items.where((service) {
-          return service.name.toLowerCase().contains(lowerQuery) ||
-              service.description.toLowerCase().contains(lowerQuery);
-        }).toList();
-      }
-
+      final paginatedServices = services
+          .skip(startIndex)
+          .take(limit + 1)
+          .toList();
+      final hasMore = paginatedServices.length > limit;
+      final items = paginatedServices.take(limit).map(_modelToEntity).toList();
       final nextCursor = hasMore && items.isNotEmpty ? items.last.id : null;
 
       return Right(
@@ -84,6 +80,8 @@ class ServiceRepositoryImpl implements IServiceRepository {
           nextCursor: nextCursor,
         ),
       );
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message, e.code));
     } catch (e) {
       return Left(ServerFailure('Failed to get services: $e'));
     }
@@ -93,38 +91,45 @@ class ServiceRepositoryImpl implements IServiceRepository {
   Future<Either<Failure, List<ServiceEntity>>> getServicesWithCache({
     bool forceRefresh = false,
   }) async {
-    final cacheService = CacheService();
-
+    // Offline-first: check cache first
     if (!forceRefresh) {
-      final cachedData = await cacheService.getCachedCategories();
-      if (cachedData != null) {
-        return Right(
-          cachedData
-              .map(
-                (json) =>
-                    _mapToServiceEntity(json['id'] as String? ?? '', json),
-              )
-              .toList(),
-        );
+      try {
+        if (await _localDataSource.hasCachedServices()) {
+          final cachedServices = await _localDataSource.getCachedServices();
+          return Right(cachedServices.map(_modelToEntity).toList());
+        }
+      } on CacheException catch (e) {
+        debugPrint('Cache miss: ${e.message}');
       }
     }
 
+    // Check network connectivity
+    if (!await _networkInfo.isConnected) {
+      // Try to return cached data even if expired
+      try {
+        final cachedServices = await _localDataSource.getCachedServices();
+        return Right(cachedServices.map(_modelToEntity).toList());
+      } catch (_) {
+        return const Left(NetworkFailure('No cached data available offline'));
+      }
+    }
+
+    // Fetch from remote
     try {
-      final snapshot = await _db
-          .collection('services')
-          .where('isActive', isEqualTo: true)
-          .get();
+      final services = await _remoteDataSource.getAllServices();
 
-      final services = snapshot.docs
-          .map((doc) => _mapToServiceEntity(doc.id, doc.data()))
-          .toList();
+      // Update cache
+      await _localDataSource.cacheServices(services);
 
-      // Cache the data
-      await cacheService.cacheCategories(
-        services.map((s) => _serviceEntityToMap(s)).toList(),
-      );
-
-      return Right(services);
+      return Right(services.map(_modelToEntity).toList());
+    } on ServerException catch (e) {
+      // Fallback to cache on server error
+      try {
+        final cachedServices = await _localDataSource.getCachedServices();
+        return Right(cachedServices.map(_modelToEntity).toList());
+      } catch (_) {
+        return Left(ServerFailure(e.message, e.code));
+      }
     } catch (e) {
       debugPrint('Error fetching services: $e');
       return Left(ServerFailure('Failed to get services: $e'));
@@ -133,11 +138,19 @@ class ServiceRepositoryImpl implements IServiceRepository {
 
   @override
   Future<Either<Failure, void>> addService(ServiceEntity service) async {
+    if (!await _networkInfo.isConnected) {
+      return const Left(NetworkFailure());
+    }
+
     try {
       await _db
           .collection('services')
           .doc(service.id)
           .set(_serviceEntityToMap(service));
+
+      // Invalidate cache
+      await _localDataSource.clearCache();
+
       return const Right(null);
     } catch (e) {
       return Left(ServerFailure('Failed to add service: $e'));
@@ -146,11 +159,19 @@ class ServiceRepositoryImpl implements IServiceRepository {
 
   @override
   Future<Either<Failure, void>> updateService(ServiceEntity service) async {
+    if (!await _networkInfo.isConnected) {
+      return const Left(NetworkFailure());
+    }
+
     try {
       await _db
           .collection('services')
           .doc(service.id)
           .update(_serviceEntityToMap(service));
+
+      // Invalidate cache
+      await _localDataSource.clearCache();
+
       return const Right(null);
     } catch (e) {
       return Left(ServerFailure('Failed to update service: $e'));
@@ -159,31 +180,39 @@ class ServiceRepositoryImpl implements IServiceRepository {
 
   @override
   Future<Either<Failure, void>> deleteService(String serviceId) async {
+    if (!await _networkInfo.isConnected) {
+      return const Left(NetworkFailure());
+    }
+
     try {
       await _db.collection('services').doc(serviceId).update({
         'isActive': false,
       });
+
+      // Invalidate cache
+      await _localDataSource.clearCache();
+
       return const Right(null);
     } catch (e) {
       return Left(ServerFailure('Failed to delete service: $e'));
     }
   }
 
-  // Helper methods for entity mapping
-  ServiceEntity _mapToServiceEntity(String id, Map<String, dynamic> data) {
+  // Helper methods for mapping
+  ServiceEntity _modelToEntity(ServiceModel model) {
     return ServiceEntity(
-      id: id.isNotEmpty ? id : (data['id'] as String? ?? ''),
-      name: data['name'] ?? '',
-      description: data['description'] ?? '',
-      iconUrl: data['iconUrl'] ?? '',
-      category: data['category'] ?? '',
-      avgPrice: (data['avgPrice'] as num?)?.toDouble() ?? 0.0,
-      minPrice: (data['minPrice'] as num?)?.toDouble() ?? 0.0,
-      maxPrice: (data['maxPrice'] as num?)?.toDouble() ?? 0.0,
-      visitFee: (data['visitFee'] as num?)?.toDouble() ?? 0.0,
-      avgCompletionTimeMinutes: data['avgCompletionTimeMinutes'] ?? 60,
-      isActive: data['isActive'] ?? true,
-      createdAt: _parseTimestamp(data['createdAt']),
+      id: model.id,
+      name: model.name,
+      description: model.description,
+      iconUrl: model.iconUrl,
+      category: model.category,
+      avgPrice: model.avgPrice,
+      minPrice: model.minPrice,
+      maxPrice: model.maxPrice,
+      visitFee: model.visitFee,
+      avgCompletionTimeMinutes: model.avgCompletionTimeMinutes,
+      isActive: model.isActive,
+      createdAt: model.createdAt,
     );
   }
 
@@ -202,14 +231,5 @@ class ServiceRepositoryImpl implements IServiceRepository {
       'isActive': service.isActive,
       'createdAt': Timestamp.fromDate(service.createdAt),
     };
-  }
-
-  DateTime _parseTimestamp(dynamic timestamp) {
-    if (timestamp is Timestamp) {
-      return timestamp.toDate();
-    } else if (timestamp is String) {
-      return DateTime.tryParse(timestamp) ?? DateTime.now();
-    }
-    return DateTime.now();
   }
 }

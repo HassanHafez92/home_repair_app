@@ -1,7 +1,7 @@
-/// Repository interface for notification operations.
-///
-/// Defines the contract for notification-related data access.
-/// Implementations handle Firestore/remote data sources.
+// Repository interface for notification operations.
+//
+// Defines the contract for notification-related data access.
+// Implementations handle Firestore/remote data sources.
 
 import 'package:dartz/dartz.dart';
 import '../../core/error/failures.dart';

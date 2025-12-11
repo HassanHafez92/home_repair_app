@@ -2,12 +2,11 @@
 // Purpose: Allow technicians to manage their service areas.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:home_repair_app/services/auth_service.dart';
-import 'package:home_repair_app/services/firestore_service.dart';
-import 'package:home_repair_app/models/technician_model.dart';
+import '../../helpers/auth_helper.dart';
+import 'package:home_repair_app/domain/repositories/i_user_repository.dart';
+import 'package:home_repair_app/core/di/injection_container.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../widgets/map_picker_dialog.dart';
 
@@ -19,7 +18,7 @@ class ServiceAreasScreen extends StatefulWidget {
 }
 
 class _ServiceAreasScreenState extends State<ServiceAreasScreen> {
-  final _firestoreService = FirestoreService();
+  final _userRepository = sl<IUserRepository>();
   final _areaController = TextEditingController();
 
   List<String> _serviceAreas = [];
@@ -39,17 +38,24 @@ class _ServiceAreasScreenState extends State<ServiceAreasScreen> {
   }
 
   Future<void> _loadServiceAreas() async {
-    final user = context.read<AuthService>().currentUser;
-    if (user != null) {
-      final userData = await _firestoreService.getUser(user.uid);
-      if (userData is TechnicianModel && mounted) {
-        setState(() {
-          _serviceAreas = List.from(userData.serviceAreas);
-          _isLoading = false;
-        });
-      } else if (mounted) {
-        setState(() => _isLoading = false);
-      }
+    final userId = context.userId;
+    if (userId != null) {
+      final result = await _userRepository.getTechnician(userId);
+      result.fold(
+        (failure) {
+          if (mounted) setState(() => _isLoading = false);
+        },
+        (technician) {
+          if (technician != null && mounted) {
+            setState(() {
+              _serviceAreas = List.from(technician.serviceAreas);
+              _isLoading = false;
+            });
+          } else if (mounted) {
+            setState(() => _isLoading = false);
+          }
+        },
+      );
     }
   }
 
@@ -82,11 +88,11 @@ class _ServiceAreasScreenState extends State<ServiceAreasScreen> {
     setState(() => _isUpdating = true);
 
     try {
-      final user = context.read<AuthService>().currentUser;
-      if (user == null) return;
+      final userId = context.userId;
+      if (userId == null) return;
 
       final newAreas = [..._serviceAreas, area];
-      await _firestoreService.updateUserFields(user.uid, {
+      await _userRepository.updateUserFields(userId, {
         'serviceAreas': newAreas,
         'updatedAt': FieldValue.serverTimestamp(),
       });
@@ -115,11 +121,11 @@ class _ServiceAreasScreenState extends State<ServiceAreasScreen> {
     setState(() => _isUpdating = true);
 
     try {
-      final user = context.read<AuthService>().currentUser;
-      if (user == null) return;
+      final userId = context.userId;
+      if (userId == null) return;
 
       final newAreas = List<String>.from(_serviceAreas)..remove(area);
-      await _firestoreService.updateUserFields(user.uid, {
+      await _userRepository.updateUserFields(userId, {
         'serviceAreas': newAreas,
         'updatedAt': FieldValue.serverTimestamp(),
       });
@@ -228,6 +234,3 @@ class _ServiceAreasScreenState extends State<ServiceAreasScreen> {
     );
   }
 }
-
-
-

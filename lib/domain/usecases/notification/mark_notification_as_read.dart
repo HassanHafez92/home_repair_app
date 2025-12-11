@@ -1,4 +1,4 @@
-/// Use case for marking a notification as read.
+// Use case for marking a notification as read.
 
 import 'package:dartz/dartz.dart';
 import '../../../core/error/failures.dart';

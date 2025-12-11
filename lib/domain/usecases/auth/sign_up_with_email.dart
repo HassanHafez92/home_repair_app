@@ -1,4 +1,4 @@
-/// Sign up use case - handles new user registration.
+// Sign up use case - handles new user registration.
 
 import 'package:dartz/dartz.dart';
 

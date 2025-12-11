@@ -1,4 +1,4 @@
-/// Domain entity representing a service.
+// Domain entity representing a service.
 
 import 'package:equatable/equatable.dart';
 

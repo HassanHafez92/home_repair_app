@@ -4,7 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
 import 'package:home_repair_app/presentation/blocs/auth/auth_bloc.dart';
 import 'package:home_repair_app/presentation/blocs/auth/auth_state.dart';
-import 'package:home_repair_app/services/auth_service.dart';
+import 'package:home_repair_app/presentation/blocs/auth/auth_event.dart';
 
 class AppDrawer extends StatelessWidget {
   final Function(int)? onNavigate;
@@ -117,10 +117,9 @@ class AppDrawer extends StatelessWidget {
               'logout'.tr(),
               style: const TextStyle(color: Colors.red),
             ),
-            onTap: () async {
+            onTap: () {
               Navigator.pop(context);
-              final authService = context.read<AuthService>();
-              await authService.signOut();
+              context.read<AuthBloc>().add(const AuthLogoutRequested());
             },
           ),
           const SizedBox(height: 16),
@@ -129,6 +128,3 @@ class AppDrawer extends StatelessWidget {
     );
   }
 }
-
-
-

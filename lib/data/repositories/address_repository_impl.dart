@@ -1,6 +1,6 @@
-/// Implementation of IAddressRepository using AddressService as data source.
-///
-/// Wraps the existing AddressService and returns Either types for error handling.
+// Implementation of IAddressRepository using AddressService as data source.
+//
+// Wraps the existing AddressService and returns Either types for error handling.
 
 import 'package:dartz/dartz.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';

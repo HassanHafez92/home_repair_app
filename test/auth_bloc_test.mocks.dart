@@ -7,12 +7,22 @@ import 'dart:async' as _i4;
 
 import 'package:dartz/dartz.dart' as _i2;
 import 'package:home_repair_app/core/error/failures.dart' as _i6;
+import 'package:home_repair_app/core/usecases/usecase.dart' as _i13;
 import 'package:home_repair_app/domain/entities/technician_entity.dart' as _i8;
 import 'package:home_repair_app/domain/entities/user_entity.dart' as _i5;
 import 'package:home_repair_app/domain/repositories/i_auth_repository.dart'
     as _i3;
 import 'package:home_repair_app/domain/repositories/i_user_repository.dart'
     as _i7;
+import 'package:home_repair_app/domain/usecases/auth/sign_in_with_email.dart'
+    as _i10;
+import 'package:home_repair_app/domain/usecases/auth/sign_in_with_facebook.dart'
+    as _i14;
+import 'package:home_repair_app/domain/usecases/auth/sign_in_with_google.dart'
+    as _i12;
+import 'package:home_repair_app/domain/usecases/auth/sign_out.dart' as _i15;
+import 'package:home_repair_app/domain/usecases/auth/sign_up_with_email.dart'
+    as _i11;
 import 'package:home_repair_app/domain/usecases/user/get_technician_stats.dart'
     as _i9;
 import 'package:mockito/mockito.dart' as _i1;
@@ -33,6 +43,12 @@ import 'package:mockito/mockito.dart' as _i1;
 
 class _FakeEither_0<L, R> extends _i1.SmartFake implements _i2.Either<L, R> {
   _FakeEither_0(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeIAuthRepository_1 extends _i1.SmartFake
+    implements _i3.IAuthRepository {
+  _FakeIAuthRepository_1(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
@@ -303,6 +319,33 @@ class MockIUserRepository extends _i1.Mock implements _i7.IUserRepository {
           as _i4.Future<_i2.Either<_i6.Failure, _i5.UserEntity?>>);
 
   @override
+  _i4.Future<_i2.Either<_i6.Failure, _i8.TechnicianEntity?>> getTechnician(
+    String? uid,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#getTechnician, [uid]),
+            returnValue:
+                _i4.Future<
+                  _i2.Either<_i6.Failure, _i8.TechnicianEntity?>
+                >.value(
+                  _FakeEither_0<_i6.Failure, _i8.TechnicianEntity?>(
+                    this,
+                    Invocation.method(#getTechnician, [uid]),
+                  ),
+                ),
+            returnValueForMissingStub:
+                _i4.Future<
+                  _i2.Either<_i6.Failure, _i8.TechnicianEntity?>
+                >.value(
+                  _FakeEither_0<_i6.Failure, _i8.TechnicianEntity?>(
+                    this,
+                    Invocation.method(#getTechnician, [uid]),
+                  ),
+                ),
+          )
+          as _i4.Future<_i2.Either<_i6.Failure, _i8.TechnicianEntity?>>);
+
+  @override
   _i4.Future<_i2.Either<_i6.Failure, void>> updateUser(_i5.UserEntity? user) =>
       (super.noSuchMethod(
             Invocation.method(#updateUser, [user]),
@@ -456,4 +499,217 @@ class MockIUserRepository extends _i1.Mock implements _i7.IUserRepository {
                 _i4.Stream<_i9.TechnicianStatsEntity>.empty(),
           )
           as _i4.Stream<_i9.TechnicianStatsEntity>);
+}
+
+/// A class which mocks [SignInWithEmail].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockSignInWithEmail extends _i1.Mock implements _i10.SignInWithEmail {
+  @override
+  _i3.IAuthRepository get repository =>
+      (super.noSuchMethod(
+            Invocation.getter(#repository),
+            returnValue: _FakeIAuthRepository_1(
+              this,
+              Invocation.getter(#repository),
+            ),
+            returnValueForMissingStub: _FakeIAuthRepository_1(
+              this,
+              Invocation.getter(#repository),
+            ),
+          )
+          as _i3.IAuthRepository);
+
+  @override
+  _i4.Future<_i2.Either<_i6.Failure, _i5.UserEntity>> call(
+    _i10.SignInParams? params,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#call, [params]),
+            returnValue:
+                _i4.Future<_i2.Either<_i6.Failure, _i5.UserEntity>>.value(
+                  _FakeEither_0<_i6.Failure, _i5.UserEntity>(
+                    this,
+                    Invocation.method(#call, [params]),
+                  ),
+                ),
+            returnValueForMissingStub:
+                _i4.Future<_i2.Either<_i6.Failure, _i5.UserEntity>>.value(
+                  _FakeEither_0<_i6.Failure, _i5.UserEntity>(
+                    this,
+                    Invocation.method(#call, [params]),
+                  ),
+                ),
+          )
+          as _i4.Future<_i2.Either<_i6.Failure, _i5.UserEntity>>);
+}
+
+/// A class which mocks [SignUpWithEmail].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockSignUpWithEmail extends _i1.Mock implements _i11.SignUpWithEmail {
+  @override
+  _i3.IAuthRepository get repository =>
+      (super.noSuchMethod(
+            Invocation.getter(#repository),
+            returnValue: _FakeIAuthRepository_1(
+              this,
+              Invocation.getter(#repository),
+            ),
+            returnValueForMissingStub: _FakeIAuthRepository_1(
+              this,
+              Invocation.getter(#repository),
+            ),
+          )
+          as _i3.IAuthRepository);
+
+  @override
+  _i4.Future<_i2.Either<_i6.Failure, _i5.UserEntity>> call(
+    _i11.SignUpParams? params,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#call, [params]),
+            returnValue:
+                _i4.Future<_i2.Either<_i6.Failure, _i5.UserEntity>>.value(
+                  _FakeEither_0<_i6.Failure, _i5.UserEntity>(
+                    this,
+                    Invocation.method(#call, [params]),
+                  ),
+                ),
+            returnValueForMissingStub:
+                _i4.Future<_i2.Either<_i6.Failure, _i5.UserEntity>>.value(
+                  _FakeEither_0<_i6.Failure, _i5.UserEntity>(
+                    this,
+                    Invocation.method(#call, [params]),
+                  ),
+                ),
+          )
+          as _i4.Future<_i2.Either<_i6.Failure, _i5.UserEntity>>);
+}
+
+/// A class which mocks [SignInWithGoogle].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockSignInWithGoogle extends _i1.Mock implements _i12.SignInWithGoogle {
+  @override
+  _i3.IAuthRepository get repository =>
+      (super.noSuchMethod(
+            Invocation.getter(#repository),
+            returnValue: _FakeIAuthRepository_1(
+              this,
+              Invocation.getter(#repository),
+            ),
+            returnValueForMissingStub: _FakeIAuthRepository_1(
+              this,
+              Invocation.getter(#repository),
+            ),
+          )
+          as _i3.IAuthRepository);
+
+  @override
+  _i4.Future<_i2.Either<_i6.Failure, _i5.UserEntity?>> call(
+    _i13.NoParams? params,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#call, [params]),
+            returnValue:
+                _i4.Future<_i2.Either<_i6.Failure, _i5.UserEntity?>>.value(
+                  _FakeEither_0<_i6.Failure, _i5.UserEntity?>(
+                    this,
+                    Invocation.method(#call, [params]),
+                  ),
+                ),
+            returnValueForMissingStub:
+                _i4.Future<_i2.Either<_i6.Failure, _i5.UserEntity?>>.value(
+                  _FakeEither_0<_i6.Failure, _i5.UserEntity?>(
+                    this,
+                    Invocation.method(#call, [params]),
+                  ),
+                ),
+          )
+          as _i4.Future<_i2.Either<_i6.Failure, _i5.UserEntity?>>);
+}
+
+/// A class which mocks [SignInWithFacebook].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockSignInWithFacebook extends _i1.Mock
+    implements _i14.SignInWithFacebook {
+  @override
+  _i3.IAuthRepository get repository =>
+      (super.noSuchMethod(
+            Invocation.getter(#repository),
+            returnValue: _FakeIAuthRepository_1(
+              this,
+              Invocation.getter(#repository),
+            ),
+            returnValueForMissingStub: _FakeIAuthRepository_1(
+              this,
+              Invocation.getter(#repository),
+            ),
+          )
+          as _i3.IAuthRepository);
+
+  @override
+  _i4.Future<_i2.Either<_i6.Failure, _i5.UserEntity?>> call(
+    _i13.NoParams? params,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#call, [params]),
+            returnValue:
+                _i4.Future<_i2.Either<_i6.Failure, _i5.UserEntity?>>.value(
+                  _FakeEither_0<_i6.Failure, _i5.UserEntity?>(
+                    this,
+                    Invocation.method(#call, [params]),
+                  ),
+                ),
+            returnValueForMissingStub:
+                _i4.Future<_i2.Either<_i6.Failure, _i5.UserEntity?>>.value(
+                  _FakeEither_0<_i6.Failure, _i5.UserEntity?>(
+                    this,
+                    Invocation.method(#call, [params]),
+                  ),
+                ),
+          )
+          as _i4.Future<_i2.Either<_i6.Failure, _i5.UserEntity?>>);
+}
+
+/// A class which mocks [SignOut].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockSignOut extends _i1.Mock implements _i15.SignOut {
+  @override
+  _i3.IAuthRepository get repository =>
+      (super.noSuchMethod(
+            Invocation.getter(#repository),
+            returnValue: _FakeIAuthRepository_1(
+              this,
+              Invocation.getter(#repository),
+            ),
+            returnValueForMissingStub: _FakeIAuthRepository_1(
+              this,
+              Invocation.getter(#repository),
+            ),
+          )
+          as _i3.IAuthRepository);
+
+  @override
+  _i4.Future<_i2.Either<_i6.Failure, void>> call(_i13.NoParams? params) =>
+      (super.noSuchMethod(
+            Invocation.method(#call, [params]),
+            returnValue: _i4.Future<_i2.Either<_i6.Failure, void>>.value(
+              _FakeEither_0<_i6.Failure, void>(
+                this,
+                Invocation.method(#call, [params]),
+              ),
+            ),
+            returnValueForMissingStub:
+                _i4.Future<_i2.Either<_i6.Failure, void>>.value(
+                  _FakeEither_0<_i6.Failure, void>(
+                    this,
+                    Invocation.method(#call, [params]),
+                  ),
+                ),
+          )
+          as _i4.Future<_i2.Either<_i6.Failure, void>>);
 }

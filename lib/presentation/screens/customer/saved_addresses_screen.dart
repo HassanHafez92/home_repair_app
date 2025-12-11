@@ -8,7 +8,7 @@ import '../../blocs/address_book/address_book_bloc.dart';
 import '../../blocs/address_book/address_book_event.dart';
 import '../../blocs/address_book/address_book_state.dart';
 import 'package:home_repair_app/models/saved_address.dart';
-import 'package:home_repair_app/services/auth_service.dart';
+import '../../helpers/auth_helper.dart';
 import 'add_edit_address_screen.dart';
 
 class SavedAddressesScreen extends StatefulWidget {
@@ -28,10 +28,9 @@ class _SavedAddressesScreenState extends State<SavedAddressesScreen> {
   }
 
   void _loadAddresses() {
-    final authService = context.read<AuthService>();
-    final user = authService.currentUser;
-    if (user != null) {
-      _userId = user.uid;
+    final userId = context.userId;
+    if (userId != null) {
+      _userId = userId;
       context.read<AddressBookBloc>().add(LoadAddresses(_userId!));
     }
   }
@@ -256,6 +255,3 @@ class _SavedAddressesScreenState extends State<SavedAddressesScreen> {
     }
   }
 }
-
-
-

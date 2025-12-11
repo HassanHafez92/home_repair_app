@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../../blocs/order/technician_order_bloc.dart';
-import 'package:home_repair_app/services/auth_service.dart';
+import '../../helpers/auth_helper.dart';
 import 'order_action_screen.dart';
 import '../../widgets/order_card.dart';
 import '../../widgets/empty_state.dart';
@@ -20,7 +20,7 @@ class _IncomingOrdersScreenState extends State<IncomingOrdersScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        final userId = context.read<AuthService>().currentUser?.uid;
+        final userId = context.userId;
         if (userId != null) {
           context.read<TechnicianOrderBloc>().add(LoadTechnicianOrders(userId));
         }
@@ -30,7 +30,7 @@ class _IncomingOrdersScreenState extends State<IncomingOrdersScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final userId = context.read<AuthService>().currentUser?.uid;
+    final userId = context.userId;
 
     if (userId == null) {
       return Scaffold(body: Center(child: Text('pleaseLogin'.tr())));
@@ -96,6 +96,3 @@ class _IncomingOrdersScreenState extends State<IncomingOrdersScreen> {
     );
   }
 }
-
-
-

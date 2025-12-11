@@ -1,4 +1,4 @@
-/// Sign out use case - handles user sign out.
+// Sign out use case - handles user sign out.
 
 import 'package:dartz/dartz.dart';
 

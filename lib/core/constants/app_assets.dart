@@ -1,7 +1,7 @@
-/// Application asset constants
-///
-/// Centralized location for all asset paths to ensure type-safety
-/// and prevent runtime errors from typos.
+// Application asset constants
+//
+// Centralized location for all asset paths to ensure type-safety
+// and prevent runtime errors from typos.
 class AppAssets {
   AppAssets._(); // Private constructor to prevent instantiation
 

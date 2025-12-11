@@ -6,7 +6,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:uuid/uuid.dart';
 import 'package:home_repair_app/services/chat_service.dart';
-import 'package:home_repair_app/services/auth_service.dart';
+import '../../helpers/auth_helper.dart';
 import 'package:home_repair_app/models/message_model.dart';
 
 class HelpSupportScreen extends StatefulWidget {
@@ -22,7 +22,6 @@ class _HelpSupportScreenState extends State<HelpSupportScreen>
   final _messageController = TextEditingController();
   final _scrollController = ScrollController();
   final ChatService _chatService = ChatService();
-  final AuthService _authService = AuthService();
 
   String? _supportChatId;
   bool _isLoading = false;
@@ -43,15 +42,15 @@ class _HelpSupportScreenState extends State<HelpSupportScreen>
   }
 
   Future<void> _initializeSupportChat() async {
-    final user = _authService.currentUser;
+    final user = context.currentUser;
     if (user == null) return;
 
     setState(() => _isLoading = true);
 
     try {
       final chatId = await _chatService.getOrCreateSupportChat(
-        customerId: user.uid,
-        customerName: user.displayName ?? 'Customer',
+        customerId: user.id,
+        customerName: user.fullName,
       );
       if (mounted) {
         setState(() {
@@ -73,8 +72,8 @@ class _HelpSupportScreenState extends State<HelpSupportScreen>
     final text = _messageController.text.trim();
     if (text.isEmpty || _supportChatId == null || _isSending) return;
 
-    final user = _authService.currentUser;
-    if (user == null) return;
+    final userId = context.userId;
+    if (userId == null) return;
 
     setState(() => _isSending = true);
     _messageController.clear();
@@ -82,7 +81,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen>
     try {
       final message = MessageModel(
         id: const Uuid().v4(),
-        senderId: user.uid,
+        senderId: userId,
         text: text,
         timestamp: DateTime.now(),
         type: MessageType.text,
@@ -311,7 +310,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen>
   }
 
   Widget _buildChatTab() {
-    final user = _authService.currentUser;
+    final user = context.currentUser;
     if (user == null) {
       return Center(
         child: Column(
@@ -440,7 +439,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen>
               }
 
               // Mark messages as read
-              _chatService.markSupportMessagesAsRead(_supportChatId!, user.uid);
+              _chatService.markSupportMessagesAsRead(_supportChatId!, user.id);
 
               return ListView.builder(
                 controller: _scrollController,
@@ -448,7 +447,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen>
                 itemCount: messages.length,
                 itemBuilder: (context, index) {
                   final message = messages[index];
-                  final isMe = message.senderId == user.uid;
+                  final isMe = message.senderId == user.id;
 
                   return Align(
                     alignment: isMe
@@ -594,6 +593,3 @@ class _HelpSupportScreenState extends State<HelpSupportScreen>
     );
   }
 }
-
-
-

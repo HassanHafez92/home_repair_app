@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:home_repair_app/services/auth_service.dart';
+import '../../helpers/auth_helper.dart';
+import '../../blocs/auth/auth_bloc.dart';
+import '../../blocs/auth/auth_event.dart';
 
 class PrivacySettingsScreen extends StatelessWidget {
   const PrivacySettingsScreen({super.key});
@@ -170,10 +172,10 @@ class PrivacySettingsScreen extends StatelessWidget {
   }
 
   Future<void> _exportUserData(BuildContext context) async {
-    final authService = context.read<AuthService>();
-    final user = authService.currentUser;
+    final userId = context.userId;
+    final user = context.currentUser;
 
-    if (user == null) return;
+    if (userId == null) return;
 
     try {
       // Show loading indicator
@@ -186,25 +188,25 @@ class PrivacySettingsScreen extends StatelessWidget {
       // Collect user data from Firestore
       final userData = await FirebaseFirestore.instance
           .collection('users')
-          .doc(user.uid)
+          .doc(userId)
           .get();
 
       final ordersSnapshot = await FirebaseFirestore.instance
           .collection('orders')
-          .where('technicianId', isEqualTo: user.uid)
+          .where('technicianId', isEqualTo: userId)
           .get();
 
       final reviewsSnapshot = await FirebaseFirestore.instance
           .collection('reviews')
-          .where('technicianId', isEqualTo: user.uid)
+          .where('technicianId', isEqualTo: userId)
           .get();
 
       // Create export data object (will be used when file download is implemented)
       // ignore: unused_local_variable
       final exportData = {
         'exportDate': DateTime.now().toIso8601String(),
-        'userId': user.uid,
-        'email': user.email,
+        'userId': userId,
+        'email': user?.email,
         'profile': userData.data(),
         'orders': ordersSnapshot.docs.map((doc) => doc.data()).toList(),
         'reviews': reviewsSnapshot.docs.map((doc) => doc.data()).toList(),
@@ -533,10 +535,9 @@ For questions about these terms, contact support@homerepair.com
   }
 
   Future<void> _deleteAccount(BuildContext context, String password) async {
-    final authService = context.read<AuthService>();
-    final user = authService.currentUser;
+    final userId = context.userId;
 
-    if (user == null) return;
+    if (userId == null) return;
 
     try {
       // Show loading
@@ -547,19 +548,16 @@ For questions about these terms, contact support@homerepair.com
       );
 
       // Mark account as deleted in Firestore
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .update({
-            'accountStatus': 'deleted',
-            'deletedAt': FieldValue.serverTimestamp(),
-            'profileVisible': false,
-          });
+      await FirebaseFirestore.instance.collection('users').doc(userId).update({
+        'accountStatus': 'deleted',
+        'deletedAt': FieldValue.serverTimestamp(),
+        'profileVisible': false,
+      });
 
       // Cancel all active orders
       final activeOrders = await FirebaseFirestore.instance
           .collection('orders')
-          .where('technicianId', isEqualTo: user.uid)
+          .where('technicianId', isEqualTo: userId)
           .where(
             'status',
             whereIn: ['pending', 'accepted', 'traveling', 'working'],
@@ -578,7 +576,9 @@ For questions about these terms, contact support@homerepair.com
       if (context.mounted) Navigator.pop(context);
 
       // Sign out
-      await authService.signOut();
+      if (context.mounted) {
+        context.read<AuthBloc>().add(const AuthLogoutRequested());
+      }
 
       // Show confirmation
       if (context.mounted) {
@@ -606,14 +606,13 @@ For questions about these terms, contact support@homerepair.com
 
   Future<bool> _getProfileVisibility(BuildContext context) async {
     try {
-      final authService = context.read<AuthService>();
-      final user = authService.currentUser;
+      final userId = context.userId;
 
-      if (user == null) return true;
+      if (userId == null) return true;
 
       final doc = await FirebaseFirestore.instance
           .collection('users')
-          .doc(user.uid)
+          .doc(userId)
           .get();
 
       return doc.data()?['profileVisible'] ?? true;
@@ -627,14 +626,13 @@ For questions about these terms, contact support@homerepair.com
     bool isVisible,
   ) async {
     try {
-      final authService = context.read<AuthService>();
-      final user = authService.currentUser;
+      final userId = context.userId;
 
-      if (user == null) return;
+      if (userId == null) return;
 
-      await FirebaseFirestore.instance.collection('users').doc(user.uid).update(
-        {'profileVisible': isVisible},
-      );
+      await FirebaseFirestore.instance.collection('users').doc(userId).update({
+        'profileVisible': isVisible,
+      });
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -673,6 +671,3 @@ class _PolicyViewerScreen extends StatelessWidget {
     );
   }
 }
-
-
-

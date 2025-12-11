@@ -1,4 +1,4 @@
-/// Create user use case - creates a new user.
+// Create user use case - creates a new user.
 
 import 'package:dartz/dartz.dart';
 

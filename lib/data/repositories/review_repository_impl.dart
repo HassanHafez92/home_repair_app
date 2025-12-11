@@ -1,6 +1,6 @@
-/// Implementation of IReviewRepository using ReviewService as data source.
-///
-/// Wraps the existing ReviewService and returns Either types for error handling.
+// Implementation of IReviewRepository using ReviewService as data source.
+//
+// Wraps the existing ReviewService and returns Either types for error handling.
 
 import 'package:dartz/dartz.dart';
 import 'package:uuid/uuid.dart';

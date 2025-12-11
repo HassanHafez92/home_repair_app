@@ -1,4 +1,4 @@
-/// Use case for getting technician reviews.
+// Use case for getting technician reviews.
 
 import 'package:dartz/dartz.dart';
 import '../../../core/error/failures.dart';

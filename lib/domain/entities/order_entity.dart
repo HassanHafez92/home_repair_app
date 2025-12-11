@@ -1,4 +1,4 @@
-/// Domain entity representing an order.
+// Domain entity representing an order.
 
 import 'package:equatable/equatable.dart';
 

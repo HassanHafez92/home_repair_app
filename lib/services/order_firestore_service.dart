@@ -28,6 +28,11 @@ import '../models/technician_stats.dart';
 /// );
 /// print('Found ${result.items.length} orders');
 /// ```
+@Deprecated(
+  'Use IOrderRepository from domain layer instead. '
+  'This service is being phased out as part of Clean Architecture migration. '
+  'See: lib/domain/repositories/i_order_repository.dart',
+)
 class OrderFirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 

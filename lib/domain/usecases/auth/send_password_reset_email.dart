@@ -1,4 +1,4 @@
-/// Send password reset email use case.
+// Send password reset email use case.
 
 import 'package:dartz/dartz.dart';
 

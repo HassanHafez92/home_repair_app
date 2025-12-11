@@ -1,6 +1,6 @@
-/// Implementation of INotificationRepository using FirestoreService as data source.
-///
-/// Wraps the existing FirestoreService notification methods and returns Either types.
+// Implementation of INotificationRepository using FirestoreService as data source.
+//
+// Wraps the existing FirestoreService notification methods and returns Either types.
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';

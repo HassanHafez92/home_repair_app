@@ -3,7 +3,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:home_repair_app/domain/entities/order_entity.dart';
-import 'package:home_repair_app/models/technician_model.dart';
+import 'package:home_repair_app/domain/entities/technician_entity.dart';
 
 class StatusBadge extends StatelessWidget {
   final String text;

@@ -70,6 +70,24 @@ class MockIUserRepository extends _i1.Mock implements _i3.IUserRepository {
           as _i4.Future<_i2.Either<_i5.Failure, _i6.UserEntity?>>);
 
   @override
+  _i4.Future<_i2.Either<_i5.Failure, _i7.TechnicianEntity?>> getTechnician(
+    String? uid,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#getTechnician, [uid]),
+            returnValue:
+                _i4.Future<
+                  _i2.Either<_i5.Failure, _i7.TechnicianEntity?>
+                >.value(
+                  _FakeEither_0<_i5.Failure, _i7.TechnicianEntity?>(
+                    this,
+                    Invocation.method(#getTechnician, [uid]),
+                  ),
+                ),
+          )
+          as _i4.Future<_i2.Either<_i5.Failure, _i7.TechnicianEntity?>>);
+
+  @override
   _i4.Future<_i2.Either<_i5.Failure, void>> updateUser(_i6.UserEntity? user) =>
       (super.noSuchMethod(
             Invocation.method(#updateUser, [user]),

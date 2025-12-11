@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:home_repair_app/services/auth_service.dart';
+import '../../helpers/auth_helper.dart';
 import '../../blocs/technician_dashboard/technician_dashboard_bloc.dart';
 import '../../blocs/order/technician_order_bloc.dart';
 import '../../widgets/order_map_view.dart';
@@ -90,7 +90,7 @@ class _TechnicianDashboardState extends State<TechnicianDashboard> {
     // Schedule the BLoC events to run after the first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        final userId = context.read<AuthService>().currentUser?.uid;
+        final userId = context.userId;
         if (userId != null) {
           context.read<TechnicianDashboardBloc>().add(
             LoadTechnicianDashboard(userId),
@@ -104,9 +104,8 @@ class _TechnicianDashboardState extends State<TechnicianDashboard> {
 
   @override
   Widget build(BuildContext context) {
-    final authService = context.read<AuthService>();
-    final user = authService.currentUser;
-    final userId = user?.uid;
+    final userId = context.userId;
+    final user = context.currentUser;
 
     if (userId == null) {
       return Scaffold(
@@ -187,7 +186,7 @@ class _TechnicianDashboardState extends State<TechnicianDashboard> {
                         children: [
                           Text('welcomeBack'.tr()),
                           Text(
-                            user?.displayName ?? 'technician'.tr(),
+                            user?.fullName ?? 'technician'.tr(),
                             style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -439,6 +438,3 @@ class _TechnicianDashboardState extends State<TechnicianDashboard> {
     );
   }
 }
-
-
-

@@ -2,12 +2,12 @@
 // Purpose: Display technician profile summary.
 
 import 'package:flutter/material.dart';
-import 'package:home_repair_app/models/technician_model.dart';
+import 'package:home_repair_app/domain/entities/technician_entity.dart';
 import 'status_badge.dart';
 import 'rating_stars.dart';
 
 class TechnicianCard extends StatelessWidget {
-  final TechnicianModel technician;
+  final TechnicianEntity technician;
   final VoidCallback? onTap;
   final bool showStatus;
 
@@ -43,7 +43,10 @@ class TechnicianCard extends StatelessWidget {
                   children: [
                     Text(
                       technician.fullName,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     RatingStars(rating: technician.rating, size: 14),
@@ -58,7 +61,10 @@ class TechnicianCard extends StatelessWidget {
                 ),
               ),
               if (showStatus)
-                StatusBadge.fromTechnicianStatus(technician.status, isSmall: true),
+                StatusBadge.fromTechnicianStatus(
+                  technician.status,
+                  isSmall: true,
+                ),
             ],
           ),
         ),
@@ -66,6 +72,3 @@ class TechnicianCard extends StatelessWidget {
     );
   }
 }
-
-
-

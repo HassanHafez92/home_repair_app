@@ -1,4 +1,4 @@
-/// Facebook sign in use case.
+// Facebook sign in use case.
 
 import 'package:dartz/dartz.dart';
 

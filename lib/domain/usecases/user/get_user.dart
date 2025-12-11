@@ -1,4 +1,4 @@
-/// Get user use case - retrieves a user by ID.
+// Get user use case - retrieves a user by ID.
 
 import 'package:dartz/dartz.dart';
 
