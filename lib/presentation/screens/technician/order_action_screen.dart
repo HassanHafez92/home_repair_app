@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:home_repair_app/domain/entities/order_entity.dart';
-import 'package:home_repair_app/services/auth_service.dart';
+import '../../helpers/auth_helper.dart';
 import '../../blocs/order/technician_order_bloc.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text_field.dart';
@@ -41,8 +41,7 @@ class _OrderActionScreenState extends State<OrderActionScreen> {
     setState(() => _isSubmitting = true);
 
     try {
-      final authService = context.read<AuthService>();
-      final technicianId = authService.currentUser?.uid;
+      final technicianId = context.userId;
 
       if (technicianId == null) throw Exception('Not logged in');
 

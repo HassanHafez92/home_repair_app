@@ -1,4 +1,4 @@
-/// Domain entity representing a customer user.
+// Domain entity representing a customer user.
 
 import 'package:equatable/equatable.dart';
 import 'user_entity.dart';

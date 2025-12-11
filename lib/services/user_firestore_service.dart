@@ -26,6 +26,11 @@ import '../models/technician_model.dart';
 ///   print('Found user: ${user.name}');
 /// }
 /// ```
+@Deprecated(
+  'Use IUserRepository from domain layer instead. '
+  'This service is being phased out as part of Clean Architecture migration. '
+  'See: lib/domain/repositories/i_user_repository.dart',
+)
 class UserFirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 

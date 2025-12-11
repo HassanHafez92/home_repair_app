@@ -2,9 +2,9 @@
 // Purpose: Manage users and approve pending technicians.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:home_repair_app/services/firestore_service.dart';
-import 'package:home_repair_app/models/technician_model.dart';
+import 'package:home_repair_app/domain/repositories/i_user_repository.dart';
+import 'package:home_repair_app/core/di/injection_container.dart';
+import 'package:home_repair_app/domain/entities/technician_entity.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/technician_card.dart';
 
@@ -58,10 +58,10 @@ class _UserManagementScreenState extends State<UserManagementScreen>
   }
 
   Widget _buildPendingTechniciansList() {
-    final firestoreService = context.read<FirestoreService>();
+    final userRepository = sl<IUserRepository>();
 
-    return StreamBuilder<List<TechnicianModel>>(
-      stream: firestoreService.streamPendingTechnicians(),
+    return StreamBuilder<List<TechnicianEntity>>(
+      stream: userRepository.streamPendingTechnicians(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -93,7 +93,7 @@ class _UserManagementScreenState extends State<UserManagementScreen>
                       width: 100,
                       variant: ButtonVariant.outline,
                       onPressed: () async {
-                        await firestoreService.updateTechnicianStatus(
+                        await userRepository.updateTechnicianStatus(
                           tech.id,
                           TechnicianStatus.rejected,
                         );
@@ -104,7 +104,7 @@ class _UserManagementScreenState extends State<UserManagementScreen>
                       text: 'Approve',
                       width: 100,
                       onPressed: () async {
-                        await firestoreService.updateTechnicianStatus(
+                        await userRepository.updateTechnicianStatus(
                           tech.id,
                           TechnicianStatus.approved,
                         );
@@ -128,6 +128,3 @@ class _UserManagementScreenState extends State<UserManagementScreen>
     );
   }
 }
-
-
-

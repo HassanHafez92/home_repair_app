@@ -1,4 +1,4 @@
-/// User repository interface for Clean Architecture.
+// User repository interface for Clean Architecture.
 
 import 'package:dartz/dartz.dart';
 
@@ -14,6 +14,9 @@ abstract class IUserRepository {
 
   /// Gets a user by their ID.
   Future<Either<Failure, UserEntity?>> getUser(String uid);
+
+  /// Gets a technician by their ID.
+  Future<Either<Failure, TechnicianEntity?>> getTechnician(String uid);
 
   /// Updates a user.
   Future<Either<Failure, void>> updateUser(UserEntity user);

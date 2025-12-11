@@ -1,4 +1,4 @@
-/// Use case for getting user addresses.
+// Use case for getting user addresses.
 
 import 'package:dartz/dartz.dart';
 import '../../../core/error/failures.dart';

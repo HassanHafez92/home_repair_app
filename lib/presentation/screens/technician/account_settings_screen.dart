@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:home_repair_app/services/auth_service.dart';
+import '../../helpers/auth_helper.dart';
 import '../../widgets/custom_text_field.dart';
 
 class AccountSettingsScreen extends StatelessWidget {
@@ -12,8 +13,7 @@ class AccountSettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final authService = context.read<AuthService>();
-    final user = authService.currentUser;
+    final user = context.currentUser;
 
     return Scaffold(
       appBar: AppBar(title: Text('accountSettings'.tr())),
@@ -388,6 +388,3 @@ class AccountSettingsScreen extends StatelessWidget {
     }
   }
 }
-
-
-

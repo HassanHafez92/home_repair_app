@@ -1,5 +1,4 @@
-/// Base use case class for Clean Architecture.
-library usecases;
+// Base use case class for Clean Architecture.
 
 import 'package:dartz/dartz.dart';
 import '../error/failures.dart';

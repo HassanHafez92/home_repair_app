@@ -1,25 +1,54 @@
 // File: lib/presentation/blocs/auth/auth_bloc.dart
-// Purpose: BLoC for handling authentication logic using Clean Architecture
+// Purpose: BLoC for handling authentication logic using Clean Architecture Use Cases
 
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:home_repair_app/core/usecases/usecase.dart';
 import 'package:home_repair_app/domain/entities/user_entity.dart';
 import 'package:home_repair_app/domain/repositories/i_auth_repository.dart';
 import 'package:home_repair_app/domain/repositories/i_user_repository.dart';
+import 'package:home_repair_app/domain/usecases/auth/sign_in_with_email.dart';
+import 'package:home_repair_app/domain/usecases/auth/sign_up_with_email.dart';
+import 'package:home_repair_app/domain/usecases/auth/sign_in_with_google.dart';
+import 'package:home_repair_app/domain/usecases/auth/sign_in_with_facebook.dart';
+import 'package:home_repair_app/domain/usecases/auth/sign_out.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
 
+/// AuthBloc using Clean Architecture Use Cases.
+///
+/// This BLoC delegates business logic to use cases instead of
+/// calling repositories directly, following Uncle Bob's Clean Architecture.
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
+  // Use Cases
+  final SignInWithEmail _signInWithEmail;
+  final SignUpWithEmail _signUpWithEmail;
+  final SignInWithGoogle _signInWithGoogle;
+  final SignInWithFacebook _signInWithFacebook;
+  final SignOut _signOut;
+
+  // Repositories (needed for auth state stream and role updates)
   final IAuthRepository _authRepository;
   final IUserRepository _userRepository;
+
   StreamSubscription<UserEntity?>? _authStateSubscription;
 
   AuthBloc({
+    required SignInWithEmail signInWithEmail,
+    required SignUpWithEmail signUpWithEmail,
+    required SignInWithGoogle signInWithGoogle,
+    required SignInWithFacebook signInWithFacebook,
+    required SignOut signOut,
     required IAuthRepository authRepository,
     required IUserRepository userRepository,
-  }) : _authRepository = authRepository,
+  }) : _signInWithEmail = signInWithEmail,
+       _signUpWithEmail = signUpWithEmail,
+       _signInWithGoogle = signInWithGoogle,
+       _signInWithFacebook = signInWithFacebook,
+       _signOut = signOut,
+       _authRepository = authRepository,
        _userRepository = userRepository,
        super(const AuthInitial()) {
     // Register event handlers
@@ -31,7 +60,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthUserChanged>(_onUserChanged);
     on<AuthRoleUpdateRequested>(_onRoleUpdateRequested);
 
-    // Listen to auth state changes (stream now returns UserEntity?)
+    // Listen to auth state changes
     _authStateSubscription = _authRepository.authStateChanges.listen((
       userEntity,
     ) {
@@ -55,9 +84,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(const AuthLoading());
 
-    final result = await _authRepository.signInWithEmail(
-      email: event.email,
-      password: event.password,
+    final result = await _signInWithEmail(
+      SignInParams(email: event.email, password: event.password),
     );
 
     result.fold(
@@ -77,11 +105,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(const AuthLoading());
 
-    final result = await _authRepository.signUpWithEmail(
-      email: event.email,
-      password: event.password,
-      fullName: event.fullName,
-      phoneNumber: event.phoneNumber,
+    final result = await _signUpWithEmail(
+      SignUpParams(
+        email: event.email,
+        password: event.password,
+        fullName: event.fullName,
+        phoneNumber: event.phoneNumber,
+      ),
     );
 
     result.fold(
@@ -101,7 +131,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(const AuthLoading());
 
-    final result = await _authRepository.signInWithGoogle();
+    final result = await _signInWithGoogle(const NoParams());
 
     result.fold(
       (failure) {
@@ -125,7 +155,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(const AuthLoading());
 
-    final result = await _authRepository.signInWithFacebook();
+    final result = await _signInWithFacebook(const NoParams());
 
     result.fold(
       (failure) {
@@ -147,7 +177,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthLogoutRequested event,
     Emitter<AuthState> emit,
   ) async {
-    final result = await _authRepository.signOut();
+    final result = await _signOut(const NoParams());
 
     result.fold(
       (failure) {
@@ -178,46 +208,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         'role': event.newRole.name,
       });
       // Reload user data to reflect the change
-      final user = await _userRepository.getUser(event.userId);
-      if (!isClosed) {
-        add(AuthUserChanged(_mapUserModelToEntity(user)));
-      }
+      final result = await _userRepository.getUser(event.userId);
+      result.fold(
+        (failure) {
+          emit(AuthError('Failed to update role: ${failure.message}'));
+        },
+        (userEntity) {
+          if (!isClosed && userEntity != null) {
+            add(AuthUserChanged(userEntity));
+          }
+        },
+      );
     } catch (e) {
       debugPrint('Error updating role: $e');
       emit(AuthError('Failed to update role: ${e.toString()}'));
-    }
-  }
-
-  /// Helper to convert UserModel to UserEntity for backwards compatibility
-  UserEntity? _mapUserModelToEntity(dynamic user) {
-    if (user == null) return null;
-    // The user from IUserRepository is still UserModel, need to convert
-    return UserEntity(
-      id: user.id,
-      email: user.email,
-      phoneNumber: user.phoneNumber,
-      fullName: user.fullName,
-      profilePhoto: user.profilePhoto,
-      role: _mapRole(user.role),
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-      lastActive: user.lastActive,
-      emailVerified: user.emailVerified,
-    );
-  }
-
-  UserRole _mapRole(dynamic role) {
-    if (role == null) return UserRole.customer;
-    if (role is UserRole) return role;
-    // Handle string role from UserModel
-    final roleName = role.toString().split('.').last;
-    switch (roleName) {
-      case 'admin':
-        return UserRole.admin;
-      case 'technician':
-        return UserRole.technician;
-      default:
-        return UserRole.customer;
     }
   }
 

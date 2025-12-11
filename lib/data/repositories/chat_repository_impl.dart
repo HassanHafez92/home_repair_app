@@ -1,6 +1,6 @@
-/// Implementation of IChatRepository using ChatService as data source.
-///
-/// Wraps the existing ChatService and returns Either types for error handling.
+// Implementation of IChatRepository using ChatService as data source.
+//
+// Wraps the existing ChatService and returns Either types for error handling.
 
 import 'package:dartz/dartz.dart';
 import '../../core/error/failures.dart';
@@ -174,7 +174,6 @@ class ChatRepositoryImpl implements IChatRepository {
         return model.MessageType.image;
       case MessageType.text:
       case MessageType.system:
-      default:
         return model.MessageType.text;
     }
   }

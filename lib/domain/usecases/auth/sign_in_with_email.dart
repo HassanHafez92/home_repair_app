@@ -1,4 +1,4 @@
-/// Sign in use case - handles user authentication.
+// Sign in use case - handles user authentication.
 
 import 'package:dartz/dartz.dart';
 

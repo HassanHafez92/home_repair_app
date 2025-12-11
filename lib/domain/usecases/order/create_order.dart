@@ -1,4 +1,4 @@
-/// Create order use case.
+// Create order use case.
 
 import 'package:dartz/dartz.dart';
 

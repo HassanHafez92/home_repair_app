@@ -1,7 +1,7 @@
-/// Repository interface for review operations.
-///
-/// Defines the contract for review-related data access.
-/// Implementations handle Firestore/remote data sources.
+// Repository interface for review operations.
+//
+// Defines the contract for review-related data access.
+// Implementations handle Firestore/remote data sources.
 
 import 'package:dartz/dartz.dart';
 import '../../core/error/failures.dart';

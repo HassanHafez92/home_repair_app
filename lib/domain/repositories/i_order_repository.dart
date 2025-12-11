@@ -1,4 +1,4 @@
-/// Order repository interface for Clean Architecture.
+// Order repository interface for Clean Architecture.
 
 import 'package:dartz/dartz.dart';
 

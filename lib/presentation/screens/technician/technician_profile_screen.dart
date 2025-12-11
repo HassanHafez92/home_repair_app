@@ -4,14 +4,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:home_repair_app/services/auth_service.dart';
+import '../../helpers/auth_helper.dart';
+import '../../blocs/auth/auth_bloc.dart';
+import '../../blocs/auth/auth_event.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:home_repair_app/services/firestore_service.dart';
+import 'package:home_repair_app/domain/repositories/i_user_repository.dart';
+import 'package:home_repair_app/core/di/injection_container.dart';
+import 'package:home_repair_app/domain/entities/technician_entity.dart';
 import 'package:home_repair_app/services/review_service.dart';
 import 'package:home_repair_app/models/technician_stats.dart';
 import 'package:home_repair_app/models/review_model.dart';
 import '../../widgets/custom_button.dart';
-import 'package:home_repair_app/models/technician_model.dart';
 import 'edit_profile_screen.dart';
 import 'portfolio_screen.dart';
 import 'certifications_screen.dart';
@@ -29,12 +32,12 @@ class TechnicianProfileScreen extends StatefulWidget {
 }
 
 class _TechnicianProfileScreenState extends State<TechnicianProfileScreen> {
-  final _firestoreService = FirestoreService();
+  final _userRepository = sl<IUserRepository>();
   final _reviewService = ReviewService();
 
   TechnicianStats? _stats;
   List<ReviewModel> _reviews = [];
-  TechnicianModel? _technician;
+  TechnicianEntity? _technician;
   bool _isLoading = true;
 
   @override
@@ -44,22 +47,33 @@ class _TechnicianProfileScreenState extends State<TechnicianProfileScreen> {
   }
 
   Future<void> _loadData() async {
-    final authService = context.read<AuthService>();
-    final user = authService.currentUser;
+    final userId = context.userId;
 
-    if (user != null) {
+    if (userId != null) {
       try {
-        final stats = await _firestoreService.getTechnicianStats(user.uid);
-        final reviews = await _reviewService.getReviewsForTechnician(user.uid);
-        final userData = await _firestoreService.getUser(user.uid);
+        final statsResult = await _userRepository.getTechnicianStats(userId);
+        final techResult = await _userRepository.getTechnician(userId);
+        final reviews = await _reviewService.getReviewsForTechnician(userId);
 
         if (mounted) {
           setState(() {
-            _stats = stats;
+            statsResult.fold(
+              (failure) => _stats = null,
+              (stats) => _stats = TechnicianStats(
+                rating: stats.rating,
+                completedJobsToday: stats.completedJobsToday,
+                completedJobsTotal: stats.completedJobsTotal,
+                todayEarnings: stats.todayEarnings,
+                pendingOrders: stats.pendingOrders,
+                activeJobs: stats.activeJobs,
+                lastUpdated: DateTime.now(),
+              ),
+            );
+            techResult.fold(
+              (failure) => _technician = null,
+              (tech) => _technician = tech,
+            );
             _reviews = reviews;
-            if (userData is TechnicianModel) {
-              _technician = userData;
-            }
             _isLoading = false;
           });
         }
@@ -74,8 +88,7 @@ class _TechnicianProfileScreenState extends State<TechnicianProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authService = context.read<AuthService>();
-    final user = authService.currentUser;
+    final user = context.currentUser;
 
     if (_isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -93,16 +106,16 @@ class _TechnicianProfileScreenState extends State<TechnicianProfileScreen> {
             CircleAvatar(
               radius: 50,
               backgroundColor: Colors.blue[100],
-              backgroundImage: user?.photoURL != null
-                  ? NetworkImage(user!.photoURL!)
+              backgroundImage: user?.profilePhoto != null
+                  ? NetworkImage(user!.profilePhoto!)
                   : null,
-              child: user?.photoURL == null
+              child: user?.profilePhoto == null
                   ? const Icon(Icons.person, size: 50, color: Colors.blue)
                   : null,
             ),
             const SizedBox(height: 16),
             Text(
-              user?.displayName ?? 'technician'.tr(),
+              user?.fullName ?? 'technician'.tr(),
               style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             Text(user?.email ?? '', style: const TextStyle(color: Colors.grey)),
@@ -302,7 +315,7 @@ class _TechnicianProfileScreenState extends State<TechnicianProfileScreen> {
               text: 'logout'.tr(),
               variant: ButtonVariant.outline,
               onPressed: () async {
-                await authService.signOut();
+                context.read<AuthBloc>().add(const AuthLogoutRequested());
                 if (context.mounted) {
                   Navigator.popUntil(context, (route) => route.isFirst);
                 }
@@ -344,6 +357,3 @@ class _TechnicianProfileScreenState extends State<TechnicianProfileScreen> {
     );
   }
 }
-
-
-

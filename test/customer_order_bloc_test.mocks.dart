@@ -10,6 +10,9 @@ import 'package:home_repair_app/core/error/failures.dart' as _i5;
 import 'package:home_repair_app/domain/entities/order_entity.dart' as _i6;
 import 'package:home_repair_app/domain/repositories/i_order_repository.dart'
     as _i3;
+import 'package:home_repair_app/domain/usecases/order/create_order.dart' as _i7;
+import 'package:home_repair_app/domain/usecases/order/update_order_status.dart'
+    as _i8;
 import 'package:mockito/mockito.dart' as _i1;
 
 // ignore_for_file: type=lint
@@ -28,6 +31,12 @@ import 'package:mockito/mockito.dart' as _i1;
 
 class _FakeEither_0<L, R> extends _i1.SmartFake implements _i2.Either<L, R> {
   _FakeEither_0(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeIOrderRepository_1 extends _i1.SmartFake
+    implements _i3.IOrderRepository {
+  _FakeIOrderRepository_1(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
@@ -280,4 +289,88 @@ class MockIOrderRepository extends _i1.Mock implements _i3.IOrderRepository {
                 _i4.Stream<List<_i6.OrderEntity>>.empty(),
           )
           as _i4.Stream<List<_i6.OrderEntity>>);
+}
+
+/// A class which mocks [CreateOrder].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockCreateOrder extends _i1.Mock implements _i7.CreateOrder {
+  @override
+  _i3.IOrderRepository get repository =>
+      (super.noSuchMethod(
+            Invocation.getter(#repository),
+            returnValue: _FakeIOrderRepository_1(
+              this,
+              Invocation.getter(#repository),
+            ),
+            returnValueForMissingStub: _FakeIOrderRepository_1(
+              this,
+              Invocation.getter(#repository),
+            ),
+          )
+          as _i3.IOrderRepository);
+
+  @override
+  _i4.Future<_i2.Either<_i5.Failure, String>> call(
+    _i7.CreateOrderParams? params,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#call, [params]),
+            returnValue: _i4.Future<_i2.Either<_i5.Failure, String>>.value(
+              _FakeEither_0<_i5.Failure, String>(
+                this,
+                Invocation.method(#call, [params]),
+              ),
+            ),
+            returnValueForMissingStub:
+                _i4.Future<_i2.Either<_i5.Failure, String>>.value(
+                  _FakeEither_0<_i5.Failure, String>(
+                    this,
+                    Invocation.method(#call, [params]),
+                  ),
+                ),
+          )
+          as _i4.Future<_i2.Either<_i5.Failure, String>>);
+}
+
+/// A class which mocks [UpdateOrderStatus].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockUpdateOrderStatus extends _i1.Mock implements _i8.UpdateOrderStatus {
+  @override
+  _i3.IOrderRepository get repository =>
+      (super.noSuchMethod(
+            Invocation.getter(#repository),
+            returnValue: _FakeIOrderRepository_1(
+              this,
+              Invocation.getter(#repository),
+            ),
+            returnValueForMissingStub: _FakeIOrderRepository_1(
+              this,
+              Invocation.getter(#repository),
+            ),
+          )
+          as _i3.IOrderRepository);
+
+  @override
+  _i4.Future<_i2.Either<_i5.Failure, void>> call(
+    _i8.UpdateOrderStatusParams? params,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#call, [params]),
+            returnValue: _i4.Future<_i2.Either<_i5.Failure, void>>.value(
+              _FakeEither_0<_i5.Failure, void>(
+                this,
+                Invocation.method(#call, [params]),
+              ),
+            ),
+            returnValueForMissingStub:
+                _i4.Future<_i2.Either<_i5.Failure, void>>.value(
+                  _FakeEither_0<_i5.Failure, void>(
+                    this,
+                    Invocation.method(#call, [params]),
+                  ),
+                ),
+          )
+          as _i4.Future<_i2.Either<_i5.Failure, void>>);
 }

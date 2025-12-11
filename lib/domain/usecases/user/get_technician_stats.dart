@@ -1,4 +1,4 @@
-/// Get technician stats use case.
+// Get technician stats use case.
 
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';

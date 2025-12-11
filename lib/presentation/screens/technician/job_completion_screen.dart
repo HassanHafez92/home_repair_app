@@ -2,10 +2,10 @@
 // Purpose: Complete job with final price, photos, and notes.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:home_repair_app/domain/entities/order_entity.dart';
-import 'package:home_repair_app/services/firestore_service.dart';
+import 'package:home_repair_app/domain/repositories/i_order_repository.dart';
+import 'package:home_repair_app/core/di/injection_container.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text_field.dart';
 
@@ -87,24 +87,38 @@ class _JobCompletionScreenState extends State<JobCompletionScreen> {
     setState(() => _isSubmitting = true);
 
     try {
-      final firestoreService = context.read<FirestoreService>();
+      final orderRepository = sl<IOrderRepository>();
 
       // In a real app, upload images to Firebase Storage here and get URLs
       // List<String> photoUrls = await _uploadPhotos();
 
       // Update order with final price and complete status
-      await firestoreService.completeOrder(
+      final result = await orderRepository.completeOrder(
         widget.order.id,
         finalPrice,
         _notesController.text,
       );
 
-      if (mounted) {
-        Navigator.popUntil(context, (route) => route.isFirst);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('jobCompletedSuccess'.tr())));
-      }
+      result.fold(
+        (failure) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('errorMessage'.tr(args: [failure.message])),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        },
+        (_) {
+          if (mounted) {
+            Navigator.popUntil(context, (route) => route.isFirst);
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text('jobCompletedSuccess'.tr())));
+          }
+        },
+      );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

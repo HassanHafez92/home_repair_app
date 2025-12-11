@@ -3,15 +3,14 @@
 
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:uuid/uuid.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:home_repair_app/services/auth_service.dart';
-import 'package:home_repair_app/services/firestore_service.dart';
-import 'package:home_repair_app/models/technician_model.dart';
+import '../../helpers/auth_helper.dart';
+import 'package:home_repair_app/domain/repositories/i_user_repository.dart';
+import 'package:home_repair_app/core/di/injection_container.dart';
 import 'package:home_repair_app/models/portfolio_item.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/caption_input_dialog.dart';
@@ -25,7 +24,7 @@ class PortfolioScreen extends StatefulWidget {
 }
 
 class _PortfolioScreenState extends State<PortfolioScreen> {
-  final _firestoreService = FirestoreService();
+  final _userRepository = sl<IUserRepository>();
   final _picker = ImagePicker();
   final _storage = FirebaseStorage.instance;
 
@@ -40,34 +39,39 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
   }
 
   Future<void> _loadPortfolio() async {
-    final user = context.read<AuthService>().currentUser;
-    if (user != null) {
-      final userData = await _firestoreService.getUser(user.uid);
-      if (userData is TechnicianModel && mounted) {
-        setState(() {
-          // Support both old and new formats for backward compatibility
-          if (userData.portfolioUrls.isNotEmpty) {
-            // Old format: convert URLs to PortfolioItems
-            _portfolio = userData.portfolioUrls.map((url) {
-              return PortfolioItem(
-                url: url,
-                caption: null,
-                uploadedAt: DateTime.now(),
-              );
-            }).toList();
+    final userId = context.userId;
+    if (userId != null) {
+      final result = await _userRepository.getTechnician(userId);
+      result.fold(
+        (failure) {
+          if (mounted) setState(() => _isLoading = false);
+        },
+        (technician) {
+          if (technician != null && mounted) {
+            setState(() {
+              if (technician.portfolioUrls.isNotEmpty) {
+                _portfolio = technician.portfolioUrls.map((url) {
+                  return PortfolioItem(
+                    url: url,
+                    caption: null,
+                    uploadedAt: DateTime.now(),
+                  );
+                }).toList();
+              }
+              _isLoading = false;
+            });
+          } else if (mounted) {
+            setState(() => _isLoading = false);
           }
-          _isLoading = false;
-        });
-      } else if (mounted) {
-        setState(() => _isLoading = false);
-      }
+        },
+      );
     }
   }
 
   Future<void> _pickAndUploadImage() async {
     try {
-      final user = context.read<AuthService>().currentUser;
-      if (user == null) return;
+      final userId = context.userId;
+      if (userId == null) return;
 
       final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
       if (image == null) return;
@@ -97,7 +101,7 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
       final Reference ref = _storage
           .ref()
           .child('technician_portfolios')
-          .child(user.uid)
+          .child(userId)
           .child(fileName);
 
       await ref.putFile(compressedFile);
@@ -112,7 +116,7 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
 
       // Update Firestore - keep old format for compatibility
       final newUrls = [..._portfolio.map((e) => e.url), downloadUrl];
-      await _firestoreService.updateUserFields(user.uid, {
+      await _userRepository.updateUserFields(userId, {
         'portfolioUrls': newUrls,
         'updatedAt': FieldValue.serverTimestamp(),
       });
@@ -139,8 +143,8 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
 
   Future<void> _deleteImage(PortfolioItem item) async {
     try {
-      final user = context.read<AuthService>().currentUser;
-      if (user == null) return;
+      final userId = context.userId;
+      if (userId == null) return;
 
       setState(() => _isLoading = true);
 
@@ -156,7 +160,7 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
       final newPortfolio = List<PortfolioItem>.from(_portfolio)..remove(item);
       final newUrls = newPortfolio.map((e) => e.url).toList();
 
-      await _firestoreService.updateUserFields(user.uid, {
+      await _userRepository.updateUserFields(userId, {
         'portfolioUrls': newUrls,
         'updatedAt': FieldValue.serverTimestamp(),
       });
@@ -300,6 +304,3 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
     );
   }
 }
-
-
-

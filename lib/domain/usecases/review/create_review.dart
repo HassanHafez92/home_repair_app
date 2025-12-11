@@ -1,4 +1,4 @@
-/// Use case for creating a review.
+// Use case for creating a review.
 
 import 'package:dartz/dartz.dart';
 import '../../../core/error/failures.dart';

@@ -1,4 +1,4 @@
-/// Google sign in use case.
+// Google sign in use case.
 
 import 'package:dartz/dartz.dart';
 

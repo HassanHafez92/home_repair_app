@@ -3,15 +3,14 @@
 
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:uuid/uuid.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:home_repair_app/services/auth_service.dart';
-import 'package:home_repair_app/services/firestore_service.dart';
-import 'package:home_repair_app/models/technician_model.dart';
+import '../../helpers/auth_helper.dart';
+import 'package:home_repair_app/domain/repositories/i_user_repository.dart';
+import 'package:home_repair_app/core/di/injection_container.dart';
 import 'package:home_repair_app/models/certification.dart';
 import '../../widgets/custom_button.dart';
 import 'package:home_repair_app/utils/image_compression_helper.dart';
@@ -24,7 +23,7 @@ class CertificationsScreen extends StatefulWidget {
 }
 
 class _CertificationsScreenState extends State<CertificationsScreen> {
-  final _firestoreService = FirestoreService();
+  final _userRepository = sl<IUserRepository>();
   final _picker = ImagePicker();
   final _storage = FirebaseStorage.instance;
 
@@ -39,33 +38,39 @@ class _CertificationsScreenState extends State<CertificationsScreen> {
   }
 
   Future<void> _loadCertifications() async {
-    final user = context.read<AuthService>().currentUser;
-    if (user != null) {
-      final userData = await _firestoreService.getUser(user.uid);
-      if (userData is TechnicianModel && mounted) {
-        setState(() {
-          // Support old format for backward compatibility
-          if (userData.certifications.isNotEmpty) {
-            _certifications = userData.certifications.map((url) {
-              return CertificationModel(
-                url: url,
-                expirationDate: null,
-                uploadedAt: DateTime.now(),
-              );
-            }).toList();
+    final userId = context.userId;
+    if (userId != null) {
+      final result = await _userRepository.getTechnician(userId);
+      result.fold(
+        (failure) {
+          if (mounted) setState(() => _isLoading = false);
+        },
+        (technician) {
+          if (technician != null && mounted) {
+            setState(() {
+              if (technician.certifications.isNotEmpty) {
+                _certifications = technician.certifications.map((url) {
+                  return CertificationModel(
+                    url: url,
+                    expirationDate: null,
+                    uploadedAt: DateTime.now(),
+                  );
+                }).toList();
+              }
+              _isLoading = false;
+            });
+          } else if (mounted) {
+            setState(() => _isLoading = false);
           }
-          _isLoading = false;
-        });
-      } else if (mounted) {
-        setState(() => _isLoading = false);
-      }
+        },
+      );
     }
   }
 
   Future<void> _pickAndUploadCertificate() async {
     try {
-      final user = context.read<AuthService>().currentUser;
-      if (user == null) return;
+      final userId = context.userId;
+      if (userId == null) return;
 
       final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
       if (image == null) return;
@@ -100,7 +105,7 @@ class _CertificationsScreenState extends State<CertificationsScreen> {
       final Reference ref = _storage
           .ref()
           .child('technician_certifications')
-          .child(user.uid)
+          .child(userId)
           .child(fileName);
 
       await ref.putFile(compressedFile);
@@ -115,7 +120,7 @@ class _CertificationsScreenState extends State<CertificationsScreen> {
 
       // Update Firestore - keep old format for compatibility
       final newUrls = [..._certifications.map((e) => e.url), downloadUrl];
-      await _firestoreService.updateUserFields(user.uid, {
+      await _userRepository.updateUserFields(userId, {
         'certifications': newUrls,
         'updatedAt': FieldValue.serverTimestamp(),
       });
@@ -142,8 +147,8 @@ class _CertificationsScreenState extends State<CertificationsScreen> {
 
   Future<void> _deleteCertificate(CertificationModel cert) async {
     try {
-      final user = context.read<AuthService>().currentUser;
-      if (user == null) return;
+      final userId = context.userId;
+      if (userId == null) return;
 
       setState(() => _isLoading = true);
 
@@ -160,7 +165,7 @@ class _CertificationsScreenState extends State<CertificationsScreen> {
         ..remove(cert);
       final newUrls = newCerts.map((e) => e.url).toList();
 
-      await _firestoreService.updateUserFields(user.uid, {
+      await _userRepository.updateUserFields(userId, {
         'certifications': newUrls,
         'updatedAt': FieldValue.serverTimestamp(),
       });
@@ -352,6 +357,3 @@ class _CertificationsScreenState extends State<CertificationsScreen> {
     );
   }
 }
-
-
-

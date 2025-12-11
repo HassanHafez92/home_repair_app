@@ -2,12 +2,11 @@
 // Purpose: Allow technicians to edit their profile details.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:home_repair_app/services/auth_service.dart';
-import 'package:home_repair_app/services/firestore_service.dart';
-import 'package:home_repair_app/models/technician_model.dart';
+import '../../helpers/auth_helper.dart';
+import 'package:home_repair_app/domain/repositories/i_user_repository.dart';
+import 'package:home_repair_app/core/di/injection_container.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text_field.dart';
 import 'package:image_picker/image_picker.dart';
@@ -24,7 +23,7 @@ class EditProfileScreen extends StatefulWidget {
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _firestoreService = FirestoreService();
+  final _userRepository = sl<IUserRepository>();
 
   late TextEditingController _nameController;
   late TextEditingController _phoneController;
@@ -40,13 +39,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   void initState() {
     super.initState();
-    final user = context.read<AuthService>().currentUser;
+    final user = context.currentUser;
     // Cast to TechnicianModel if possible, or just use UserModel fields
     // Since we are in Technician flow, we expect it to be TechnicianModel eventually
     // But AuthService might return UserModel. We need to fetch full technician data if needed.
     // For now, let's assume we can get basic info.
 
-    _nameController = TextEditingController(text: user?.displayName ?? '');
+    _nameController = TextEditingController(text: user?.fullName ?? '');
     _phoneController = TextEditingController(text: user?.phoneNumber ?? '');
     _bioController = TextEditingController(); // Placeholder
     _hourlyRateController = TextEditingController();
@@ -56,16 +55,23 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Future<void> _loadTechnicianData() async {
-    final user = context.read<AuthService>().currentUser;
-    if (user != null) {
-      final userData = await _firestoreService.getUser(user.uid);
-      if (userData is TechnicianModel && mounted) {
-        setState(() {
-          _hourlyRateController.text = userData.hourlyRate?.toString() ?? '';
-          _experienceController.text = userData.yearsOfExperience.toString();
-          _profilePhotoUrl = userData.profilePhoto;
-        });
-      }
+    final userId = context.userId;
+    if (userId != null) {
+      final result = await _userRepository.getTechnician(userId);
+      result.fold(
+        (failure) {}, // Silently fail, use defaults
+        (technician) {
+          if (technician != null && mounted) {
+            setState(() {
+              _hourlyRateController.text =
+                  technician.hourlyRate?.toString() ?? '';
+              _experienceController.text = technician.yearsOfExperience
+                  .toString();
+              _profilePhotoUrl = technician.profilePhoto;
+            });
+          }
+        },
+      );
     }
   }
 
@@ -87,8 +93,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       if (!mounted) return;
       setState(() => _isLoading = true);
 
-      final user = context.read<AuthService>().currentUser;
-      if (user == null) {
+      final userId = context.userId;
+      if (userId == null) {
         if (mounted) setState(() => _isLoading = false);
         return;
       }
@@ -106,14 +112,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       final ref = FirebaseStorage.instance
           .ref()
           .child('profile_photos')
-          .child(user.uid)
+          .child(userId)
           .child('profile.jpg');
 
       await ref.putFile(compressedFile);
       final downloadUrl = await ref.getDownloadURL();
 
       // Update Firestore and Auth
-      await _firestoreService.updateUserFields(user.uid, {
+      await _userRepository.updateUserFields(userId, {
         'photoURL': downloadUrl,
         'updatedAt': FieldValue.serverTimestamp(),
       });
@@ -143,10 +149,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final authService = context.read<AuthService>();
-      final user = authService.currentUser;
+      final userId = context.userId;
+      final user = context.currentUser;
 
-      if (user != null) {
+      if (userId != null) {
         // 1. Update Auth Profile (Name, Photo)
         // Note: Phone update in Auth usually requires verification, so we might just update DB for now
         // or skip Auth phone update if it's complex. Let's update DB fields.
@@ -161,10 +167,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           'updatedAt': FieldValue.serverTimestamp(),
         };
 
-        await _firestoreService.updateUserFields(user.uid, updates);
+        await _userRepository.updateUserFields(userId, updates);
 
         // Update local auth user display name if changed
-        if (_nameController.text.trim() != user.displayName) {
+        if (_nameController.text.trim() != user?.fullName) {
           // This might need a method in AuthService to update profile
           // For now, we assume Firestore update is the source of truth
         }
@@ -294,6 +300,3 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 }
-
-
-

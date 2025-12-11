@@ -1,4 +1,4 @@
-/// Use case for deleting an address.
+// Use case for deleting an address.
 
 import 'package:dartz/dartz.dart';
 import '../../../core/error/failures.dart';

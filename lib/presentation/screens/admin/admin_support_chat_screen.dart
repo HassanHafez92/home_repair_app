@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:uuid/uuid.dart';
 import 'package:home_repair_app/services/chat_service.dart';
-import 'package:home_repair_app/services/auth_service.dart';
+import '../../helpers/auth_helper.dart';
 import 'package:home_repair_app/models/message_model.dart';
 
 class AdminSupportChatScreen extends StatefulWidget {
@@ -24,7 +24,6 @@ class AdminSupportChatScreen extends StatefulWidget {
 
 class _AdminSupportChatScreenState extends State<AdminSupportChatScreen> {
   final ChatService _chatService = ChatService();
-  final AuthService _authService = AuthService();
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   bool _isSending = false;
@@ -36,14 +35,14 @@ class _AdminSupportChatScreenState extends State<AdminSupportChatScreen> {
   }
 
   Future<void> _assignAdminToChat() async {
-    final user = _authService.currentUser;
+    final user = context.currentUser;
     if (user == null) return;
 
     try {
       await _chatService.assignAdminToSupportChat(
         chatId: widget.chatId,
-        adminId: user.uid,
-        adminName: user.displayName ?? 'Admin',
+        adminId: user.id,
+        adminName: user.fullName,
       );
     } catch (e) {
       // Already assigned or error - ignore
@@ -54,8 +53,8 @@ class _AdminSupportChatScreenState extends State<AdminSupportChatScreen> {
     final text = _messageController.text.trim();
     if (text.isEmpty || _isSending) return;
 
-    final user = _authService.currentUser;
-    if (user == null) return;
+    final userId = context.userId;
+    if (userId == null) return;
 
     setState(() => _isSending = true);
     _messageController.clear();
@@ -63,7 +62,7 @@ class _AdminSupportChatScreenState extends State<AdminSupportChatScreen> {
     try {
       final message = MessageModel(
         id: const Uuid().v4(),
-        senderId: user.uid,
+        senderId: userId,
         text: text,
         timestamp: DateTime.now(),
         type: MessageType.text,
@@ -150,7 +149,7 @@ class _AdminSupportChatScreenState extends State<AdminSupportChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final user = _authService.currentUser;
+    final user = context.currentUser;
 
     return Scaffold(
       appBar: AppBar(
@@ -239,7 +238,7 @@ class _AdminSupportChatScreenState extends State<AdminSupportChatScreen> {
                 if (user != null) {
                   _chatService.markSupportMessagesAsRead(
                     widget.chatId,
-                    user.uid,
+                    user.id,
                   );
                 }
 
@@ -249,8 +248,7 @@ class _AdminSupportChatScreenState extends State<AdminSupportChatScreen> {
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
                     final message = messages[index];
-                    final isAdmin =
-                        user != null && message.senderId == user.uid;
+                    final isAdmin = user != null && message.senderId == user.id;
 
                     return Align(
                       alignment: isAdmin
@@ -365,6 +363,3 @@ class _AdminSupportChatScreenState extends State<AdminSupportChatScreen> {
     );
   }
 }
-
-
-

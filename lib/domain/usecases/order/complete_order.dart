@@ -1,4 +1,4 @@
-/// Complete order use case.
+// Complete order use case.
 
 import 'package:dartz/dartz.dart';
 

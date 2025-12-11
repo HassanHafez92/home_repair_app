@@ -1,4 +1,4 @@
-/// Use case for saving a new address.
+// Use case for saving a new address.
 
 import 'package:dartz/dartz.dart';
 import '../../../core/error/failures.dart';

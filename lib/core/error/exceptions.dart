@@ -1,7 +1,6 @@
-/// Exception classes for data layer errors.
-library exceptions;
+// Exception classes for data layer errors.
 
-/// Base exception for server errors.
+// Base exception for server errors.
 class ServerException implements Exception {
   final String message;
   final String? code;

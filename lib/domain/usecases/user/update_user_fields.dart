@@ -1,4 +1,4 @@
-/// Update user fields use case.
+// Update user fields use case.
 
 import 'package:dartz/dartz.dart';
 

@@ -1,8 +1,8 @@
-/// Auth repository interface for Clean Architecture.
-///
-/// This interface defines the contract for authentication operations.
-/// Implementations should handle Firebase Auth and return Either types
-/// for error handling.
+// Auth repository interface for Clean Architecture.
+//
+// This interface defines the contract for authentication operations.
+// Implementations should handle Firebase Auth and return Either types
+// for error handling.
 
 import 'package:dartz/dartz.dart';
 

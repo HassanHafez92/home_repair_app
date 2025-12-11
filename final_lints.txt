@@ -1,0 +1,14 @@
+Analyzing home_repair_app...                                    
+
+   info - Library names are not necessary - lib\data\datasources\local\i_user_local_data_source.dart:4:9 - unnecessary_library_name
+   info - Library names are not necessary - lib\data\datasources\local\service_local_data_source.dart:2:9 - unnecessary_library_name
+   info - Library names are not necessary - lib\data\datasources\local\user_local_data_source.dart:2:9 - unnecessary_library_name
+   info - Library names are not necessary - lib\data\datasources\remote\auth_remote_data_source.dart:4:9 - unnecessary_library_name
+   info - Library names are not necessary - lib\data\datasources\remote\i_order_remote_data_source.dart:4:9 - unnecessary_library_name
+   info - Library names are not necessary - lib\data\datasources\remote\i_service_remote_data_source.dart:4:9 - unnecessary_library_name
+   info - Library names are not necessary - lib\data\datasources\remote\i_user_remote_data_source.dart:5:9 - unnecessary_library_name
+   info - Library names are not necessary - lib\data\datasources\remote\order_remote_data_source.dart:2:9 - unnecessary_library_name
+   info - Library names are not necessary - lib\data\datasources\remote\service_remote_data_source.dart:2:9 - unnecessary_library_name
+   info - Library names are not necessary - lib\data\datasources\remote\user_remote_data_source.dart:2:9 - unnecessary_library_name
+warning - This default clause is covered by the previous cases - lib\data\repositories\chat_repository_impl.dart:177:7 - unreachable_switch_default
+

@@ -6,7 +6,7 @@ import 'package:uuid/uuid.dart';
 
 import 'package:home_repair_app/models/review_model.dart';
 import 'package:home_repair_app/services/review_service.dart';
-import 'package:home_repair_app/services/auth_service.dart';
+import '../../helpers/auth_helper.dart';
 
 class AddReviewScreen extends StatefulWidget {
   final String orderId;
@@ -26,7 +26,6 @@ class _AddReviewScreenState extends State<AddReviewScreen> {
   final _formKey = GlobalKey<FormState>();
   final _commentController = TextEditingController();
   final _reviewService = ReviewService();
-  final _authService = AuthService();
 
   double _rating = 0;
   bool _isSubmitting = false;
@@ -49,11 +48,19 @@ class _AddReviewScreenState extends State<AddReviewScreen> {
     setState(() => _isSubmitting = true);
 
     try {
+      final userId = context.userId;
+      if (userId == null) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('error'.tr())));
+        return;
+      }
+
       final review = ReviewModel(
         id: const Uuid().v4(),
         orderId: widget.orderId,
         technicianId: widget.technicianId,
-        customerId: _authService.currentUser!.uid,
+        customerId: userId,
         rating: _rating.toInt(),
         categories: {}, // Can be expanded later
         comment: _commentController.text.trim(),
@@ -159,6 +166,3 @@ class _AddReviewScreenState extends State<AddReviewScreen> {
     );
   }
 }
-
-
-

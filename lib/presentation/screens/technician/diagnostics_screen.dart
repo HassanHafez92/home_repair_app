@@ -4,10 +4,9 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:home_repair_app/services/auth_service.dart';
+import '../../helpers/auth_helper.dart';
 
 class DiagnosticsScreen extends StatefulWidget {
   const DiagnosticsScreen({super.key});
@@ -45,8 +44,7 @@ class _DiagnosticsScreenState extends State<DiagnosticsScreen> {
 
   Future<void> _testAuthentication() async {
     try {
-      final authService = context.read<AuthService>();
-      final user = authService.currentUser;
+      final user = context.currentUser;
 
       if (user == null) {
         _addResult(
@@ -59,7 +57,7 @@ class _DiagnosticsScreenState extends State<DiagnosticsScreen> {
         return;
       }
 
-      if (!user.emailVerified) {
+      if (!(user.emailVerified ?? false)) {
         _addResult(
           'authentication',
           DiagnosticResult.warning(
@@ -407,6 +405,3 @@ class DiagnosticResult {
     }
   }
 }
-
-
-

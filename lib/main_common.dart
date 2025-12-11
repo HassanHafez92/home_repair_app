@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:home_repair_app/config/app_config.dart';
 import 'firebase_config.dart';
 import 'services/auth_service.dart';
@@ -14,16 +15,12 @@ import 'services/storage_service.dart';
 import 'services/notification_service.dart';
 import 'services/address_service.dart';
 import 'package:home_repair_app/services/snackbar_service.dart';
+import 'core/di/injection_container.dart';
 import 'domain/repositories/i_auth_repository.dart';
 import 'domain/repositories/i_user_repository.dart';
 import 'domain/repositories/i_order_repository.dart';
 import 'domain/repositories/i_service_repository.dart';
 import 'domain/repositories/i_admin_repository.dart';
-import 'data/repositories/auth_repository_impl.dart';
-import 'data/repositories/user_repository_impl.dart';
-import 'data/repositories/order_repository_impl.dart';
-import 'data/repositories/service_repository_impl.dart';
-import 'data/repositories/admin_repository_impl.dart';
 import 'presentation/blocs/auth/auth_bloc.dart';
 import 'presentation/blocs/auth/auth_state.dart';
 import 'domain/entities/user_entity.dart';
@@ -94,6 +91,10 @@ Future<void> mainCommon(AppConfig config) async {
   // Phase 1: Initialize Notifications
   await NotificationService().initialize();
 
+  // Initialize SharedPreferences and then all dependencies via DI container
+  final sharedPreferences = await SharedPreferences.getInstance();
+  await initializeDependencies(sharedPreferences);
+
   runApp(
     EasyLocalization(
       supportedLocales: const [Locale('en'), Locale('ar')],
@@ -111,79 +112,45 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Initialize services and repositories
-    final authService = AuthService();
-    final firestoreService = FirestoreService();
-    final storageService = StorageService();
-    final addressService = AddressService();
-
-    // Repositories
-    final authRepository = AuthRepositoryImpl();
-    final userRepository = UserRepositoryImpl();
-    final orderRepository = OrderRepositoryImpl();
-    final serviceRepository = ServiceRepositoryImpl();
-    final adminRepository = AdminRepositoryImpl(
-      firestore: FirebaseFirestore.instance,
-    );
-
     return MultiBlocProvider(
       providers: [
-        // Service Providers (Legacy)
-        RepositoryProvider<AuthService>.value(value: authService),
-        RepositoryProvider<FirestoreService>.value(value: firestoreService),
-        RepositoryProvider<StorageService>.value(value: storageService),
-        RepositoryProvider<AddressService>.value(value: addressService),
+        // Service Providers (Legacy) - accessed via DI container
+        RepositoryProvider<AuthService>.value(value: sl<AuthService>()),
+        RepositoryProvider<FirestoreService>.value(
+          value: sl<FirestoreService>(),
+        ),
+        RepositoryProvider<StorageService>.value(value: sl<StorageService>()),
+        RepositoryProvider<AddressService>.value(value: sl<AddressService>()),
 
-        // Repository Providers
-        RepositoryProvider<IAuthRepository>.value(value: authRepository),
-        RepositoryProvider<IUserRepository>.value(value: userRepository),
-        RepositoryProvider<IOrderRepository>.value(value: orderRepository),
-        RepositoryProvider<IServiceRepository>.value(value: serviceRepository),
-        RepositoryProvider<IAdminRepository>.value(value: adminRepository),
+        // Repository Providers - accessed via DI container
+        RepositoryProvider<IAuthRepository>.value(value: sl<IAuthRepository>()),
+        RepositoryProvider<IUserRepository>.value(value: sl<IUserRepository>()),
+        RepositoryProvider<IOrderRepository>.value(
+          value: sl<IOrderRepository>(),
+        ),
+        RepositoryProvider<IServiceRepository>.value(
+          value: sl<IServiceRepository>(),
+        ),
+        RepositoryProvider<IAdminRepository>.value(
+          value: sl<IAdminRepository>(),
+        ),
 
-        // BLoC Providers
-        BlocProvider(
-          create: (context) => AuthBloc(
-            authRepository: authRepository,
-            userRepository: userRepository,
-          ),
+        // BLoC Providers - created via DI container factory
+        BlocProvider<AuthBloc>(create: (_) => sl<AuthBloc>()),
+        BlocProvider<ServiceBloc>(
+          create: (_) => sl<ServiceBloc>()..add(const ServiceLoadRequested()),
         ),
-        BlocProvider(
-          create: (context) =>
-              ServiceBloc(serviceRepository: serviceRepository)
-                ..add(const ServiceLoadRequested()),
+        BlocProvider<CustomerOrderBloc>(create: (_) => sl<CustomerOrderBloc>()),
+        BlocProvider<TechnicianOrderBloc>(
+          create: (_) => sl<TechnicianOrderBloc>(),
         ),
-        BlocProvider(
-          create: (context) =>
-              CustomerOrderBloc(orderRepository: orderRepository),
+        BlocProvider<TechnicianDashboardBloc>(
+          create: (_) => sl<TechnicianDashboardBloc>(),
         ),
-        BlocProvider(
-          create: (context) =>
-              TechnicianOrderBloc(orderRepository: orderRepository),
-        ),
-        BlocProvider(
-          create: (context) =>
-              TechnicianDashboardBloc(userRepository: userRepository),
-        ),
-        BlocProvider(
-          create: (context) => BookingBloc(orderRepository: orderRepository),
-        ),
-        BlocProvider(
-          create: (context) => ProfileBloc(
-            authRepository: authRepository,
-            userRepository: userRepository,
-            storageService: storageService,
-          ),
-        ),
-        BlocProvider(
-          create: (context) => AdminBloc(
-            adminRepository: adminRepository,
-            orderRepository: orderRepository,
-          ),
-        ),
-        BlocProvider(
-          create: (context) => AddressBookBloc(addressService: addressService),
-        ),
+        BlocProvider<BookingBloc>(create: (_) => sl<BookingBloc>()),
+        BlocProvider<ProfileBloc>(create: (_) => sl<ProfileBloc>()),
+        BlocProvider<AdminBloc>(create: (_) => sl<AdminBloc>()),
+        BlocProvider<AddressBookBloc>(create: (_) => sl<AddressBookBloc>()),
       ],
       child: Builder(
         builder: (context) {

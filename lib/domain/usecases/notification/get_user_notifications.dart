@@ -1,4 +1,4 @@
-/// Use case for getting user notifications.
+// Use case for getting user notifications.
 
 import 'package:dartz/dartz.dart';
 import '../../../core/error/failures.dart';

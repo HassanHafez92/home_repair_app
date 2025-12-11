@@ -3,7 +3,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:home_repair_app/services/auth_service.dart';
+import 'package:home_repair_app/presentation/blocs/auth/auth_bloc.dart';
+import 'package:home_repair_app/presentation/blocs/auth/auth_event.dart';
 import 'admin_dashboard_screen.dart';
 import 'user_management_screen.dart';
 import 'service_management_screen.dart';
@@ -100,11 +101,9 @@ class _AdminLayoutState extends State<AdminLayout> {
                   padding: const EdgeInsets.only(bottom: 24.0),
                   child: IconButton(
                     icon: const Icon(Icons.logout),
-                    onPressed: () async {
-                      await context.read<AuthService>().signOut();
-                      if (context.mounted) {
-                        Navigator.popUntil(context, (route) => route.isFirst);
-                      }
+                    onPressed: () {
+                      context.read<AuthBloc>().add(const AuthLogoutRequested());
+                      Navigator.popUntil(context, (route) => route.isFirst);
                     },
                   ),
                 ),
@@ -161,6 +160,3 @@ class _AdminLayoutState extends State<AdminLayout> {
     );
   }
 }
-
-
-

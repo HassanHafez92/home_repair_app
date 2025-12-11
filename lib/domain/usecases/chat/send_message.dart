@@ -1,4 +1,4 @@
-/// Use case for sending a message in a chat.
+// Use case for sending a message in a chat.
 
 import 'package:dartz/dartz.dart';
 import '../../../core/error/failures.dart';

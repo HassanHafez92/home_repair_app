@@ -1,28 +1,43 @@
-/// Order repository implementation using Firestore.
+// Order repository implementation using data sources.
+//
+// Delegates to order remote data source and handles exception-to-failure
+// conversion for Clean Architecture.
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../core/error/exceptions.dart';
 import '../../core/error/failures.dart';
+import '../../core/network/network_info.dart';
 import '../../domain/entities/order_entity.dart';
 import '../../domain/repositories/i_order_repository.dart';
+import '../../models/order_model.dart' hide OrderStatus;
+import '../datasources/remote/i_order_remote_data_source.dart';
 
-/// Implementation of [IOrderRepository] using Firestore.
+/// Implementation of [IOrderRepository] using data sources.
 class OrderRepositoryImpl implements IOrderRepository {
+  final IOrderRemoteDataSource _remoteDataSource;
+  final INetworkInfo _networkInfo;
   final FirebaseFirestore _db;
 
-  OrderRepositoryImpl({FirebaseFirestore? db})
-    : _db = db ?? FirebaseFirestore.instance;
+  OrderRepositoryImpl({
+    required IOrderRemoteDataSource remoteDataSource,
+    required INetworkInfo networkInfo,
+    FirebaseFirestore? db,
+  }) : _remoteDataSource = remoteDataSource,
+       _networkInfo = networkInfo,
+       _db = db ?? FirebaseFirestore.instance;
 
   @override
   Future<Either<Failure, OrderEntity?>> getOrder(String orderId) async {
     try {
-      final doc = await _db.collection('orders').doc(orderId).get();
-      if (!doc.exists || doc.data() == null) {
-        return const Right(null);
-      }
-      return Right(_mapToOrderEntity(orderId, doc.data()!));
+      final orderModel = await _remoteDataSource.getOrder(orderId);
+      return Right(_modelToEntity(orderModel));
+    } on NotFoundException {
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message, e.code));
     } catch (e) {
       debugPrint('Error fetching order $orderId: $e');
       return Left(ServerFailure('Failed to get order: $e'));
@@ -31,10 +46,12 @@ class OrderRepositoryImpl implements IOrderRepository {
 
   @override
   Future<Either<Failure, String>> createOrder(OrderEntity order) async {
-    try {
-      final docRef = _db.collection('orders').doc();
-      final orderId = docRef.id;
+    if (!await _networkInfo.isConnected) {
+      return const Left(NetworkFailure());
+    }
 
+    try {
+      // Fetch service name and customer info if not provided
       String? serviceName = order.serviceName;
       String? customerName = order.customerName;
       String? customerPhoneNumber = order.customerPhoneNumber;
@@ -61,17 +78,18 @@ class OrderRepositoryImpl implements IOrderRepository {
         }
       }
 
-      final orderData = _orderEntityToMap(
+      final orderModel = _entityToModel(
         order.copyWith(
-          id: orderId,
           serviceName: serviceName,
           customerName: customerName,
           customerPhoneNumber: customerPhoneNumber,
         ),
       );
 
-      await docRef.set(orderData);
+      final orderId = await _remoteDataSource.createOrder(orderModel);
       return Right(orderId);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message, e.code));
     } catch (e) {
       return Left(ServerFailure('Failed to create order: $e'));
     }
@@ -83,14 +101,19 @@ class OrderRepositoryImpl implements IOrderRepository {
     String technicianId,
     double estimate,
   ) async {
+    if (!await _networkInfo.isConnected) {
+      return const Left(NetworkFailure());
+    }
+
     try {
-      await _db.collection('orders').doc(orderId).update({
+      await _remoteDataSource.updateOrder(orderId, {
         'technicianId': technicianId,
         'status': 'accepted',
         'initialEstimate': estimate,
-        'updatedAt': FieldValue.serverTimestamp(),
       });
       return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message, e.code));
     } catch (e) {
       return Left(ServerFailure('Failed to assign technician: $e'));
     }
@@ -102,14 +125,19 @@ class OrderRepositoryImpl implements IOrderRepository {
     double finalPrice,
     String? notes,
   ) async {
+    if (!await _networkInfo.isConnected) {
+      return const Left(NetworkFailure());
+    }
+
     try {
-      await _db.collection('orders').doc(orderId).update({
+      await _remoteDataSource.updateOrder(orderId, {
         'status': 'completed',
         'finalPrice': finalPrice,
         'notes': notes,
-        'updatedAt': FieldValue.serverTimestamp(),
       });
       return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message, e.code));
     } catch (e) {
       return Left(ServerFailure('Failed to complete order: $e'));
     }
@@ -120,13 +148,18 @@ class OrderRepositoryImpl implements IOrderRepository {
     String orderId,
     String reason,
   ) async {
+    if (!await _networkInfo.isConnected) {
+      return const Left(NetworkFailure());
+    }
+
     try {
-      await _db.collection('orders').doc(orderId).update({
+      await _remoteDataSource.updateOrder(orderId, {
         'status': 'cancelled',
         'rejectionReason': reason,
-        'updatedAt': FieldValue.serverTimestamp(),
       });
       return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message, e.code));
     } catch (e) {
       return Left(ServerFailure('Failed to reject order: $e'));
     }
@@ -141,47 +174,24 @@ class OrderRepositoryImpl implements IOrderRepository {
     OrderStatus? statusFilter,
   }) async {
     try {
-      Query query = _db
-          .collection('orders')
-          .where('customerId', isEqualTo: customerId);
+      final result = await _remoteDataSource.getCustomerOrders(
+        customerId: customerId,
+        limit: limit,
+        startAfterId: startAfterCursor,
+        status: statusFilter?.toString().split('.').last,
+      );
 
-      if (statusFilter != null) {
-        query = query.where(
-          'status',
-          isEqualTo: statusFilter.toString().split('.').last,
-        );
-      }
-
-      query = query.orderBy('dateRequested', descending: true);
-      query = query.limit(limit + 1);
-
-      if (startAfterCursor != null && startAfterCursor.isNotEmpty) {
-        final startAfterDoc = await _db
-            .collection('orders')
-            .doc(startAfterCursor)
-            .get();
-        if (startAfterDoc.exists) {
-          query = query.startAfterDocument(startAfterDoc);
-        }
-      }
-
-      final snapshot = await query.get();
-      final docs = snapshot.docs;
-      final hasMore = docs.length > limit;
-      final items = docs.take(limit).map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
-        return _mapToOrderEntity(doc.id, data);
-      }).toList();
-
-      final nextCursor = hasMore && items.isNotEmpty ? items.last.id : null;
+      final entities = result.items.map(_modelToEntity).toList();
 
       return Right(
         PaginatedResult<OrderEntity>(
-          items: items,
-          hasMore: hasMore,
-          nextCursor: nextCursor,
+          items: entities,
+          hasMore: result.hasMore,
+          nextCursor: result.nextCursor,
         ),
       );
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message, e.code));
     } catch (e) {
       return Left(ServerFailure('Failed to get orders: $e'));
     }
@@ -192,12 +202,18 @@ class OrderRepositoryImpl implements IOrderRepository {
     String orderId,
     OrderStatus status,
   ) async {
+    if (!await _networkInfo.isConnected) {
+      return const Left(NetworkFailure());
+    }
+
     try {
-      await _db.collection('orders').doc(orderId).update({
-        'status': status.toString().split('.').last,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
+      await _remoteDataSource.updateOrderStatus(
+        orderId,
+        status.toString().split('.').last,
+      );
       return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message, e.code));
     } catch (e) {
       return Left(ServerFailure('Failed to update order status: $e'));
     }
@@ -208,31 +224,20 @@ class OrderRepositoryImpl implements IOrderRepository {
     String userId, {
     bool isTechnician = false,
   }) {
-    Query query = _db.collection('orders');
-
     if (isTechnician) {
-      query = query.where('technicianId', isEqualTo: userId);
+      return _remoteDataSource
+          .watchTechnicianOrders(userId)
+          .map((models) => models.map(_modelToEntity).toList());
     } else {
-      query = query.where('customerId', isEqualTo: userId);
+      return _remoteDataSource
+          .watchCustomerOrders(userId)
+          .map((models) => models.map(_modelToEntity).toList());
     }
-
-    return query
-        .orderBy('dateRequested', descending: true)
-        .snapshots()
-        .map(
-          (snapshot) => snapshot.docs
-              .map(
-                (doc) => _mapToOrderEntity(
-                  doc.id,
-                  doc.data() as Map<String, dynamic>,
-                ),
-              )
-              .toList(),
-        );
   }
 
   @override
   Stream<List<OrderEntity>> streamPendingOrdersForTechnician() {
+    // Use direct Firestore for pending orders (all technicians can see)
     return _db
         .collection('orders')
         .where('status', isEqualTo: 'pending')
@@ -240,7 +245,7 @@ class OrderRepositoryImpl implements IOrderRepository {
         .snapshots()
         .map(
           (snapshot) => snapshot.docs
-              .map((doc) => _mapToOrderEntity(doc.id, doc.data()))
+              .map((doc) => _mapDocToEntity(doc.id, doc.data()))
               .toList(),
         );
   }
@@ -254,13 +259,69 @@ class OrderRepositoryImpl implements IOrderRepository {
         .snapshots()
         .map(
           (snapshot) => snapshot.docs
-              .map((doc) => _mapToOrderEntity(doc.id, doc.data()))
+              .map((doc) => _mapDocToEntity(doc.id, doc.data()))
               .toList(),
         );
   }
 
-  // Helper methods for entity mapping
-  OrderEntity _mapToOrderEntity(String id, Map<String, dynamic> data) {
+  // Helper methods for mapping
+  OrderEntity _modelToEntity(OrderModel model) {
+    return OrderEntity(
+      id: model.id,
+      customerId: model.customerId,
+      technicianId: model.technicianId,
+      serviceId: model.serviceId,
+      description: model.description,
+      photoUrls: model.photoUrls,
+      location: model.location,
+      address: model.address,
+      dateRequested: model.dateRequested,
+      dateScheduled: model.dateScheduled,
+      status: _parseOrderStatus(model.status.toString().split('.').last),
+      initialEstimate: model.initialEstimate,
+      finalPrice: model.finalPrice,
+      visitFee: model.visitFee,
+      vat: model.vat,
+      paymentMethod: model.paymentMethod,
+      paymentStatus: model.paymentStatus,
+      notes: model.notes,
+      serviceName: model.serviceName,
+      customerName: model.customerName,
+      customerPhoneNumber: model.customerPhoneNumber,
+      createdAt: model.createdAt,
+      updatedAt: model.updatedAt,
+    );
+  }
+
+  OrderModel _entityToModel(OrderEntity entity) {
+    return OrderModel(
+      id: entity.id,
+      customerId: entity.customerId,
+      technicianId: entity.technicianId,
+      serviceId: entity.serviceId,
+      description: entity.description,
+      photoUrls: entity.photoUrls,
+      location: entity.location,
+      address: entity.address,
+      dateRequested: entity.dateRequested,
+      dateScheduled: entity.dateScheduled,
+      status: _entityStatusToModelStatus(entity.status),
+      initialEstimate: entity.initialEstimate,
+      finalPrice: entity.finalPrice,
+      visitFee: entity.visitFee,
+      vat: entity.vat,
+      paymentMethod: entity.paymentMethod,
+      paymentStatus: entity.paymentStatus,
+      notes: entity.notes,
+      serviceName: entity.serviceName,
+      customerName: entity.customerName,
+      customerPhoneNumber: entity.customerPhoneNumber,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+    );
+  }
+
+  OrderEntity _mapDocToEntity(String id, Map<String, dynamic> data) {
     return OrderEntity(
       id: id,
       customerId: data['customerId'] ?? '',
@@ -290,36 +351,6 @@ class OrderRepositoryImpl implements IOrderRepository {
     );
   }
 
-  Map<String, dynamic> _orderEntityToMap(OrderEntity order) {
-    return {
-      'id': order.id,
-      'customerId': order.customerId,
-      'technicianId': order.technicianId,
-      'serviceId': order.serviceId,
-      'description': order.description,
-      'photoUrls': order.photoUrls,
-      'location': order.location,
-      'address': order.address,
-      'dateRequested': Timestamp.fromDate(order.dateRequested),
-      'dateScheduled': order.dateScheduled != null
-          ? Timestamp.fromDate(order.dateScheduled!)
-          : null,
-      'status': order.status.toString().split('.').last,
-      'initialEstimate': order.initialEstimate,
-      'finalPrice': order.finalPrice,
-      'visitFee': order.visitFee,
-      'vat': order.vat,
-      'paymentMethod': order.paymentMethod,
-      'paymentStatus': order.paymentStatus,
-      'notes': order.notes,
-      'serviceName': order.serviceName,
-      'customerName': order.customerName,
-      'customerPhoneNumber': order.customerPhoneNumber,
-      'createdAt': Timestamp.fromDate(order.createdAt),
-      'updatedAt': Timestamp.fromDate(order.updatedAt),
-    };
-  }
-
   OrderStatus _parseOrderStatus(String? status) {
     if (status == null) return OrderStatus.pending;
     switch (status) {
@@ -338,6 +369,12 @@ class OrderRepositoryImpl implements IOrderRepository {
       default:
         return OrderStatus.pending;
     }
+  }
+
+  // Note: OrderModel uses its own OrderStatus enum
+  dynamic _entityStatusToModelStatus(OrderStatus status) {
+    // The OrderModel uses the same string representation
+    return status.toString().split('.').last;
   }
 
   DateTime _parseTimestamp(dynamic timestamp) {

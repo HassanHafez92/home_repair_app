@@ -1,7 +1,7 @@
-/// Repository interface for address operations.
-///
-/// Defines the contract for saved address data access.
-/// Implementations handle Firestore/remote data sources.
+// Repository interface for address operations.
+//
+// Defines the contract for saved address data access.
+// Implementations handle Firestore/remote data sources.
 
 import 'package:dartz/dartz.dart';
 import '../../core/error/failures.dart';
