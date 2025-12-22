@@ -1,10 +1,8 @@
-// File: lib/widgets/order_card.dart
-// Purpose: Unified card to display order details for Customer, Technician, and Admin.
-
 import 'package:flutter/material.dart';
 import 'package:home_repair_app/domain/entities/order_entity.dart';
 import 'status_badge.dart';
 import 'custom_button.dart';
+import '../theme/design_tokens.dart';
 
 class OrderCard extends StatelessWidget {
   final OrderEntity order;
@@ -26,15 +24,21 @@ class OrderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      margin: const EdgeInsets.only(bottom: DesignTokens.spaceMD),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(DesignTokens.radiusLG),
+        side: BorderSide(color: colorScheme.outline.withValues(alpha: 0.5)),
+      ),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(DesignTokens.radiusLG),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(DesignTokens.spaceLG),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -45,33 +49,34 @@ class OrderCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       order.serviceId, // In real app, map ID to Name
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: DesignTokens.fontWeightBold,
                       ),
                     ),
                   ),
                   StatusBadge.fromOrderStatus(order.status),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: DesignTokens.spaceMD),
 
               // Details
               _buildDetailRow(
-                Icons.calendar_today,
+                theme,
+                Icons.calendar_today_rounded,
                 _formatDate(order.dateRequested),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: DesignTokens.spaceXS),
               if (order.initialEstimate != null)
                 _buildDetailRow(
-                  Icons.attach_money,
-                  '${order.initialEstimate!.toInt()} EGP (Est.)',
+                  theme,
+                  Icons.payments_outlined,
+                  '${order.initialEstimate!.toInt()} EGP (Estimated)',
                 ),
 
               if (isTechnicianView && order.status == OrderStatus.pending) ...[
-                const SizedBox(height: 16),
+                const SizedBox(height: DesignTokens.spaceLG),
                 const Divider(),
-                const SizedBox(height: 8),
+                const SizedBox(height: DesignTokens.spaceMD),
                 Row(
                   children: [
                     Expanded(
@@ -79,15 +84,15 @@ class OrderCard extends StatelessWidget {
                         text: 'Reject',
                         variant: ButtonVariant.outline,
                         onPressed: onReject,
-                        height: 40,
+                        height: 48,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: DesignTokens.spaceMD),
                     Expanded(
                       child: CustomButton(
                         text: 'Accept',
                         onPressed: onAccept,
-                        height: 40,
+                        height: 48,
                       ),
                     ),
                   ],
@@ -100,18 +105,22 @@ class OrderCard extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailRow(IconData icon, String text) {
+  Widget _buildDetailRow(ThemeData theme, IconData icon, String text) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: Colors.grey),
-        const SizedBox(width: 8),
-        Text(text, style: const TextStyle(color: Colors.grey)),
+        Icon(icon, size: 16, color: DesignTokens.neutral500),
+        const SizedBox(width: DesignTokens.spaceSM),
+        Text(
+          text,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: DesignTokens.neutral600,
+          ),
+        ),
       ],
     );
   }
 
   String _formatDate(DateTime date) {
-    // Simple formatter, can use intl package later
     return '${date.day}/${date.month}/${date.year}';
   }
 }

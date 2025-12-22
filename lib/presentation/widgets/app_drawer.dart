@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:home_repair_app/presentation/blocs/auth/auth_bloc.dart';
 import 'package:home_repair_app/presentation/blocs/auth/auth_state.dart';
 import 'package:home_repair_app/presentation/blocs/auth/auth_event.dart';
+import '../theme/design_tokens.dart';
 
 class AppDrawer extends StatelessWidget {
   final Function(int)? onNavigate;
@@ -13,82 +14,148 @@ class AppDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Drawer(
+      backgroundColor: theme.scaffoldBackgroundColor,
       child: Column(
         children: [
-          // Drawer Header
+          // Premium Drawer Header
           BlocBuilder<AuthBloc, AuthState>(
             builder: (context, state) {
               final user = state is AuthAuthenticated ? state.user : null;
-              return UserAccountsDrawerHeader(
-                decoration: const BoxDecoration(color: Colors.deepOrange),
-                accountName: Text(
-                  user?.fullName ?? 'Guest',
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+              return Container(
+                padding: const EdgeInsets.only(
+                  top: DesignTokens.space2XL,
+                  left: DesignTokens.spaceLG,
+                  right: DesignTokens.spaceLG,
+                  bottom: DesignTokens.spaceLG,
                 ),
-                accountEmail: Text(user?.email ?? ''),
-                currentAccountPicture: CircleAvatar(
-                  backgroundColor: Colors.white,
-                  backgroundImage: user?.profilePhoto != null
-                      ? NetworkImage(user!.profilePhoto!)
-                      : null,
-                  child: user?.profilePhoto == null
-                      ? Text(
-                          (user?.fullName ?? 'G').substring(0, 1).toUpperCase(),
-                          style: const TextStyle(
-                            fontSize: 24,
-                            color: Colors.deepOrange,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [colorScheme.primary, DesignTokens.primaryBlueDark],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 64,
+                      height: 64,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(
+                          DesignTokens.radiusSM,
+                        ),
+                        image: user?.profilePhoto != null
+                            ? DecorationImage(
+                                image: NetworkImage(user!.profilePhoto!),
+                                fit: BoxFit.cover,
+                              )
+                            : null,
+                      ),
+                      alignment: Alignment.center,
+                      child: user?.profilePhoto == null
+                          ? Text(
+                              (user?.fullName ?? 'G')
+                                  .substring(0, 1)
+                                  .toUpperCase(),
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: DesignTokens.fontWeightBold,
+                                color: colorScheme.primary,
+                              ),
+                            )
+                          : null,
+                    ),
+                    const SizedBox(width: DesignTokens.spaceMD),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            user?.fullName ?? 'Guest User',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              color: Colors.white,
+                              fontWeight: DesignTokens.fontWeightBold,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        )
-                      : null,
+                          Text(
+                            user?.email ?? 'Sign in to access features',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: Colors.white.withValues(alpha: 0.8),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               );
             },
           ),
 
+          const SizedBox(height: DesignTokens.spaceMD),
+
           // Navigation Items
-          ListTile(
-            leading: const Icon(Icons.home),
-            title: Text('home'.tr()),
-            onTap: () {
-              Navigator.pop(context); // Close drawer
-              onNavigate?.call(0); // Go to Home tab
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.grid_view),
-            title: Text('services'.tr()),
+          _buildDrawerItem(
+            context,
+            icon: Icons.home_rounded,
+            label: 'home'.tr(),
             onTap: () {
               Navigator.pop(context);
-              onNavigate?.call(1); // Go to Services tab
+              onNavigate?.call(0);
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.list_alt),
-            title: Text('orders'.tr()),
+          _buildDrawerItem(
+            context,
+            icon: Icons.grid_view_rounded,
+            label: 'services'.tr(),
             onTap: () {
               Navigator.pop(context);
-              onNavigate?.call(2); // Go to Orders tab
+              onNavigate?.call(1);
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.person),
-            title: Text('profile'.tr()),
+          _buildDrawerItem(
+            context,
+            icon: Icons.receipt_long_rounded,
+            label: 'orders'.tr(),
             onTap: () {
               Navigator.pop(context);
-              onNavigate?.call(4); // Go to Profile tab
+              onNavigate?.call(2);
+            },
+          ),
+          _buildDrawerItem(
+            context,
+            icon: Icons.person_rounded,
+            label: 'profile'.tr(),
+            onTap: () {
+              Navigator.pop(context);
+              onNavigate?.call(3);
             },
           ),
 
-          const Divider(),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: DesignTokens.spaceLG),
+            child: Divider(),
+          ),
 
-          // Settings & Actions
-          ListTile(
-            leading: const Icon(Icons.language),
-            title: Text('language'.tr()),
+          _buildDrawerItem(
+            context,
+            icon: Icons.language_rounded,
+            label: 'language'.tr(),
             trailing: Text(
               context.locale.languageCode == 'en' ? 'EN' : 'AR',
-              style: const TextStyle(color: Colors.grey),
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: colorScheme.primary,
+                fontWeight: DesignTokens.fontWeightBold,
+              ),
             ),
             onTap: () {
               if (context.locale.languageCode == 'en') {
@@ -99,9 +166,10 @@ class AppDrawer extends StatelessWidget {
               Navigator.pop(context);
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.help_outline),
-            title: Text('helpSupport'.tr()),
+          _buildDrawerItem(
+            context,
+            icon: Icons.help_outline_rounded,
+            label: 'helpSupport'.tr(),
             onTap: () {
               Navigator.pop(context);
               context.push('/customer/help');
@@ -109,21 +177,52 @@ class AppDrawer extends StatelessWidget {
           ),
 
           const Spacer(),
-          const Divider(),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: DesignTokens.spaceLG),
+            child: Divider(),
+          ),
 
-          ListTile(
-            leading: const Icon(Icons.logout, color: Colors.red),
-            title: Text(
-              'logout'.tr(),
-              style: const TextStyle(color: Colors.red),
-            ),
+          _buildDrawerItem(
+            context,
+            icon: Icons.logout_rounded,
+            label: 'logout'.tr(),
+            color: DesignTokens.statusCancelled,
             onTap: () {
               Navigator.pop(context);
               context.read<AuthBloc>().add(const AuthLogoutRequested());
             },
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: DesignTokens.spaceLG),
         ],
+      ),
+    );
+  }
+
+  Widget _buildDrawerItem(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+    Color? color,
+    Widget? trailing,
+  }) {
+    final theme = Theme.of(context);
+    return ListTile(
+      leading: Icon(icon, color: color ?? DesignTokens.neutral600),
+      title: Text(
+        label,
+        style: theme.textTheme.bodyMedium?.copyWith(
+          color: color ?? DesignTokens.neutral800,
+          fontWeight: DesignTokens.fontWeightSemiBold,
+        ),
+      ),
+      trailing: trailing,
+      onTap: onTap,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
+      ),
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: DesignTokens.spaceLG,
       ),
     );
   }

@@ -15,7 +15,6 @@ class CustomerEntity extends Equatable {
   final DateTime lastActive;
   final bool? emailVerified;
   final List<String> savedAddresses;
-  final List<String> savedPaymentMethods;
 
   const CustomerEntity({
     required this.id,
@@ -28,7 +27,6 @@ class CustomerEntity extends Equatable {
     required this.lastActive,
     this.emailVerified,
     this.savedAddresses = const [],
-    this.savedPaymentMethods = const [],
   });
 
   UserRole get role => UserRole.customer;
@@ -45,7 +43,6 @@ class CustomerEntity extends Equatable {
     lastActive,
     emailVerified,
     savedAddresses,
-    savedPaymentMethods,
   ];
 
   /// Convert to base UserEntity for polymorphic use.
@@ -73,7 +70,6 @@ class CustomerEntity extends Equatable {
     DateTime? lastActive,
     bool? emailVerified,
     List<String>? savedAddresses,
-    List<String>? savedPaymentMethods,
   }) {
     return CustomerEntity(
       id: id ?? this.id,
@@ -86,7 +82,6 @@ class CustomerEntity extends Equatable {
       lastActive: lastActive ?? this.lastActive,
       emailVerified: emailVerified ?? this.emailVerified,
       savedAddresses: savedAddresses ?? this.savedAddresses,
-      savedPaymentMethods: savedPaymentMethods ?? this.savedPaymentMethods,
     );
   }
 }

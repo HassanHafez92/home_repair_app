@@ -11,55 +11,55 @@ class DesignTokens {
 
   // ========== Color Palette ==========
 
-  /// Primary brand colors
-  static const Color primaryBlue = Color(0xFF2196F3);
-  static const Color primaryBlueDark = Color(0xFF1976D2);
-  static const Color primaryBlueLight = Color(0xFF64B5F6);
+  /// Primary brand colors - Modern Indigo palette
+  static const Color primaryBlue = Color(0xFF4F46E5); // Indigo 600
+  static const Color primaryBlueDark = Color(0xFF4338CA); // Indigo 700
+  static const Color primaryBlueLight = Color(0xFF818CF8); // Indigo 400
 
   /// Accent colors
-  static const Color accentOrange = Color(0xFFFF9800);
-  static const Color accentGreen = Color(0xFF4CAF50);
-  static const Color accentRed = Color(0xFFF44336);
+  static const Color accentOrange = Color(0xFFF59E0B); // Amber 500
+  static const Color accentGreen = Color(0xFF10B981); // Emerald 500
+  static const Color accentRed = Color(0xFFEF4444); // Red 500
 
-  /// Neutral colors
-  static const Color neutral900 = Color(0xFF212121);
-  static const Color neutral800 = Color(0xFF424242);
-  static const Color neutral700 = Color(0xFF616161);
-  static const Color neutral600 = Color(0xFF757575);
-  static const Color neutral500 = Color(0xFF9E9E9E);
-  static const Color neutral400 = Color(0xFFBDBDBD);
-  static const Color neutral300 = Color(0xFFE0E0E0);
-  static const Color neutral200 = Color(0xFFEEEEEE);
-  static const Color neutral100 = Color(0xFFF5F5F5);
-  static const Color neutral50 = Color(0xFFFAFAFA);
+  /// Neutral colors - Slate palette for premium feel
+  static const Color neutral900 = Color(0xFF0F172A);
+  static const Color neutral800 = Color(0xFF1E293B);
+  static const Color neutral700 = Color(0xFF334155);
+  static const Color neutral600 = Color(0xFF475569);
+  static const Color neutral500 = Color(0xFF64748B);
+  static const Color neutral400 = Color(0xFF94A3B8);
+  static const Color neutral300 = Color(0xFFCBD5E1);
+  static const Color neutral200 = Color(0xFFE2E8F0);
+  static const Color neutral100 = Color(0xFFF1F5F9);
+  static const Color neutral50 = Color(0xFFF8FAFC);
 
   /// Semantic colors
-  static const Color success = Color(0xFF4CAF50);
-  static const Color warning = Color(0xFFFF9800);
-  static const Color error = Color(0xFFF44336);
-  static const Color info = Color(0xFF2196F3);
+  static const Color success = accentGreen;
+  static const Color warning = accentOrange;
+  static const Color error = accentRed;
+  static const Color info = primaryBlue;
 
   /// Background colors
-  static const Color backgroundLight = Color(0xFFFFFFFF);
-  static const Color backgroundDark = Color(0xFF121212);
-  static const Color surfaceLight = Color(0xFFFAFAFA);
-  static const Color surfaceDark = Color(0xFF1E1E1E);
+  static const Color backgroundLight = Color(0xFFF8FAFC);
+  static const Color backgroundDark = Color(0xFF0F172A);
+  static const Color surfaceLight = Color(0xFFFFFFFF);
+  static const Color surfaceDark = Color(0xFF1E293B);
 
   // ========== Typography ==========
 
-  /// Font family
-  static const String fontFamily = 'Roboto';
+  /// Font family - Modern, premium font
+  static const String fontFamily = 'Outfit';
 
   /// Font sizes
-  static const double fontSizeXS = 10.0;
-  static const double fontSizeSM = 12.0;
-  static const double fontSizeBase = 14.0;
-  static const double fontSizeMD = 16.0;
-  static const double fontSizeLG = 18.0;
-  static const double fontSizeXL = 20.0;
-  static const double fontSize2XL = 24.0;
-  static const double fontSize3XL = 30.0;
-  static const double fontSize4XL = 36.0;
+  static const double fontSizeXS = 12.0;
+  static const double fontSizeSM = 13.0;
+  static const double fontSizeBase = 15.0;
+  static const double fontSizeMD = 17.0;
+  static const double fontSizeLG = 19.0;
+  static const double fontSizeXL = 22.0;
+  static const double fontSize2XL = 28.0;
+  static const double fontSize3XL = 34.0;
+  static const double fontSize4XL = 42.0;
 
   /// Font weights
   static const FontWeight fontWeightLight = FontWeight.w300;
@@ -69,42 +69,59 @@ class DesignTokens {
   static const FontWeight fontWeightBold = FontWeight.w700;
 
   /// Line heights
-  static const double lineHeightTight = 1.2;
+  static const double lineHeightTight = 1.1;
   static const double lineHeightNormal = 1.5;
-  static const double lineHeightRelaxed = 1.75;
+  static const double lineHeightRelaxed = 1.8;
 
   // ========== Spacing ==========
 
-  static const double spaceXXS = 2.0;
-  static const double spaceXS = 4.0;
-  static const double spaceSM = 8.0;
-  static const double spaceMD = 12.0;
-  static const double spaceBase = 16.0;
-  static const double spaceLG = 20.0;
-  static const double spaceXL = 24.0;
-  static const double space2XL = 32.0;
-  static const double space3XL = 40.0;
-  static const double space4XL = 48.0;
+  static const double spaceXXS = 4.0;
+  static const double spaceXS = 6.0;
+  static const double spaceSM = 10.0;
+  static const double spaceMD = 14.0;
+  static const double spaceBase = 18.0;
+  static const double spaceLG = 24.0;
+  static const double spaceXL = 32.0;
+  static const double space2XL = 40.0;
+  static const double space3XL = 56.0;
+  static const double space4XL = 72.0;
 
   // ========== Border Radius ==========
 
-  static const double radiusXS = 2.0;
-  static const double radiusSM = 4.0;
-  static const double radiusMD = 8.0;
-  static const double radiusLG = 12.0;
-  static const double radiusXL = 16.0;
-  static const double radius2XL = 20.0;
+  static const double radiusXS = 4.0;
+  static const double radiusSM = 8.0;
+  static const double radiusMD = 12.0;
+  static const double radiusLG = 18.0;
+  static const double radiusXL = 24.0;
+  static const double radius2XL = 32.0;
   static const double radiusFull = 999.0;
 
   // ========== Elevation / Shadows ==========
 
   static const double elevationNone = 0.0;
   static const double elevationXS = 1.0;
-  static const double elevationSM = 2.0;
-  static const double elevationMD = 4.0;
-  static const double elevationLG = 8.0;
-  static const double elevationXL = 12.0;
-  static const double elevation2XL = 16.0;
+  static const double elevationSM = 3.0;
+  static const double elevationMD = 6.0;
+  static const double elevationLG = 12.0;
+  static const double elevationXL = 20.0;
+  static const double elevation2XL = 30.0;
+
+  /// Premium soft shadows
+  static List<BoxShadow> shadowSoft = [
+    BoxShadow(
+      color: neutral900.withValues(alpha: 0.04),
+      blurRadius: 10,
+      offset: const Offset(0, 4),
+    ),
+  ];
+
+  static List<BoxShadow> shadowMedium = [
+    BoxShadow(
+      color: neutral900.withValues(alpha: 0.06),
+      blurRadius: 20,
+      offset: const Offset(0, 8),
+    ),
+  ];
 
   // ========== Icon Sizes ==========
 
@@ -117,9 +134,9 @@ class DesignTokens {
 
   // ========== Animation Durations ==========
 
-  static const Duration durationFast = Duration(milliseconds: 150);
-  static const Duration durationNormal = Duration(milliseconds: 300);
-  static const Duration durationSlow = Duration(milliseconds: 500);
+  static const Duration durationFast = Duration(milliseconds: 200);
+  static const Duration durationNormal = Duration(milliseconds: 400);
+  static const Duration durationSlow = Duration(milliseconds: 600);
 
   // ========== Breakpoints ==========
 
@@ -137,13 +154,13 @@ class DesignTokens {
   );
 
   static const LinearGradient successGradient = LinearGradient(
-    colors: [Color(0xFF4CAF50), Color(0xFF388E3C)],
+    colors: [Color(0xFF10B981), Color(0xFF059669)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const LinearGradient warningGradient = LinearGradient(
-    colors: [Color(0xFFFF9800), Color(0xFFF57C00)],
+    colors: [Color(0xFFF59E0B), Color(0xFFD97706)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
@@ -152,8 +169,8 @@ class DesignTokens {
 
   /// Spacing for different UI components
   static const EdgeInsets paddingButton = EdgeInsets.symmetric(
-    horizontal: spaceBase,
-    vertical: spaceMD,
+    horizontal: spaceLG,
+    vertical: spaceBase,
   );
 
   static const EdgeInsets paddingCard = EdgeInsets.all(spaceBase);
@@ -169,12 +186,12 @@ class DesignTokens {
   // ========== Status Colors ==========
 
   /// Order status colors
-  static const Color statusPending = Color(0xFFFF9800); // Orange
-  static const Color statusAccepted = Color(0xFF2196F3); // Blue
-  static const Color statusInProgress = Color(0xFF9C27B0); // Purple
-  static const Color statusCompleted = Color(0xFF4CAF50); // Green
-  static const Color statusCancelled = Color(0xFFF44336); // Red
-  static const Color statusRejected = Color(0xFFFF5252); // Light Red
+  static const Color statusPending = Color(0xFFF59E0B); // Amber
+  static const Color statusAccepted = Color(0xFF6366F1); // Indigo
+  static const Color statusInProgress = Color(0xFF8B5CF6); // Violet
+  static const Color statusCompleted = Color(0xFF10B981); // Emerald
+  static const Color statusCancelled = Color(0xFFEF4444); // Red
+  static const Color statusRejected = Color(0xFFF43F5E); // Rose
 
   /// Get color for order status
   static Color getStatusColor(String status) {
@@ -197,6 +214,3 @@ class DesignTokens {
     }
   }
 }
-
-
-

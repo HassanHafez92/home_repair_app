@@ -21,11 +21,6 @@ CustomerModel _$CustomerModelFromJson(Map<String, dynamic> json) =>
               ?.map((e) => e as String)
               .toList() ??
           const [],
-      savedPaymentMethods:
-          (json['savedPaymentMethods'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          const [],
     );
 
 Map<String, dynamic> _$CustomerModelToJson(CustomerModel instance) =>
@@ -39,5 +34,4 @@ Map<String, dynamic> _$CustomerModelToJson(CustomerModel instance) =>
       'updatedAt': _timestampToJson(instance.updatedAt),
       'lastActive': _timestampToJson(instance.lastActive),
       'savedAddresses': instance.savedAddresses,
-      'savedPaymentMethods': instance.savedPaymentMethods,
     };

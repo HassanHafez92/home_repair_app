@@ -86,14 +86,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 _buildMenuItem(
                   context,
-                  icon: Icons.payment_outlined,
-                  title: 'paymentMethods'.tr(),
-                  onTap: () {
-                    context.push('/customer/payment-methods');
-                  },
-                ),
-                _buildMenuItem(
-                  context,
                   icon: Icons.notifications_outlined,
                   title: 'notifications'.tr(),
                   onTap: () {

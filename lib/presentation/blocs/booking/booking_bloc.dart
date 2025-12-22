@@ -22,7 +22,6 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     on<BookingDescriptionChanged>(_onDescriptionChanged);
     on<BookingLocationChanged>(_onLocationChanged);
     on<BookingScheduleChanged>(_onScheduleChanged);
-    on<BookingPaymentMethodChanged>(_onPaymentMethodChanged);
     on<BookingSubmitted>(_onSubmitted);
   }
 
@@ -36,7 +35,6 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
         address: '',
         scheduledDate: null,
         scheduledTime: null,
-        paymentMethod: 'cash',
       ),
     );
   }
@@ -75,13 +73,6 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
         scheduledTime: event.time ?? state.scheduledTime,
       ),
     );
-  }
-
-  void _onPaymentMethodChanged(
-    BookingPaymentMethodChanged event,
-    Emitter<BookingState> emit,
-  ) {
-    emit(state.copyWith(paymentMethod: event.method));
   }
 
   Future<void> _onSubmitted(
@@ -128,7 +119,6 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
         initialEstimate: state.service!.avgPrice,
         visitFee: state.service!.visitFee,
         vat: state.service!.avgPrice * 0.14,
-        paymentMethod: state.paymentMethod,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );

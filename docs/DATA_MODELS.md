@@ -6,7 +6,6 @@
 - [Core Models](#core-models)
 - [User Models](#user-models)
 - [Service Models](#service-models)
-- [Payment Models](#payment-models)
 - [Communication Models](#communication-models)
 - [Supporting Models](#supporting-models)
 - [Model Relationships](#model-relationships)
@@ -116,7 +115,6 @@ Extends `UserModel` with customer-specific fields.
 |-------|------|----------|-------------|
 | *(Inherits all from UserModel)* | | | |
 | `savedAddresses` | `List<String>` | ✅ | List of saved address IDs |
-| `savedPaymentMethods` | `List<String>` | ✅ | List of saved payment method IDs |
 
 **Fixed Role**: Always `UserRole.customer`
 
@@ -175,8 +173,6 @@ Represents a service order placed by a customer.
 | `finalPrice` | `double?` | ❌ | Final agreed price |
 | `visitFee` | `double` | ✅ | Visit/inspection fee |
 | `vat` | `double` | ✅ | VAT amount |
-| `paymentMethod` | `String` | ✅ | Payment method: `'cash'`, `'card'`, `'wallet'` |
-| `paymentStatus` | `String` | ✅ | Status: `'pending'`, `'paid'`, `'failed'` |
 | `notes` | `String?` | ❌ | Additional notes |
 | `serviceName` | `String?` | ❌ | **Denormalized** service name |
 | `customerName` | `String?` | ❌ | **Denormalized** customer name |
@@ -259,45 +255,6 @@ Customer review for a completed service.
 - `price`: Value for money (1-5)
 
 ---
-
-## Payment Models
-
-### 7. PaymentModel
-
-**Location**: [`lib/models/payment_model.dart`](file:///c:/Users/Hassan/.gemini/antigravity/scratch/home_repair_app/lib/models/payment_model.dart)
-
-Records payment transactions.
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `id` | `String` | ✅ | Payment unique identifier |
-| `orderId` | `String` | ✅ | Associated order ID (FK) |
-| `amount` | `double` | ✅ | Payment amount |
-| `method` | `String` | ✅ | Payment method |
-| `status` | `String` | ✅ | Status: `'pending'`, `'completed'`, `'failed'` |
-| `transactionId` | `String?` | ❌ | External transaction ID |
-| `timestamp` | `DateTime` | ✅ | Payment timestamp |
-
----
-
-### 8. PaymentMethodModel
-
-**Location**: [`lib/models/payment_method_model.dart`](file:///c:/Users/Hassan/.gemini/antigravity/scratch/home_repair_app/lib/models/payment_method_model.dart)
-
-Saved payment methods for users.
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `id` | `String` | ✅ | Payment method ID |
-| `userId` | `String` | ✅ | Owner user ID (FK) |
-| `type` | `String` | ✅ | Type: `'card'`, `'wallet'` |
-| `cardLast4` | `String?` | ❌ | Last 4 digits of card |
-| `cardBrand` | `String?` | ❌ | Card brand (Visa, Mastercard) |
-| `isDefault` | `bool` | ✅ | Default payment method |
-| `createdAt` | `DateTime` | ✅ | Creation timestamp |
-
----
-
 ### 9. InvoiceModel
 
 **Location**: [`lib/models/invoice_model.dart`](file:///c:/Users/Hassan/.gemini/antigravity/scratch/home_repair_app/lib/models/invoice_model.dart)
@@ -499,7 +456,6 @@ erDiagram
     UserModel ||--o{ ChatModel : "participates"
     UserModel ||--o{ NotificationModel : "receives"
     UserModel ||--o{ SavedAddress : "has"
-    UserModel ||--o{ PaymentMethodModel : "owns"
     
     CustomerModel --|> UserModel : "extends"
     TechnicianModel --|> UserModel : "extends"
@@ -507,7 +463,6 @@ erDiagram
     ServiceModel ||--o{ OrderModel : "ordered-as"
     OrderModel ||--|| ChatModel : "has-conversation"
     OrderModel ||--o| ReviewModel : "reviewed-in"
-    OrderModel ||--o| PaymentModel : "paid-via"
     OrderModel ||--o| InvoiceModel : "billed-as"
     
     ChatModel ||--o{ MessageModel : "contains"
@@ -523,12 +478,10 @@ erDiagram
 | UserModel | OrderModel | `customerId`, `technicianId` |
 | UserModel | ReviewModel | `customerId`, `technicianId` |
 | UserModel | SavedAddress | `userId` |
-| UserModel | PaymentMethodModel | `userId` |
 | UserModel | NotificationModel | `userId` |
 | ServiceModel | OrderModel | `serviceId` |
 | OrderModel | ChatModel | `orderId` |
 | OrderModel | ReviewModel | `orderId` |
-| OrderModel | PaymentModel | `orderId` |
 | OrderModel | InvoiceModel | `orderId` |
 | ChatModel | MessageModel | (subcollection) |
 
@@ -636,7 +589,6 @@ final String? customerPhoneNumber;  // Denormalized from UserModel
 |----------|--------|-------|
 | **User Models** | UserModel, CustomerModel, TechnicianModel | 3 |
 | **Service Models** | OrderModel, ServiceModel, ReviewModel | 3 |
-| **Payment Models** | PaymentModel, PaymentMethodModel, InvoiceModel, WalletModel, PromotionModel | 5 |
 | **Communication** | ChatModel, MessageModel, NotificationModel | 3 |
 | **Supporting** | AddressModel, SavedAddress, DashboardStats, TechnicianStats, PaginatedResult | 5 |
 | **Generated Files** | All `.g.dart` files | 17 |

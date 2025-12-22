@@ -1,13 +1,11 @@
-// File: lib/widgets/service_card.dart
-// Purpose: Card displaying service information.
-
 import 'package:flutter/material.dart';
 import 'package:home_repair_app/domain/entities/service_entity.dart';
+import '../theme/design_tokens.dart';
 
 class ServiceCard extends StatelessWidget {
   final ServiceEntity service;
   final VoidCallback onTap;
-  final IconData? iconData; // Added to support custom icons passed from parent
+  final IconData? iconData;
 
   const ServiceCard({
     super.key,
@@ -21,53 +19,59 @@ class ServiceCard extends StatelessWidget {
     return Semantics(
       button: true,
       label: 'Book ${service.name} service',
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(DesignTokens.radiusLG),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: BorderRadius.circular(DesignTokens.radiusLG),
+              border: Border.all(
+                color: Theme.of(
+                  context,
+                ).colorScheme.outline.withValues(alpha: 0.5),
+                width: 1,
               ),
-            ],
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Icon
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.grey.shade100),
+              boxShadow: DesignTokens.shadowSoft,
+            ),
+            padding: const EdgeInsets.symmetric(
+              horizontal: DesignTokens.spaceSM,
+              vertical: DesignTokens.spaceBase,
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Icon
+                Container(
+                  padding: const EdgeInsets.all(DesignTokens.spaceMD),
+                  decoration: BoxDecoration(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.08),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    iconData ?? Icons.build_rounded,
+                    color: Theme.of(context).colorScheme.primary,
+                    size: DesignTokens.iconSizeLG,
+                  ),
                 ),
-                child: Icon(
-                  iconData ?? Icons.build, // Use passed icon or default
-                  color: Colors.redAccent, // Match the red/orange theme
-                  size: 32,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Text(
+                const SizedBox(height: DesignTokens.spaceMD),
+                // Text
+                Text(
                   service.name,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: DesignTokens.fontWeightBold,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

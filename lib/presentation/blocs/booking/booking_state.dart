@@ -17,7 +17,6 @@ class BookingState extends Equatable {
   final double? longitude;
   final DateTime? scheduledDate;
   final TimeOfDay? scheduledTime;
-  final String paymentMethod;
   final String? errorMessage;
   final String? orderId;
 
@@ -31,7 +30,6 @@ class BookingState extends Equatable {
     this.longitude,
     this.scheduledDate,
     this.scheduledTime,
-    this.paymentMethod = 'cash',
     this.errorMessage,
     this.orderId,
   });
@@ -39,7 +37,6 @@ class BookingState extends Equatable {
   bool get isStep1Valid => description.isNotEmpty;
   bool get isStep2Valid =>
       address.isNotEmpty && scheduledDate != null && scheduledTime != null;
-  bool get isStep3Valid => true; // Payment method always has a default
 
   BookingState copyWith({
     BookingStatus? status,
@@ -51,7 +48,6 @@ class BookingState extends Equatable {
     double? longitude,
     DateTime? scheduledDate,
     TimeOfDay? scheduledTime,
-    String? paymentMethod,
     String? errorMessage,
     String? orderId,
   }) {
@@ -65,7 +61,6 @@ class BookingState extends Equatable {
       longitude: longitude ?? this.longitude,
       scheduledDate: scheduledDate ?? this.scheduledDate,
       scheduledTime: scheduledTime ?? this.scheduledTime,
-      paymentMethod: paymentMethod ?? this.paymentMethod,
       errorMessage: errorMessage ?? this.errorMessage,
       orderId: orderId ?? this.orderId,
     );
@@ -82,7 +77,6 @@ class BookingState extends Equatable {
     longitude,
     scheduledDate,
     scheduledTime,
-    paymentMethod,
     errorMessage,
     orderId,
   ];

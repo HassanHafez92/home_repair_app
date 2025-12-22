@@ -43,8 +43,6 @@ class OrderModel extends Equatable {
   final double? finalPrice;
   final double visitFee;
   final double vat;
-  final String paymentMethod;
-  final String paymentStatus; // pending, paid, failed
   final String? notes;
 
   // Denormalized fields (stored in Firestore for performance)
@@ -74,8 +72,6 @@ class OrderModel extends Equatable {
     this.finalPrice,
     required this.visitFee,
     required this.vat,
-    required this.paymentMethod,
-    this.paymentStatus = 'pending',
     this.notes,
     this.serviceName,
     this.customerName,
@@ -105,8 +101,6 @@ class OrderModel extends Equatable {
     double? finalPrice,
     double? visitFee,
     double? vat,
-    String? paymentMethod,
-    String? paymentStatus,
     String? notes,
     String? serviceName,
     String? customerName,
@@ -130,8 +124,6 @@ class OrderModel extends Equatable {
       finalPrice: finalPrice ?? this.finalPrice,
       visitFee: visitFee ?? this.visitFee,
       vat: vat ?? this.vat,
-      paymentMethod: paymentMethod ?? this.paymentMethod,
-      paymentStatus: paymentStatus ?? this.paymentStatus,
       notes: notes ?? this.notes,
       serviceName: serviceName ?? this.serviceName,
       customerName: customerName ?? this.customerName,
@@ -158,8 +150,6 @@ class OrderModel extends Equatable {
     finalPrice,
     visitFee,
     vat,
-    paymentMethod,
-    paymentStatus,
     notes,
     serviceName,
     customerName,
@@ -192,8 +182,6 @@ class OrderModel extends Equatable {
       finalPrice: finalPrice,
       visitFee: visitFee,
       vat: vat,
-      paymentMethod: paymentMethod,
-      paymentStatus: paymentStatus,
       notes: notes,
       serviceName: serviceName,
       customerName: customerName,

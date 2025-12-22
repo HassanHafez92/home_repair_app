@@ -10,7 +10,6 @@ part 'customer_model.g.dart';
 @JsonSerializable(explicitToJson: true)
 class CustomerModel extends UserModel {
   final List<String> savedAddresses;
-  final List<String> savedPaymentMethods;
 
   CustomerModel({
     required super.id,
@@ -22,7 +21,6 @@ class CustomerModel extends UserModel {
     required super.updatedAt,
     required super.lastActive,
     this.savedAddresses = const [],
-    this.savedPaymentMethods = const [],
   }) : super(role: UserRole.customer);
 
   factory CustomerModel.fromJson(Map<String, dynamic> json) =>

@@ -20,7 +20,7 @@ import '../presentation/screens/auth/technician_signup_screen.dart';
 import '../presentation/screens/customer/home_screen.dart';
 import '../presentation/screens/customer/edit_profile_screen.dart';
 import '../presentation/screens/customer/saved_addresses_screen.dart';
-import '../presentation/screens/customer/payment_methods_screen.dart';
+
 import '../presentation/screens/customer/notifications_settings_screen.dart';
 import '../presentation/screens/customer/help_support_screen.dart';
 import '../presentation/screens/customer/about_screen.dart';
@@ -168,10 +168,6 @@ class AppRouter {
         GoRoute(
           path: '/customer/addresses',
           builder: (context, state) => const SavedAddressesScreen(),
-        ),
-        GoRoute(
-          path: '/customer/payment-methods',
-          builder: (context, state) => const PaymentMethodsScreen(),
         ),
         GoRoute(
           path: '/customer/notifications',
