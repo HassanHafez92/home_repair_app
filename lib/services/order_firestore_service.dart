@@ -109,7 +109,6 @@ class OrderFirestoreService {
       visitFee: order.visitFee,
       vat: order.vat,
       customerPhoneNumber: customerPhoneNumber,
-      paymentMethod: order.paymentMethod,
       createdAt: order.createdAt,
       updatedAt: order.updatedAt,
       technicianId: order.technicianId,

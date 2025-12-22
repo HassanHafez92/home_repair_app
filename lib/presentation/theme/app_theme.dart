@@ -13,19 +13,22 @@ class AppTheme {
   static final ThemeData lightTheme = ThemeData(
     useMaterial3: true,
     brightness: Brightness.light,
+    fontFamily: DesignTokens.fontFamily,
 
     // Color Scheme
     colorScheme: ColorScheme.light(
       primary: DesignTokens.primaryBlue,
-      primaryContainer: DesignTokens.primaryBlueLight,
+      primaryContainer: DesignTokens.primaryBlueLight.withValues(alpha: 0.2),
       secondary: DesignTokens.accentOrange,
-      secondaryContainer: Color(0xFFFFCC80),
+      secondaryContainer: DesignTokens.accentOrange.withValues(alpha: 0.1),
       surface: DesignTokens.surfaceLight,
       error: DesignTokens.error,
       onPrimary: Colors.white,
       onSecondary: Colors.white,
       onSurface: DesignTokens.neutral900,
+      onSurfaceVariant: DesignTokens.neutral600,
       onError: Colors.white,
+      outline: DesignTokens.neutral200,
     ),
 
     // Scaffold
@@ -36,11 +39,14 @@ class AppTheme {
       backgroundColor: DesignTokens.backgroundLight,
       foregroundColor: DesignTokens.neutral900,
       elevation: 0,
-      centerTitle: true,
+      scrolledUnderElevation: 0,
+      centerTitle: false,
       titleTextStyle: TextStyle(
+        fontFamily: DesignTokens.fontFamily,
         fontSize: DesignTokens.fontSizeLG,
-        fontWeight: DesignTokens.fontWeightSemiBold,
+        fontWeight: DesignTokens.fontWeightBold,
         color: DesignTokens.neutral900,
+        letterSpacing: -0.5,
       ),
       iconTheme: IconThemeData(
         color: DesignTokens.neutral900,
@@ -50,9 +56,10 @@ class AppTheme {
 
     // Card Theme
     cardTheme: CardThemeData(
-      elevation: DesignTokens.elevationSM,
+      elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(DesignTokens.radiusLG),
+        side: BorderSide(color: DesignTokens.neutral200, width: 1),
       ),
       color: Colors.white,
       margin: const EdgeInsets.symmetric(vertical: DesignTokens.spaceSM),
@@ -60,31 +67,28 @@ class AppTheme {
 
     // Elevated Button Theme
     elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        padding: DesignTokens.paddingButton,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
-        ),
-        elevation: DesignTokens.elevationSM,
-        textStyle: TextStyle(
-          fontSize: DesignTokens.fontSizeBase,
-          fontWeight: DesignTokens.fontWeightMedium,
-        ),
-      ),
-    ),
-
-    // Text Button Theme
-    textButtonTheme: TextButtonThemeData(
-      style: TextButton.styleFrom(
-        padding: DesignTokens.paddingButton,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
-        ),
-        textStyle: TextStyle(
-          fontSize: DesignTokens.fontSizeBase,
-          fontWeight: DesignTokens.fontWeightMedium,
-        ),
-      ),
+      style:
+          ElevatedButton.styleFrom(
+            foregroundColor: Colors.white,
+            backgroundColor: DesignTokens.primaryBlue,
+            padding: DesignTokens.paddingButton,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
+            ),
+            elevation: 0,
+            textStyle: TextStyle(
+              fontFamily: DesignTokens.fontFamily,
+              fontSize: DesignTokens.fontSizeBase,
+              fontWeight: DesignTokens.fontWeightSemiBold,
+              letterSpacing: 0.2,
+            ),
+          ).copyWith(
+            elevation: WidgetStateProperty.resolveWith<double>((states) {
+              if (states.contains(WidgetState.pressed)) return 0;
+              if (states.contains(WidgetState.hovered)) return 2;
+              return 0;
+            }),
+          ),
     ),
 
     // Outlined Button Theme
@@ -94,10 +98,12 @@ class AppTheme {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
         ),
-        side: BorderSide(color: DesignTokens.primaryBlue, width: 1.5),
+        side: BorderSide(color: DesignTokens.neutral200, width: 1.5),
+        foregroundColor: DesignTokens.neutral900,
         textStyle: TextStyle(
+          fontFamily: DesignTokens.fontFamily,
           fontSize: DesignTokens.fontSizeBase,
-          fontWeight: DesignTokens.fontWeightMedium,
+          fontWeight: DesignTokens.fontWeightSemiBold,
         ),
       ),
     ),
@@ -105,18 +111,18 @@ class AppTheme {
     // Input Decoration Theme
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: DesignTokens.neutral100,
+      fillColor: Colors.white,
       contentPadding: EdgeInsets.symmetric(
         horizontal: DesignTokens.spaceBase,
         vertical: DesignTokens.spaceMD,
       ),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
-        borderSide: BorderSide.none,
+        borderSide: BorderSide(color: DesignTokens.neutral200, width: 1),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
-        borderSide: BorderSide.none,
+        borderSide: BorderSide(color: DesignTokens.neutral200, width: 1),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
@@ -133,6 +139,7 @@ class AppTheme {
       labelStyle: TextStyle(
         fontSize: DesignTokens.fontSizeBase,
         color: DesignTokens.neutral600,
+        fontWeight: DesignTokens.fontWeightMedium,
       ),
       hintStyle: TextStyle(
         fontSize: DesignTokens.fontSizeBase,
@@ -146,16 +153,19 @@ class AppTheme {
         fontSize: DesignTokens.fontSize4XL,
         fontWeight: DesignTokens.fontWeightBold,
         color: DesignTokens.neutral900,
+        letterSpacing: -1.0,
       ),
       displayMedium: TextStyle(
         fontSize: DesignTokens.fontSize3XL,
         fontWeight: DesignTokens.fontWeightBold,
         color: DesignTokens.neutral900,
+        letterSpacing: -0.8,
       ),
       headlineLarge: TextStyle(
         fontSize: DesignTokens.fontSize2XL,
-        fontWeight: DesignTokens.fontWeightSemiBold,
+        fontWeight: DesignTokens.fontWeightBold,
         color: DesignTokens.neutral900,
+        letterSpacing: -0.5,
       ),
       headlineMedium: TextStyle(
         fontSize: DesignTokens.fontSizeXL,
@@ -164,32 +174,34 @@ class AppTheme {
       ),
       titleLarge: TextStyle(
         fontSize: DesignTokens.fontSizeLG,
-        fontWeight: DesignTokens.fontWeightMedium,
+        fontWeight: DesignTokens.fontWeightSemiBold,
         color: DesignTokens.neutral900,
       ),
       titleMedium: TextStyle(
         fontSize: DesignTokens.fontSizeMD,
         fontWeight: DesignTokens.fontWeightMedium,
-        color: DesignTokens.neutral900,
+        color: DesignTokens.neutral800,
       ),
       bodyLarge: TextStyle(
         fontSize: DesignTokens.fontSizeMD,
         fontWeight: DesignTokens.fontWeightRegular,
-        color: DesignTokens.neutral800,
+        color: DesignTokens.neutral700,
+        height: 1.5,
       ),
       bodyMedium: TextStyle(
         fontSize: DesignTokens.fontSizeBase,
         fontWeight: DesignTokens.fontWeightRegular,
-        color: DesignTokens.neutral800,
+        color: DesignTokens.neutral600,
+        height: 1.5,
       ),
       bodySmall: TextStyle(
         fontSize: DesignTokens.fontSizeSM,
         fontWeight: DesignTokens.fontWeightRegular,
-        color: DesignTokens.neutral700,
+        color: DesignTokens.neutral500,
       ),
       labelLarge: TextStyle(
         fontSize: DesignTokens.fontSizeBase,
-        fontWeight: DesignTokens.fontWeightMedium,
+        fontWeight: DesignTokens.fontWeightSemiBold,
         color: DesignTokens.neutral900,
       ),
     ),
@@ -200,29 +212,6 @@ class AppTheme {
       thickness: 1,
       space: DesignTokens.spaceBase,
     ),
-
-    // Icon Theme
-    iconTheme: IconThemeData(
-      color: DesignTokens.neutral700,
-      size: DesignTokens.iconSizeMD,
-    ),
-
-    // Chip Theme
-    chipTheme: ChipThemeData(
-      backgroundColor: DesignTokens.neutral100,
-      deleteIconColor: DesignTokens.neutral600,
-      labelStyle: TextStyle(
-        fontSize: DesignTokens.fontSizeSM,
-        color: DesignTokens.neutral800,
-      ),
-      padding: EdgeInsets.symmetric(
-        horizontal: DesignTokens.spaceSM,
-        vertical: DesignTokens.spaceXS,
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
-      ),
-    ),
   );
 
   // ========== Dark Theme ==========
@@ -230,19 +219,22 @@ class AppTheme {
   static final ThemeData darkTheme = ThemeData(
     useMaterial3: true,
     brightness: Brightness.dark,
+    fontFamily: DesignTokens.fontFamily,
 
     // Color Scheme
     colorScheme: ColorScheme.dark(
       primary: DesignTokens.primaryBlueLight,
       primaryContainer: DesignTokens.primaryBlueDark,
       secondary: DesignTokens.accentOrange,
-      secondaryContainer: Color(0xFFF57C00),
+      secondaryContainer: DesignTokens.accentOrange.withValues(alpha: 0.2),
       surface: DesignTokens.surfaceDark,
       error: DesignTokens.error,
       onPrimary: DesignTokens.neutral900,
       onSecondary: Colors.white,
       onSurface: DesignTokens.neutral50,
+      onSurfaceVariant: DesignTokens.neutral400,
       onError: Colors.white,
+      outline: DesignTokens.neutral700,
     ),
 
     // Scaffold
@@ -253,11 +245,14 @@ class AppTheme {
       backgroundColor: DesignTokens.surfaceDark,
       foregroundColor: DesignTokens.neutral50,
       elevation: 0,
-      centerTitle: true,
+      scrolledUnderElevation: 0,
+      centerTitle: false,
       titleTextStyle: TextStyle(
+        fontFamily: DesignTokens.fontFamily,
         fontSize: DesignTokens.fontSizeLG,
-        fontWeight: DesignTokens.fontWeightSemiBold,
+        fontWeight: DesignTokens.fontWeightBold,
         color: DesignTokens.neutral50,
+        letterSpacing: -0.5,
       ),
       iconTheme: IconThemeData(
         color: DesignTokens.neutral50,
@@ -267,9 +262,10 @@ class AppTheme {
 
     // Card Theme
     cardTheme: CardThemeData(
-      elevation: DesignTokens.elevationSM,
+      elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(DesignTokens.radiusLG),
+        side: BorderSide(color: DesignTokens.neutral800, width: 1),
       ),
       color: DesignTokens.surfaceDark,
       margin: const EdgeInsets.symmetric(vertical: DesignTokens.spaceSM),
@@ -278,43 +274,17 @@ class AppTheme {
     // Elevated Button Theme
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
+        foregroundColor: DesignTokens.neutral900,
+        backgroundColor: DesignTokens.primaryBlueLight,
         padding: DesignTokens.paddingButton,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
         ),
-        elevation: DesignTokens.elevationSM,
+        elevation: 0,
         textStyle: TextStyle(
+          fontFamily: DesignTokens.fontFamily,
           fontSize: DesignTokens.fontSizeBase,
-          fontWeight: DesignTokens.fontWeightMedium,
-        ),
-      ),
-    ),
-
-    // Text Button Theme
-    textButtonTheme: TextButtonThemeData(
-      style: TextButton.styleFrom(
-        padding: DesignTokens.paddingButton,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
-        ),
-        textStyle: TextStyle(
-          fontSize: DesignTokens.fontSizeBase,
-          fontWeight: DesignTokens.fontWeightMedium,
-        ),
-      ),
-    ),
-
-    // Outlined Button Theme
-    outlinedButtonTheme: OutlinedButtonThemeData(
-      style: OutlinedButton.styleFrom(
-        padding: DesignTokens.paddingButton,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
-        ),
-        side: BorderSide(color: DesignTokens.primaryBlueLight, width: 1.5),
-        textStyle: TextStyle(
-          fontSize: DesignTokens.fontSizeBase,
-          fontWeight: DesignTokens.fontWeightMedium,
+          fontWeight: DesignTokens.fontWeightSemiBold,
         ),
       ),
     ),
@@ -322,18 +292,18 @@ class AppTheme {
     // Input Decoration Theme
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: Color(0xFF2C2C2C),
+      fillColor: Color(0xFF1E293B),
       contentPadding: EdgeInsets.symmetric(
         horizontal: DesignTokens.spaceBase,
         vertical: DesignTokens.spaceMD,
       ),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
-        borderSide: BorderSide.none,
+        borderSide: BorderSide(color: DesignTokens.neutral700, width: 1),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
-        borderSide: BorderSide.none,
+        borderSide: BorderSide(color: DesignTokens.neutral700, width: 1),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
@@ -350,6 +320,7 @@ class AppTheme {
       labelStyle: TextStyle(
         fontSize: DesignTokens.fontSizeBase,
         color: DesignTokens.neutral400,
+        fontWeight: DesignTokens.fontWeightMedium,
       ),
       hintStyle: TextStyle(
         fontSize: DesignTokens.fontSizeBase,
@@ -363,16 +334,19 @@ class AppTheme {
         fontSize: DesignTokens.fontSize4XL,
         fontWeight: DesignTokens.fontWeightBold,
         color: DesignTokens.neutral50,
+        letterSpacing: -1.0,
       ),
       displayMedium: TextStyle(
         fontSize: DesignTokens.fontSize3XL,
         fontWeight: DesignTokens.fontWeightBold,
         color: DesignTokens.neutral50,
+        letterSpacing: -0.8,
       ),
       headlineLarge: TextStyle(
         fontSize: DesignTokens.fontSize2XL,
-        fontWeight: DesignTokens.fontWeightSemiBold,
+        fontWeight: DesignTokens.fontWeightBold,
         color: DesignTokens.neutral50,
+        letterSpacing: -0.5,
       ),
       headlineMedium: TextStyle(
         fontSize: DesignTokens.fontSizeXL,
@@ -381,36 +355,37 @@ class AppTheme {
       ),
       titleLarge: TextStyle(
         fontSize: DesignTokens.fontSizeLG,
-        fontWeight: DesignTokens.fontWeightMedium,
+        fontWeight: DesignTokens.fontWeightSemiBold,
         color: DesignTokens.neutral50,
       ),
       titleMedium: TextStyle(
         fontSize: DesignTokens.fontSizeMD,
         fontWeight: DesignTokens.fontWeightMedium,
-        color: DesignTokens.neutral50,
+        color: DesignTokens.neutral100,
       ),
       bodyLarge: TextStyle(
         fontSize: DesignTokens.fontSizeMD,
         fontWeight: DesignTokens.fontWeightRegular,
-        color: DesignTokens.neutral100,
+        color: DesignTokens.neutral200,
+        height: 1.5,
       ),
       bodyMedium: TextStyle(
         fontSize: DesignTokens.fontSizeBase,
         fontWeight: DesignTokens.fontWeightRegular,
-        color: DesignTokens.neutral100,
+        color: DesignTokens.neutral300,
+        height: 1.5,
       ),
       bodySmall: TextStyle(
         fontSize: DesignTokens.fontSizeSM,
         fontWeight: DesignTokens.fontWeightRegular,
-        color: DesignTokens.neutral300,
+        color: DesignTokens.neutral400,
       ),
       labelLarge: TextStyle(
         fontSize: DesignTokens.fontSizeBase,
-        fontWeight: DesignTokens.fontWeightMedium,
+        fontWeight: DesignTokens.fontWeightSemiBold,
         color: DesignTokens.neutral50,
       ),
     ),
-
     // Divider Theme
     dividerTheme: DividerThemeData(
       color: DesignTokens.neutral700,
@@ -420,7 +395,7 @@ class AppTheme {
 
     // Icon Theme
     iconTheme: IconThemeData(
-      color: DesignTokens.neutral300,
+      color: DesignTokens.neutral700,
       size: DesignTokens.iconSizeMD,
     ),
 
@@ -442,6 +417,3 @@ class AppTheme {
     ),
   );
 }
-
-
-

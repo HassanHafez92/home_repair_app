@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../theme/design_tokens.dart';
 
 class PromotionalBanner extends StatelessWidget {
   final VoidCallback? onTap;
@@ -8,45 +9,51 @@ class PromotionalBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       width: double.infinity,
-      height: 180,
+      height: 200,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        gradient: const LinearGradient(
-          colors: [
-            Color(0xFFFF512F),
-            Color(0xFFDD2476),
-          ], // Orange to Pink gradient
+        borderRadius: BorderRadius.circular(DesignTokens.radiusLG),
+        gradient: LinearGradient(
+          colors: [colorScheme.primary, DesignTokens.primaryBlueDark],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        boxShadow: DesignTokens.shadowMedium,
       ),
       child: Stack(
         children: [
-          // Background decorative elements (circles/blobs) could go here
+          // Background decorative elements
           Positioned(
-            right: -20,
-            top: -20,
+            right: -30,
+            bottom: -30,
             child: Container(
-              width: 100,
-              height: 100,
+              width: 140,
+              height: 140,
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
             ),
           ),
+          Positioned(
+            left: -20,
+            top: -20,
+            child: Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.05),
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
 
           Padding(
-            padding: const EdgeInsets.all(20.0),
+            padding: const EdgeInsets.all(DesignTokens.spaceLG),
             child: Row(
               children: [
                 // Text Content
@@ -56,69 +63,77 @@ class PromotionalBanner extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        'promoActivateApartment'.tr(),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          height: 1.2,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'promoColorChoice'.tr(),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
+                          horizontal: DesignTokens.spaceSM,
+                          vertical: DesignTokens.spaceXXS,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.yellow[700],
-                          borderRadius: BorderRadius.circular(8),
+                          color: DesignTokens.accentOrange,
+                          borderRadius: BorderRadius.circular(
+                            DesignTokens.radiusXS,
+                          ),
                         ),
                         child: Text(
-                          'promoDiscount'.tr(),
-                          style: const TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
+                          'promoDiscount'.tr().toUpperCase(),
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: Colors.white,
+                            fontWeight: DesignTokens.fontWeightBold,
+                            letterSpacing: 1.0,
                           ),
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: DesignTokens.spaceSM),
+                      Text(
+                        'promoActivateApartment'.tr(),
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          color: Colors.white,
+                          fontWeight: DesignTokens.fontWeightBold,
+                          height: 1.1,
+                        ),
+                      ),
+                      const SizedBox(height: DesignTokens.spaceXS),
+                      Text(
+                        'promoColorChoice'.tr(),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: Colors.white.withValues(alpha: 0.8),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: DesignTokens.spaceLG),
                       ElevatedButton(
                         onPressed: onTap,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          foregroundColor: Colors.white,
+                          backgroundColor: Colors.white,
+                          foregroundColor: colorScheme.primary,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(
+                              DesignTokens.radiusSM,
+                            ),
                           ),
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          minimumSize: const Size(0, 36),
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: DesignTokens.spaceLG,
+                          ),
+                          textStyle: theme.textTheme.labelLarge?.copyWith(
+                            fontWeight: DesignTokens.fontWeightBold,
+                          ),
                         ),
                         child: Text('viewDetails'.tr()),
                       ),
                     ],
                   ),
                 ),
-                // Image Placeholder (Paint bucket/roller)
+                // Icon
                 Expanded(
                   flex: 2,
                   child: Container(
-                    // In a real app, this would be an Image.asset
-                    alignment: Alignment.center,
+                    alignment: Alignment.centerRight,
                     child: Icon(
-                      Icons.format_paint,
-                      size: 80,
-                      color: Colors.white.withValues(alpha: 0.9),
+                      Icons.format_paint_rounded,
+                      size: 90,
+                      color: Colors.white.withValues(alpha: 0.25),
                     ),
                   ),
                 ),
@@ -130,6 +145,3 @@ class PromotionalBanner extends StatelessWidget {
     );
   }
 }
-
-
-

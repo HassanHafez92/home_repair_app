@@ -1,7 +1,5 @@
-// File: lib/widgets/custom_button.dart
-// Purpose: Reusable button component with primary, secondary, and outline variants.
-
 import 'package:flutter/material.dart';
+import '../theme/design_tokens.dart';
 
 enum ButtonVariant { primary, secondary, outline, text }
 
@@ -22,42 +20,45 @@ class CustomButton extends StatelessWidget {
     this.variant = ButtonVariant.primary,
     this.icon,
     this.width,
-    this.height = 50.0,
+    this.height = 56.0,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     // Determine colors based on variant
     Color backgroundColor;
     Color foregroundColor;
     BorderSide? borderSide;
+    double elevation = 0;
 
     switch (variant) {
       case ButtonVariant.primary:
-        backgroundColor = theme.primaryColor;
+        backgroundColor = colorScheme.primary;
         foregroundColor = Colors.white;
+        elevation = 0;
         break;
       case ButtonVariant.secondary:
-        backgroundColor = Colors.grey[200]!;
-        foregroundColor = Colors.black87;
+        backgroundColor = colorScheme.secondary;
+        foregroundColor = Colors.white;
         break;
       case ButtonVariant.outline:
         backgroundColor = Colors.transparent;
-        foregroundColor = theme.primaryColor;
-        borderSide = BorderSide(color: theme.primaryColor);
+        foregroundColor = colorScheme.primary;
+        borderSide = BorderSide(color: colorScheme.primary, width: 1.5);
         break;
       case ButtonVariant.text:
         backgroundColor = Colors.transparent;
-        foregroundColor = theme.primaryColor;
+        foregroundColor = colorScheme.primary;
         break;
     }
 
     // Disable colors if onPressed is null (disabled state)
     if (onPressed == null) {
-      backgroundColor = Colors.grey[300]!;
-      foregroundColor = Colors.grey[500]!;
+      backgroundColor = DesignTokens.neutral200;
+      foregroundColor = DesignTokens.neutral400;
       borderSide = null;
     }
 
@@ -70,16 +71,32 @@ class CustomButton extends StatelessWidget {
         height: height,
         child: ElevatedButton(
           onPressed: isLoading ? null : onPressed,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: backgroundColor,
-            foregroundColor: foregroundColor,
-            elevation: variant == ButtonVariant.primary ? 2 : 0,
-            side: borderSide,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-          ),
+          style:
+              ElevatedButton.styleFrom(
+                backgroundColor: backgroundColor,
+                foregroundColor: foregroundColor,
+                elevation: elevation,
+                side: borderSide,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: DesignTokens.spaceLG,
+                ),
+                textStyle: theme.textTheme.labelLarge?.copyWith(
+                  fontSize: DesignTokens.fontSizeBase,
+                  fontWeight: DesignTokens.fontWeightSemiBold,
+                  letterSpacing: 0.5,
+                ),
+              ).copyWith(
+                elevation: WidgetStateProperty.resolveWith<double>((states) {
+                  if (variant == ButtonVariant.primary) {
+                    if (states.contains(WidgetState.pressed)) return 0;
+                    if (states.contains(WidgetState.hovered)) return 2;
+                  }
+                  return 0;
+                }),
+              ),
           child: isLoading
               ? SizedBox(
                   height: 24,
@@ -93,16 +110,10 @@ class CustomButton extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     if (icon != null) ...[
-                      Icon(icon, size: 20),
-                      const SizedBox(width: 8),
+                      Icon(icon, size: DesignTokens.iconSizeSM),
+                      const SizedBox(width: DesignTokens.spaceSM),
                     ],
-                    Text(
-                      text,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                    Text(text),
                   ],
                 ),
         ),
@@ -110,6 +121,3 @@ class CustomButton extends StatelessWidget {
     );
   }
 }
-
-
-

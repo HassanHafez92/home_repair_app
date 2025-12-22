@@ -144,10 +144,7 @@ class _BookingFlowScreenState extends State<BookingFlowScreen> {
                         );
                       }
                       break;
-                    case 2: // Payment
-                      bookingBloc.add(const BookingStepChanged(3));
-                      break;
-                    case 3: // Confirmation
+                    case 2: // Confirmation
                       final authState = context.read<AuthBloc>().state;
                       if (authState is AuthAuthenticated) {
                         // Check email verification before allowing booking
@@ -373,38 +370,7 @@ class _BookingFlowScreenState extends State<BookingFlowScreen> {
                     ),
                     isActive: state.currentStep >= 1,
                   ),
-                  // Step 3: Payment Method
-                  Step(
-                    title: Text('paymentMethod'.tr()),
-                    content: RadioGroup<String>(
-                      groupValue: state.paymentMethod,
-                      onChanged: (value) {
-                        if (value != null) {
-                          context.read<BookingBloc>().add(
-                            BookingPaymentMethodChanged(value),
-                          );
-                        }
-                      },
-                      child: Column(
-                        children: [
-                          RadioListTile<String>(
-                            title: Text('cashOnDelivery'.tr()),
-                            value: 'cash',
-                          ),
-                          RadioListTile<String>(
-                            title: Text('wallet'.tr()),
-                            value: 'wallet',
-                          ),
-                          RadioListTile<String>(
-                            title: Text('card'.tr()),
-                            value: 'card',
-                          ),
-                        ],
-                      ),
-                    ),
-                    isActive: state.currentStep >= 2,
-                  ),
-                  // Step 4: Confirmation
+                  // Step 3: Confirmation
                   Step(
                     title: Text('confirmation'.tr()),
                     content: Column(
@@ -421,10 +387,6 @@ class _BookingFlowScreenState extends State<BookingFlowScreen> {
                         _buildSummaryRow(
                           'preferredTime'.tr(),
                           state.scheduledTime?.format(context) ?? '',
-                        ),
-                        _buildSummaryRow(
-                          'paymentMethod'.tr(),
-                          state.paymentMethod.toUpperCase(),
                         ),
                         const Divider(),
                         _buildSummaryRow(
@@ -449,7 +411,7 @@ class _BookingFlowScreenState extends State<BookingFlowScreen> {
                         ),
                       ],
                     ),
-                    isActive: state.currentStep >= 3,
+                    isActive: state.currentStep >= 2,
                   ),
                 ],
               ),

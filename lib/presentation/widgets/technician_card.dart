@@ -1,10 +1,8 @@
-// File: lib/widgets/technician_card.dart
-// Purpose: Display technician profile summary.
-
 import 'package:flutter/material.dart';
 import 'package:home_repair_app/domain/entities/technician_entity.dart';
 import 'status_badge.dart';
 import 'rating_stars.dart';
+import '../theme/design_tokens.dart';
 
 class TechnicianCard extends StatelessWidget {
   final TechnicianEntity technician;
@@ -20,32 +18,49 @@ class TechnicianCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: DesignTokens.spaceMD),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
+        side: BorderSide(color: colorScheme.outline.withValues(alpha: 0.5)),
+      ),
       child: InkWell(
         onTap: onTap,
+        borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(DesignTokens.spaceMD),
           child: Row(
             children: [
-              CircleAvatar(
-                radius: 25,
-                backgroundColor: Colors.blue[100],
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: colorScheme.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(DesignTokens.radiusSM),
+                ),
+                alignment: Alignment.center,
                 child: Text(
                   technician.fullName[0].toUpperCase(),
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    color: colorScheme.primary,
+                    fontWeight: DesignTokens.fontWeightBold,
+                    fontSize: 20,
+                  ),
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: DesignTokens.spaceMD),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       technician.fullName,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: DesignTokens.fontWeightBold,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -53,7 +68,9 @@ class TechnicianCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       technician.specializations.join(', '),
-                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: DesignTokens.neutral500,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -61,9 +78,12 @@ class TechnicianCard extends StatelessWidget {
                 ),
               ),
               if (showStatus)
-                StatusBadge.fromTechnicianStatus(
-                  technician.status,
-                  isSmall: true,
+                Padding(
+                  padding: const EdgeInsets.only(left: DesignTokens.spaceSM),
+                  child: StatusBadge.fromTechnicianStatus(
+                    technician.status,
+                    isSmall: true,
+                  ),
                 ),
             ],
           ),

@@ -1,9 +1,7 @@
-// File: lib/widgets/status_badge.dart
-// Purpose: Display a consistent status label with color coding.
-
 import 'package:flutter/material.dart';
 import 'package:home_repair_app/domain/entities/order_entity.dart';
 import 'package:home_repair_app/domain/entities/technician_entity.dart';
+import '../theme/design_tokens.dart';
 
 class StatusBadge extends StatelessWidget {
   final String text;
@@ -22,27 +20,9 @@ class StatusBadge extends StatelessWidget {
     OrderStatus status, {
     bool isSmall = false,
   }) {
-    Color color;
-    switch (status) {
-      case OrderStatus.pending:
-        color = Colors.orange;
-        break;
-      case OrderStatus.accepted:
-      case OrderStatus.traveling:
-      case OrderStatus.arrived:
-      case OrderStatus.working:
-        color = Colors.blue;
-        break;
-      case OrderStatus.completed:
-        color = Colors.green;
-        break;
-      case OrderStatus.cancelled:
-        color = Colors.red;
-        break;
-    }
     return StatusBadge(
-      text: status.toString().split('.').last.toUpperCase(),
-      color: color,
+      text: status.name.toUpperCase(),
+      color: DesignTokens.getStatusColor(status.name),
       isSmall: isSmall,
     );
   }
@@ -52,44 +32,34 @@ class StatusBadge extends StatelessWidget {
     TechnicianStatus status, {
     bool isSmall = false,
   }) {
-    Color color;
-    switch (status) {
-      case TechnicianStatus.pending:
-        color = Colors.orange;
-        break;
-      case TechnicianStatus.approved:
-        color = Colors.green;
-        break;
-      case TechnicianStatus.rejected:
-      case TechnicianStatus.suspended:
-        color = Colors.red;
-        break;
-    }
     return StatusBadge(
-      text: status.toString().split('.').last.toUpperCase(),
-      color: color,
+      text: status.name.toUpperCase(),
+      color: DesignTokens.getStatusColor(status.name),
       isSmall: isSmall,
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
       padding: EdgeInsets.symmetric(
-        horizontal: isSmall ? 6 : 10,
-        vertical: isSmall ? 2 : 4,
+        horizontal: isSmall ? DesignTokens.spaceXS : DesignTokens.spaceSM,
+        vertical: isSmall ? DesignTokens.spaceXXS : DesignTokens.spaceXS,
       ),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(DesignTokens.radiusXS),
+        border: Border.all(color: color.withValues(alpha: 0.2), width: 1),
       ),
       child: Text(
         text,
-        style: TextStyle(
+        style: theme.textTheme.labelSmall?.copyWith(
           color: color,
-          fontSize: isSmall ? 10 : 12,
-          fontWeight: FontWeight.bold,
+          fontSize: isSmall ? 10 : 11,
+          fontWeight: DesignTokens.fontWeightBold,
+          letterSpacing: 0.5,
         ),
       ),
     );

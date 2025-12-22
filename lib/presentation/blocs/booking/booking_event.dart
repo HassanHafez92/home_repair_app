@@ -52,13 +52,6 @@ class BookingScheduleChanged extends BookingEvent {
   List<Object?> get props => [date, time];
 }
 
-class BookingPaymentMethodChanged extends BookingEvent {
-  final String method;
-  const BookingPaymentMethodChanged(this.method);
-  @override
-  List<Object?> get props => [method];
-}
-
 class BookingSubmitted extends BookingEvent {
   final String userId;
   const BookingSubmitted(this.userId);

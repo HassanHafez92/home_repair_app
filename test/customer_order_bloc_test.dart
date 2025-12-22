@@ -43,7 +43,6 @@ void main() {
       dateRequested: DateTime(2025, 1, 1),
       visitFee: 50.0,
       vat: 15.0,
-      paymentMethod: 'cash',
       createdAt: DateTime(2025, 1, 1),
       updatedAt: DateTime(2025, 1, 1),
     );
