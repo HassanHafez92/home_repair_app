@@ -16,9 +16,6 @@
       "api_key": [
         {
           "current_key": "AIzaSyDeAQz4kYjm7WFF-m2LsSQ4KfVOtUEj-IQ"
-        },
-        {
-          "current_key": "AIzaSyDSiF5OtgJK9hNb2XtbYDN2rt-_rpdXM9g"
         }
       ],
       "services": {
@@ -29,7 +26,7 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:970866219192:android:ab5a5646905737bfd03c4d",
+        "mobilesdk_app_id": "1:970866219192:android:679780d0064f07e9d03c4d",
         "android_client_info": {
           "package_name": "com.example.home_repair_app.dev"
         }
@@ -38,9 +35,6 @@
       "api_key": [
         {
           "current_key": "AIzaSyDeAQz4kYjm7WFF-m2LsSQ4KfVOtUEj-IQ"
-        },
-        {
-          "current_key": "AIzaSyDSiF5OtgJK9hNb2XtbYDN2rt-_rpdXM9g"
         }
       ],
       "services": {
@@ -51,7 +45,7 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:970866219192:android:4f045f822c301c8ed03c4d",
+        "mobilesdk_app_id": "1:970866219192:android:679780d0064f07e9d03c4d",
         "android_client_info": {
           "package_name": "com.example.home_repair_app.stg"
         }
@@ -60,9 +54,6 @@
       "api_key": [
         {
           "current_key": "AIzaSyDeAQz4kYjm7WFF-m2LsSQ4KfVOtUEj-IQ"
-        },
-        {
-          "current_key": "AIzaSyDSiF5OtgJK9hNb2XtbYDN2rt-_rpdXM9g"
         }
       ],
       "services": {
@@ -73,7 +64,7 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:970866219192:android:396a0012a9cd1696d03c4d",
+        "mobilesdk_app_id": "1:970866219192:android:679780d0064f07e9d03c4d",
         "android_client_info": {
           "package_name": "com.example.home_repair_app.uat"
         }
@@ -82,9 +73,6 @@
       "api_key": [
         {
           "current_key": "AIzaSyDeAQz4kYjm7WFF-m2LsSQ4KfVOtUEj-IQ"
-        },
-        {
-          "current_key": "AIzaSyDSiF5OtgJK9hNb2XtbYDN2rt-_rpdXM9g"
         }
       ],
       "services": {
