@@ -1,0 +1,56 @@
+flavors:
+  production:
+    app:
+      name: "Home Repair"
+
+    android:
+      applicationId: "com.example.home_repair_app"
+      firebase:
+        config: "./firebase/production/google-services.json"
+
+    ios:
+      bundleId: "com.example.homeRepairApp"
+      firebase:
+        config: "./firebase/production/GoogleService-Info.plist"
+
+  dev:
+    app:
+      name: "Home Repair (DEV)"
+
+    android:
+      applicationId: "com.example.home_repair_app.dev"
+      firebase:
+        config: "./firebase/dev/google-services.json"
+
+    ios:
+      bundleId: "com.example.homeRepairApp.dev"
+      firebase:
+        config: "./firebase/dev/GoogleService-Info.plist"
+
+  stg:
+    app:
+      name: "Home Repair (STG)"
+
+    android:
+      applicationId: "com.example.home_repair_app.stg"
+      firebase:
+        config: "./firebase/stg/google-services.json"
+
+    ios:
+      bundleId: "com.example.homeRepairApp.stg"
+      firebase:
+        config: "./firebase/stg/GoogleService-Info.plist"
+
+  uat:
+    app:
+      name: "Home Repair (UAT)"
+
+    android:
+      applicationId: "com.example.home_repair_app.uat"
+      firebase:
+        config: "./firebase/uat/google-services.json"
+
+    ios:
+      bundleId: "com.example.homeRepairApp.uat"
+      firebase:
+        config: "./firebase/uat/GoogleService-Info.plist"

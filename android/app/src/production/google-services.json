@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "970866219192",
+    "project_id": "home-rapier-app-479514",
+    "storage_bucket": "home-rapier-app-479514.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:970866219192:android:679780d0064f07e9d03c4d",
+        "android_client_info": {
+          "package_name": "com.example.home_repair_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDeAQz4kYjm7WFF-m2LsSQ4KfVOtUEj-IQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

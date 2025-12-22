@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "519364342004",
-    "project_id": "home-repair-app-46c2d",
-    "storage_bucket": "home-repair-app-46c2d.firebasestorage.app"
+    "project_number": "970866219192",
+    "project_id": "home-rapier-app-479514",
+    "storage_bucket": "home-rapier-app-479514.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:519364342004:android:47c0ba1f9d6ae9113deea1",
+        "mobilesdk_app_id": "1:970866219192:android:679780d0064f07e9d03c4d",
         "android_client_info": {
           "package_name": "com.example.home_repair_app"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBF4yfT5q4acjz1UGuak86cWnCbVnPGMv8"
+          "current_key": "AIzaSyDeAQz4kYjm7WFF-m2LsSQ4KfVOtUEj-IQ"
         }
       ],
       "services": {
