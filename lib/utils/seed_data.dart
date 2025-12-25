@@ -20,7 +20,9 @@ class SeedData {
         description:
             'Professional plumbing repair and installation services. Fix leaks, install fixtures, and more.',
         category: 'Plumbing',
-        iconUrl: 'https://cdn-icons-png.flaticon.com/512/2332/2332688.png',
+        // Plumbing: Bathroom/sink repair photo
+        iconUrl:
+            'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?auto=format&fit=crop&q=80&w=500',
         avgPrice: 150.0,
         minPrice: 100.0,
         maxPrice: 300.0,
@@ -35,7 +37,9 @@ class SeedData {
         description:
             'Expert electrical repairs, installations, and troubleshooting. Licensed electricians.',
         category: 'Electrical',
-        iconUrl: 'https://cdn-icons-png.flaticon.com/512/1087/1087927.png',
+        // Electrical: Electrician working
+        iconUrl:
+            'https://images.unsplash.com/photo-1621905476059-5f33604063bd?auto=format&fit=crop&q=80&w=500',
         avgPrice: 200.0,
         minPrice: 150.0,
         maxPrice: 400.0,
@@ -50,7 +54,9 @@ class SeedData {
         description:
             'Air conditioning repair, maintenance, and installation. Keep your home cool.',
         category: 'AC Repair',
-        iconUrl: 'https://cdn-icons-png.flaticon.com/512/2917/2917995.png',
+        // AC Repair: AC unit
+        iconUrl:
+            'https://images.unsplash.com/photo-1621905476980-5f33604063bd?auto=format&fit=crop&q=80&w=500',
         avgPrice: 250.0,
         minPrice: 180.0,
         maxPrice: 500.0,
