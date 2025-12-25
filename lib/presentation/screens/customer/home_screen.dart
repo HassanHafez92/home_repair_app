@@ -6,7 +6,11 @@ import 'package:flutter/foundation.dart';
 import 'package:home_repair_app/utils/seed_data.dart';
 import '../../widgets/service_card.dart';
 import 'package:home_repair_app/domain/entities/service_entity.dart';
-import '../../widgets/promotional_banner.dart';
+import '../../widgets/hero_carousel.dart';
+import '../../widgets/testimonials_section.dart';
+import '../../widgets/location_selector.dart';
+import '../../widgets/quick_action_bar.dart';
+import '../../widgets/popular_services_section.dart';
 import 'services_screen.dart';
 import 'service_details_screen.dart';
 import 'orders_screen.dart';
@@ -215,6 +219,29 @@ class HomeContent extends StatelessWidget {
               ),
             ),
             actions: [
+              // Search Button
+              IconButton(
+                onPressed: () => onTabChange(1),
+                icon: Container(
+                  padding: const EdgeInsets.all(DesignTokens.spaceXS),
+                  decoration: BoxDecoration(
+                    color: colorScheme.surface,
+                    borderRadius: BorderRadius.circular(DesignTokens.radiusSM),
+                    border: Border.all(
+                      color: colorScheme.outline.withValues(alpha: 0.5),
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.search_rounded,
+                    color: colorScheme.primary,
+                    size: 20,
+                  ),
+                ),
+              ),
+              // Location Selector
+              const LocationSelector(),
+              const SizedBox(width: DesignTokens.spaceXS),
+              // Menu Button
               IconButton(
                 onPressed: () {
                   Scaffold.of(context).openEndDrawer();
@@ -284,10 +311,38 @@ class HomeContent extends StatelessWidget {
                   ),
                 ),
 
+                const SizedBox(height: DesignTokens.spaceMD),
+
+                // Quick Action Bar (Emergency / Schedule)
+                const QuickActionBar(),
+
                 const SizedBox(height: DesignTokens.spaceXL),
 
-                // Promotional Banner
-                PromotionalBanner(onTap: () => onTabChange(1)),
+                // Hero Carousel
+                HeroCarousel.withDefaultSlides(onCtaTap: () => onTabChange(1)),
+
+                const SizedBox(height: DesignTokens.spaceLG),
+
+                // Popular Services Section
+                BlocBuilder<ServiceBloc, ServiceState>(
+                  builder: (context, state) {
+                    if (state.services.isNotEmpty) {
+                      return PopularServicesSection(
+                        services: state.services.take(5).toList(),
+                        onServiceTap: (service) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  ServiceDetailsScreen(service: service),
+                            ),
+                          );
+                        },
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  },
+                ),
 
                 const SizedBox(height: DesignTokens.spaceXL),
 
@@ -362,7 +417,7 @@ class HomeContent extends StatelessWidget {
                             crossAxisCount: 3,
                             crossAxisSpacing: DesignTokens.spaceMD,
                             mainAxisSpacing: DesignTokens.spaceMD,
-                            childAspectRatio: 0.8,
+                            childAspectRatio: 0.65,
                           ),
                       itemCount: min(services.length, 6),
                       itemBuilder: (context, index) {
@@ -411,9 +466,18 @@ class HomeContent extends StatelessWidget {
                     child: Text('viewMoreServices'.tr()),
                   ),
                 ),
-
-                const SizedBox(height: DesignTokens.space2XL),
               ]),
+            ),
+          ),
+
+          // Customer Testimonials Section (outside SliverPadding for proper full-width scroll)
+          SliverToBoxAdapter(
+            child: Column(
+              children: [
+                const SizedBox(height: DesignTokens.spaceXL),
+                const TestimonialsSection(),
+                const SizedBox(height: DesignTokens.space2XL),
+              ],
             ),
           ),
         ],

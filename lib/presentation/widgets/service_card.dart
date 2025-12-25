@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:home_repair_app/domain/entities/service_entity.dart';
 import '../theme/design_tokens.dart';
 
@@ -45,7 +46,7 @@ class ServiceCard extends StatelessWidget {
               children: [
                 // Icon
                 Container(
-                  padding: const EdgeInsets.all(DesignTokens.spaceMD),
+                  padding: const EdgeInsets.all(DesignTokens.spaceSM),
                   decoration: BoxDecoration(
                     color: Theme.of(
                       context,
@@ -55,10 +56,34 @@ class ServiceCard extends StatelessWidget {
                   child: Icon(
                     iconData ?? Icons.build_rounded,
                     color: Theme.of(context).colorScheme.primary,
-                    size: DesignTokens.iconSizeLG,
+                    size: DesignTokens.iconSizeMD,
                   ),
                 ),
-                const SizedBox(height: DesignTokens.spaceMD),
+                const SizedBox(height: DesignTokens.spaceXS),
+                // Price Badge
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: DesignTokens.spaceXS,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(DesignTokens.radiusXS),
+                  ),
+                  child: Text(
+                    'fromPrice'.tr(
+                      namedArgs: {'price': service.minPrice.toInt().toString()},
+                    ),
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: DesignTokens.fontWeightSemiBold,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: DesignTokens.spaceXXS),
                 // Text
                 Text(
                   service.name,
