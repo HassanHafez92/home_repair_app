@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:home_repair_app/services/recommendation_service.dart';
 import 'package:home_repair_app/presentation/screens/customer/recommendations_screen.dart';
+import 'package:home_repair_app/presentation/theme/design_tokens.dart';
 
 /// Widget displaying a section of recommended services
 class RecommendationsSection extends StatelessWidget {
@@ -45,7 +46,7 @@ class RecommendationsSection extends StatelessWidget {
       children: [
         // Section header
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: DesignTokens.spaceMD),
           child: Row(
             children: [
               Icon(
@@ -53,7 +54,7 @@ class RecommendationsSection extends StatelessWidget {
                 size: 20,
                 color: theme.colorScheme.primary,
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: DesignTokens.spaceXS),
               Text(
                 title ?? 'recommendedForYou'.tr(),
                 style: theme.textTheme.titleMedium?.copyWith(
@@ -82,14 +83,16 @@ class RecommendationsSection extends StatelessWidget {
           ),
         ),
 
-        const SizedBox(height: 8),
+        const SizedBox(height: DesignTokens.spaceSM),
 
         // Horizontal scroll list
         SizedBox(
-          height: 200,
+          height: 210, // Slightly taller to accommodate shadow
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
+            padding: const EdgeInsets.symmetric(
+              horizontal: DesignTokens.spaceMD,
+            ),
             itemCount: recommendations.length,
             itemBuilder: (context, index) {
               final rec = recommendations[index];
@@ -127,28 +130,31 @@ class _RecommendationCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: 160,
-        margin: const EdgeInsets.only(right: 12),
+        margin: const EdgeInsets.only(
+          right: DesignTokens.spaceMD,
+          bottom: DesignTokens.spaceXS,
+        ),
         decoration: BoxDecoration(
           color: theme.cardColor,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
+          boxShadow: DesignTokens.shadowSoft,
+          border: Border.all(
+            color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+            width: 1,
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Image/Icon area
             Container(
-              height: 80,
+              height: 90,
               decoration: BoxDecoration(
-                color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                color: theme.colorScheme.primaryContainer.withValues(
+                  alpha: 0.3,
+                ),
                 borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(16),
+                  top: Radius.circular(DesignTokens.radiusMD),
                 ),
               ),
               child: Stack(
@@ -167,19 +173,27 @@ class _RecommendationCard extends StatelessWidget {
                       left: 8,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
+                          horizontal: 8,
+                          vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: _getReasonColor(recommendation.reason),
-                          borderRadius: BorderRadius.circular(8),
+                          color: _getReasonColor(recommendation.reason, theme),
+                          borderRadius: BorderRadius.circular(
+                            DesignTokens.radiusSM,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.1),
+                              blurRadius: 4,
+                            ),
+                          ],
                         ),
                         child: Text(
                           _getReasonLabel(recommendation.reason),
-                          style: const TextStyle(
+                          style: theme.textTheme.labelSmall?.copyWith(
                             color: Colors.white,
-                            fontSize: 9,
                             fontWeight: FontWeight.bold,
+                            fontSize: 10,
                           ),
                         ),
                       ),
@@ -191,34 +205,37 @@ class _RecommendationCard extends StatelessWidget {
             // Content
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(DesignTokens.spaceSM),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
                       service.name,
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
+                        height: 1.2,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const Spacer(),
-                    Row(
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           '${service.minPrice.toInt()} EGP',
-                          style: theme.textTheme.bodySmall?.copyWith(
+                          style: theme.textTheme.bodyMedium?.copyWith(
                             color: theme.colorScheme.primary,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        Text(
-                          ' - ${service.maxPrice.toInt()} EGP',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.grey,
+                        if (service.maxPrice > service.minPrice)
+                          Text(
+                            ' - ${service.maxPrice.toInt()} EGP',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
                           ),
-                        ),
                       ],
                     ),
                   ],
@@ -247,18 +264,18 @@ class _RecommendationCard extends StatelessWidget {
     return Icons.build;
   }
 
-  Color _getReasonColor(RecommendationReason reason) {
+  Color _getReasonColor(RecommendationReason reason, ThemeData theme) {
     switch (reason) {
       case RecommendationReason.categoryInterest:
-        return Colors.purple;
+        return Colors.purple.shade400;
       case RecommendationReason.customersAlsoBooked:
-        return Colors.orange;
+        return Colors.orange.shade400;
       case RecommendationReason.seasonal:
-        return Colors.green;
+        return Colors.green.shade500;
       case RecommendationReason.popular:
-        return Colors.blue;
+        return Colors.blue.shade400;
       case RecommendationReason.recentlyViewed:
-        return Colors.grey;
+        return Colors.grey.shade600;
     }
   }
 

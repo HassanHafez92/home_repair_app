@@ -301,16 +301,22 @@ class _RecommendationTile extends StatelessWidget {
           color: theme.cardColor,
           borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
           boxShadow: DesignTokens.shadowSoft,
+          border: Border.all(
+            color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+            width: 1,
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Service icon/image area
             Container(
-              height: 80,
+              height: 90,
               width: double.infinity,
               decoration: BoxDecoration(
-                color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                color: theme.colorScheme.primaryContainer.withValues(
+                  alpha: 0.3,
+                ),
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(DesignTokens.radiusMD),
                 ),
@@ -330,33 +336,34 @@ class _RecommendationTile extends StatelessWidget {
                 padding: const EdgeInsets.all(DesignTokens.spaceSM),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
                       service.name,
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
+                        height: 1.2,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const Spacer(),
-                    Row(
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           '${service.minPrice.toInt()} EGP',
-                          style: theme.textTheme.bodySmall?.copyWith(
+                          style: theme.textTheme.bodyMedium?.copyWith(
                             color: theme.colorScheme.primary,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        if (service.maxPrice > service.minPrice) ...[
+                        if (service.maxPrice > service.minPrice)
                           Text(
                             ' - ${service.maxPrice.toInt()} EGP',
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: DesignTokens.neutral500,
+                              color: theme.colorScheme.onSurfaceVariant,
                             ),
                           ),
-                        ],
                       ],
                     ),
                   ],
