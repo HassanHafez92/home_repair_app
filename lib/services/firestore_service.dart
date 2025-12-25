@@ -83,6 +83,18 @@ class FirestoreService {
         );
   }
 
+  /// Get a single service by ID
+  Future<ServiceModel?> getService(String serviceId) async {
+    try {
+      final doc = await _db.collection('services').doc(serviceId).get();
+      if (!doc.exists || doc.data() == null) return null;
+      return ServiceModel.fromJson(doc.data()!);
+    } catch (e) {
+      debugPrint('Error fetching service $serviceId: $e');
+      return null;
+    }
+  }
+
   /// Get services with pagination support
   /// Returns PaginatedResult for better pagination control
   Future<PaginatedResult<ServiceModel>> getServicesPaginated({

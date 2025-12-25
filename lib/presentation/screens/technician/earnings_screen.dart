@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../../widgets/custom_button.dart';
+import 'withdrawal_screen.dart';
 
 class EarningsScreen extends StatelessWidget {
   const EarningsScreen({super.key});
@@ -92,8 +93,11 @@ class EarningsScreen extends StatelessWidget {
                   text: 'withdraw'.tr(),
                   variant: ButtonVariant.secondary,
                   onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('withdrawalComingSoon'.tr())),
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const WithdrawalScreen(),
+                      ),
                     );
                   },
                 ),
@@ -114,7 +118,12 @@ class EarningsScreen extends StatelessWidget {
                   ),
                 ),
                 const Spacer(),
-                TextButton(onPressed: () {}, child: Text('filter'.tr())),
+                TextButton(
+                  onPressed: () {
+                    _showFilterDialog(context);
+                  },
+                  child: Text('filter'.tr()),
+                ),
               ],
             ),
           ),
@@ -180,7 +189,63 @@ class EarningsScreen extends StatelessWidget {
       ],
     );
   }
+
+  void _showFilterDialog(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'filterTransactions'.tr(),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            ListTile(
+              leading: const Icon(Icons.today),
+              title: Text('today'.tr()),
+              onTap: () => Navigator.pop(context),
+            ),
+            ListTile(
+              leading: const Icon(Icons.calendar_view_week),
+              title: Text('thisWeek'.tr()),
+              onTap: () => Navigator.pop(context),
+            ),
+            ListTile(
+              leading: const Icon(Icons.calendar_month),
+              title: Text('thisMonth'.tr()),
+              onTap: () => Navigator.pop(context),
+            ),
+            ListTile(
+              leading: const Icon(Icons.calendar_today),
+              title: Text('thisYear'.tr()),
+              onTap: () => Navigator.pop(context),
+            ),
+            ListTile(
+              leading: const Icon(Icons.date_range),
+              title: Text('customRange'.tr()),
+              onTap: () async {
+                Navigator.pop(context);
+                final picked = await showDateRangePicker(
+                  context: context,
+                  firstDate: DateTime(2020),
+                  lastDate: DateTime.now(),
+                );
+                if (picked != null) {
+                  // Filter transactions by date range
+                  // In a real app, this would update the state
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
-
-
-

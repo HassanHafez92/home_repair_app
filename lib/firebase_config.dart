@@ -45,20 +45,21 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBF4yfT5q4acjz1UGuak86cWnCbVnPGMv8',
-    appId: '1:519364342004:android:47c0ba1f9d6ae9113deea1',
-    messagingSenderId: '519364342004',
-    projectId: 'home-repair-app-46c2d',
-    storageBucket: 'home-repair-app-46c2d.appspot.com',
+    apiKey: 'AIzaSyDSiF5OtgJK9hNb2XtbYDN2rt-_rpdXM9g',
+    appId: '1:970866219192:android:679780d0064f07e9d03c4d',
+    messagingSenderId: '970866219192',
+    projectId: 'home-rapier-app-479514',
+    storageBucket: 'home-rapier-app-479514.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'YOUR-IOS-API-KEY',
-    appId: 'YOUR-IOS-APP-ID',
-    messagingSenderId: 'YOUR-SENDER-ID',
-    projectId: 'YOUR-PROJECT-ID',
-    storageBucket: 'YOUR-STORAGE-BUCKET',
-    iosClientId: 'YOUR-IOS-CLIENT-ID',
+    apiKey: 'AIzaSyD_i-4R01ONjc5dY1b6kfUdqaeM5bVm4S4',
+    appId: '1:970866219192:ios:e278504fe7df4b1bd03c4d',
+    messagingSenderId: '970866219192',
+    projectId: 'home-rapier-app-479514',
+    storageBucket: 'home-rapier-app-479514.firebasestorage.app',
+    iosClientId:
+        '970866219192-1c47a8muciu8ap2v92tehv12lbckj86d.apps.googleusercontent.com',
     iosBundleId: 'com.example.homeRepairApp',
   );
 }

@@ -26,6 +26,7 @@ class _TechnicianSignupScreenState extends State<TechnicianSignupScreen> {
   final _passwordController = TextEditingController();
   final _nationalIdController = TextEditingController();
   final _experienceController = TextEditingController();
+  final _bioController = TextEditingController();
 
   final List<String> _selectedSpecializations = [];
   bool _isSubmitting = false;
@@ -47,6 +48,7 @@ class _TechnicianSignupScreenState extends State<TechnicianSignupScreen> {
     _passwordController.dispose();
     _nationalIdController.dispose();
     _experienceController.dispose();
+    _bioController.dispose();
     super.dispose();
   }
 
@@ -227,6 +229,13 @@ class _TechnicianSignupScreenState extends State<TechnicianSignupScreen> {
                 },
               ),
               const SizedBox(height: 16),
+              CustomTextField(
+                label: 'bio'.tr(),
+                hint: 'describeProfessionalExperience'.tr(),
+                controller: _bioController,
+                maxLines: 3,
+              ),
+              const SizedBox(height: 16),
 
               // Specializations
               Text(
@@ -305,6 +314,3 @@ class _TechnicianSignupScreenState extends State<TechnicianSignupScreen> {
     );
   }
 }
-
-
-

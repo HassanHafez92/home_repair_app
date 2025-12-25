@@ -12,7 +12,7 @@ import '../../core/error/failures.dart';
 import '../../core/network/network_info.dart';
 import '../../domain/entities/order_entity.dart';
 import '../../domain/repositories/i_order_repository.dart';
-import '../../models/order_model.dart' hide OrderStatus;
+import '../../models/order_model.dart' as om;
 import '../datasources/remote/i_order_remote_data_source.dart';
 
 /// Implementation of [IOrderRepository] using data sources.
@@ -265,7 +265,7 @@ class OrderRepositoryImpl implements IOrderRepository {
   }
 
   // Helper methods for mapping
-  OrderEntity _modelToEntity(OrderModel model) {
+  OrderEntity _modelToEntity(om.OrderModel model) {
     return OrderEntity(
       id: model.id,
       customerId: model.customerId,
@@ -291,8 +291,8 @@ class OrderRepositoryImpl implements IOrderRepository {
     );
   }
 
-  OrderModel _entityToModel(OrderEntity entity) {
-    return OrderModel(
+  om.OrderModel _entityToModel(OrderEntity entity) {
+    return om.OrderModel(
       id: entity.id,
       customerId: entity.customerId,
       technicianId: entity.technicianId,
@@ -366,9 +366,23 @@ class OrderRepositoryImpl implements IOrderRepository {
   }
 
   // Note: OrderModel uses its own OrderStatus enum
-  dynamic _entityStatusToModelStatus(OrderStatus status) {
-    // The OrderModel uses the same string representation
-    return status.toString().split('.').last;
+  om.OrderStatus _entityStatusToModelStatus(OrderStatus status) {
+    switch (status) {
+      case OrderStatus.pending:
+        return om.OrderStatus.pending;
+      case OrderStatus.accepted:
+        return om.OrderStatus.accepted;
+      case OrderStatus.traveling:
+        return om.OrderStatus.traveling;
+      case OrderStatus.arrived:
+        return om.OrderStatus.arrived;
+      case OrderStatus.working:
+        return om.OrderStatus.working;
+      case OrderStatus.completed:
+        return om.OrderStatus.completed;
+      case OrderStatus.cancelled:
+        return om.OrderStatus.cancelled;
+    }
   }
 
   DateTime _parseTimestamp(dynamic timestamp) {

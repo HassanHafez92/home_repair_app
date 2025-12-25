@@ -4,6 +4,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:equatable/equatable.dart';
+import '../domain/entities/service_entity.dart';
 
 part 'service_model.g.dart';
 
@@ -59,6 +60,24 @@ class ServiceModel extends Equatable {
     isActive,
     createdAt,
   ];
+
+  /// Convert to ServiceEntity for domain layer
+  ServiceEntity toEntity() {
+    return ServiceEntity(
+      id: id,
+      name: name,
+      description: description,
+      iconUrl: iconUrl,
+      category: category,
+      avgPrice: avgPrice,
+      minPrice: minPrice,
+      maxPrice: maxPrice,
+      visitFee: visitFee,
+      avgCompletionTimeMinutes: avgCompletionTimeMinutes,
+      isActive: isActive,
+      createdAt: createdAt,
+    );
+  }
 }
 
 DateTime _timestampFromJson(dynamic timestamp) {

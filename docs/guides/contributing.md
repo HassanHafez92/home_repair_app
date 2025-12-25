@@ -125,7 +125,7 @@ Follow the [Effective Dart](https://dart.dev/guides/language/effective-dart) sty
 
 **1. File Structure** (for each feature):
 ```
-lib/blocs/feature_name/
+lib/presentation/blocs/feature_name/
 ├── feature_bloc.dart
 ├── feature_event.dart
 └── feature_state.dart

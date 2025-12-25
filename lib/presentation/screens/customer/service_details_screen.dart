@@ -4,7 +4,9 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:home_repair_app/domain/entities/service_entity.dart';
+import 'package:home_repair_app/models/price_estimate_model.dart';
 import '../../widgets/custom_button.dart';
+import '../../widgets/price_calculator_widget.dart';
 import 'booking/booking_flow_screen.dart';
 
 class ServiceDetailsScreen extends StatelessWidget {
@@ -14,6 +16,13 @@ class ServiceDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Create price estimate from service data
+    final priceEstimate = PriceEstimateModel.estimate(
+      minPrice: service.minPrice,
+      maxPrice: service.maxPrice,
+      inspectionFee: service.visitFee, // 50 EGP inspection fee
+    );
+
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -87,7 +96,16 @@ class ServiceDetailsScreen extends StatelessWidget {
                   _buildFeatureItem('verifiedTechnician'.tr()),
                   _buildFeatureItem('warranty30Days'.tr()),
 
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 24),
+
+                  // Price Estimate Calculator
+                  PriceCalculatorWidget(
+                    estimate: priceEstimate,
+                    showAddOnSelection: false, // No add-ons defined yet
+                    compact: false,
+                  ),
+
+                  const SizedBox(height: 24),
 
                   // Book Button
                   CustomButton(

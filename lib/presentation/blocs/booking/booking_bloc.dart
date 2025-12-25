@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 
 import 'package:home_repair_app/domain/entities/order_entity.dart';
 import 'package:home_repair_app/domain/repositories/i_order_repository.dart';
+import 'package:home_repair_app/models/media_file_model.dart';
 import 'package:home_repair_app/services/notification_service.dart';
 import 'booking_event.dart';
 import 'booking_state.dart';
@@ -20,6 +21,8 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     on<BookingStarted>(_onStarted);
     on<BookingStepChanged>(_onStepChanged);
     on<BookingDescriptionChanged>(_onDescriptionChanged);
+    on<BookingMediaAdded>(_onMediaAdded);
+    on<BookingMediaRemoved>(_onMediaRemoved);
     on<BookingLocationChanged>(_onLocationChanged);
     on<BookingScheduleChanged>(_onScheduleChanged);
     on<BookingSubmitted>(_onSubmitted);
@@ -32,6 +35,7 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
         service: event.service,
         currentStep: 0,
         description: '',
+        mediaFiles: [],
         address: '',
         scheduledDate: null,
         scheduledTime: null,
@@ -48,6 +52,19 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     Emitter<BookingState> emit,
   ) {
     emit(state.copyWith(description: event.description));
+  }
+
+  void _onMediaAdded(BookingMediaAdded event, Emitter<BookingState> emit) {
+    final updatedMedia = List<MediaFileModel>.from(state.mediaFiles)
+      ..add(event.media);
+    emit(state.copyWith(mediaFiles: updatedMedia));
+  }
+
+  void _onMediaRemoved(BookingMediaRemoved event, Emitter<BookingState> emit) {
+    final updatedMedia = state.mediaFiles
+        .where((m) => m.id != event.mediaId)
+        .toList();
+    emit(state.copyWith(mediaFiles: updatedMedia));
   }
 
   void _onLocationChanged(
@@ -125,6 +142,8 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
 
       final result = await _orderRepository.createOrder(order);
 
+      String? successOrderId;
+
       result.fold(
         (failure) => emit(
           state.copyWith(
@@ -132,18 +151,28 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
             errorMessage: failure.message,
           ),
         ),
-        (orderId) async {
-          // Show local notification
-          await NotificationService().showNotification(
-            title: 'Order Confirmed! 🎉',
-            body:
-                'Your order #${orderId.substring(0, 8)} has been created successfully.',
-            payload: orderId,
-          );
-
-          emit(state.copyWith(status: BookingStatus.success, orderId: orderId));
+        (orderId) {
+          successOrderId = orderId;
         },
       );
+
+      // Handle success case outside of fold to properly await
+      if (successOrderId != null) {
+        // Show local notification
+        await NotificationService().showNotification(
+          title: 'Order Confirmed! 🎉',
+          body:
+              'Your order #${successOrderId!.substring(0, 8)} has been created successfully.',
+          payload: successOrderId,
+        );
+
+        emit(
+          state.copyWith(
+            status: BookingStatus.success,
+            orderId: successOrderId,
+          ),
+        );
+      }
     } catch (e) {
       // ignore: avoid_print
       print('BookingBloc Error: $e');

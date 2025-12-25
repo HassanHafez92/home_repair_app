@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:home_repair_app/domain/entities/service_entity.dart';
 import '../../../widgets/custom_text_field.dart';
+import '../../../widgets/media_picker_widget.dart';
 import '../../../blocs/booking/booking_bloc.dart';
 import '../../../blocs/booking/booking_event.dart';
 import '../../../blocs/booking/booking_state.dart';
@@ -193,16 +194,38 @@ class _BookingFlowScreenState extends State<BookingFlowScreen> {
                   // Step 1: Description
                   Step(
                     title: Text('describeProblem'.tr()),
-                    content: CustomTextField(
-                      label: 'problemDescription'.tr(),
-                      hint: 'describeWhatNeedsToBeFixed'.tr(),
-                      controller: _descriptionController,
-                      maxLines: 4,
-                      onChanged: (value) {
-                        context.read<BookingBloc>().add(
-                          BookingDescriptionChanged(value),
-                        );
-                      },
+                    content: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        CustomTextField(
+                          label: 'problemDescription'.tr(),
+                          hint: 'describeWhatNeedsToBeFixed'.tr(),
+                          controller: _descriptionController,
+                          maxLines: 4,
+                          onChanged: (value) {
+                            context.read<BookingBloc>().add(
+                              BookingDescriptionChanged(value),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        MediaPickerWidget(
+                          mediaFiles: state.mediaFiles,
+                          maxPhotos: 5,
+                          maxVideos: 1,
+                          maxVideoDurationSeconds: 30,
+                          onMediaAdded: (media) {
+                            context.read<BookingBloc>().add(
+                              BookingMediaAdded(media),
+                            );
+                          },
+                          onMediaRemoved: (mediaId) {
+                            context.read<BookingBloc>().add(
+                              BookingMediaRemoved(mediaId),
+                            );
+                          },
+                        ),
+                      ],
                     ),
                     isActive: state.currentStep >= 0,
                   ),

@@ -4,6 +4,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:home_repair_app/domain/entities/service_entity.dart';
+import 'package:home_repair_app/models/media_file_model.dart';
 
 enum BookingStatus { initial, filling, submitting, success, failure }
 
@@ -12,6 +13,7 @@ class BookingState extends Equatable {
   final int currentStep;
   final ServiceEntity? service;
   final String description;
+  final List<MediaFileModel> mediaFiles;
   final String address;
   final double? latitude;
   final double? longitude;
@@ -25,6 +27,7 @@ class BookingState extends Equatable {
     this.currentStep = 0,
     this.service,
     this.description = '',
+    this.mediaFiles = const [],
     this.address = '',
     this.latitude,
     this.longitude,
@@ -43,6 +46,7 @@ class BookingState extends Equatable {
     int? currentStep,
     ServiceEntity? service,
     String? description,
+    List<MediaFileModel>? mediaFiles,
     String? address,
     double? latitude,
     double? longitude,
@@ -56,6 +60,7 @@ class BookingState extends Equatable {
       currentStep: currentStep ?? this.currentStep,
       service: service ?? this.service,
       description: description ?? this.description,
+      mediaFiles: mediaFiles ?? this.mediaFiles,
       address: address ?? this.address,
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
@@ -72,6 +77,7 @@ class BookingState extends Equatable {
     currentStep,
     service,
     description,
+    mediaFiles,
     address,
     latitude,
     longitude,

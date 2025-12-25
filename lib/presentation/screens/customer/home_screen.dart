@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:math';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/foundation.dart';
+import 'package:home_repair_app/utils/seed_data.dart';
 import '../../widgets/service_card.dart';
 import 'package:home_repair_app/domain/entities/service_entity.dart';
 import '../../widgets/promotional_banner.dart';
@@ -10,8 +12,11 @@ import 'service_details_screen.dart';
 import 'orders_screen.dart';
 
 import 'profile_screen.dart';
+import '../../blocs/auth/auth_bloc.dart';
+import '../../blocs/auth/auth_state.dart';
 import '../../blocs/service/service_bloc.dart';
 import '../../blocs/service/service_state.dart';
+import '../../blocs/service/service_event.dart';
 import '../../theme/design_tokens.dart';
 import '../../widgets/app_drawer.dart';
 
@@ -181,24 +186,31 @@ class HomeContent extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(
                   horizontal: DesignTokens.spaceLG,
                 ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Hello, Hassan!', // Dynamic in real app
-                      style: theme.textTheme.headlineLarge?.copyWith(
-                        fontWeight: DesignTokens.fontWeightBold,
-                      ),
-                    ),
-                    Text(
-                      'How can we help you today?',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: DesignTokens.neutral500,
-                      ),
-                    ),
-                    const SizedBox(height: DesignTokens.spaceLG),
-                  ],
+                child: BlocBuilder<AuthBloc, AuthState>(
+                  builder: (context, authState) {
+                    final userName = authState is AuthAuthenticated
+                        ? authState.user.fullName.split(' ').first
+                        : 'guest'.tr();
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'greeting'.tr(namedArgs: {'name': userName}),
+                          style: theme.textTheme.headlineLarge?.copyWith(
+                            fontWeight: DesignTokens.fontWeightBold,
+                          ),
+                        ),
+                        Text(
+                          'howCanWeHelp'.tr(),
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: DesignTokens.neutral500,
+                          ),
+                        ),
+                        const SizedBox(height: DesignTokens.spaceLG),
+                      ],
+                    );
+                  },
                 ),
               ),
             ),
@@ -262,7 +274,7 @@ class HomeContent extends StatelessWidget {
                         ),
                         const SizedBox(width: DesignTokens.spaceSM),
                         Text(
-                          'Search for services...',
+                          'searchService'.tr(),
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: DesignTokens.neutral400,
                           ),
@@ -316,7 +328,28 @@ class HomeContent extends StatelessWidget {
                     } else if (state.status == ServiceStatus.failure) {
                       return Center(child: Text('errorLoadingServices'.tr()));
                     } else if (state.services.isEmpty) {
-                      return Center(child: Text('noServicesAvailable'.tr()));
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text('noServicesAvailable'.tr()),
+                            if (kDebugMode) ...[
+                              const SizedBox(height: 16),
+                              ElevatedButton(
+                                onPressed: () async {
+                                  await SeedData.seedServices();
+                                  if (context.mounted) {
+                                    context.read<ServiceBloc>().add(
+                                      const ServiceLoadRequested(),
+                                    );
+                                  }
+                                },
+                                child: const Text('Seed Data (Debug Only)'),
+                              ),
+                            ],
+                          ],
+                        ),
+                      );
                     }
 
                     final services = state.services;

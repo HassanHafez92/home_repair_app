@@ -108,12 +108,12 @@ flutter pub get
 # 3. Run code generation
 flutter pub run build_runner build --delete-conflicting-outputs
 
-# 4. Configure Firebase
-flutter pub global activate flutterfire_cli
+# 4. Configure Firebase (if setting up new environment)
+# Note: Project already configured for dev, stg, prod flavors
 flutterfire configure
 
-# 5. Run the app
-flutter run
+# 5. Run the app (Development Flavor)
+flutter run --flavor dev -t lib/main_dev.dart
 ```
 
 **For detailed setup instructions** → See [Developer Onboarding](docs/guides/developer_onboarding.md)
@@ -124,13 +124,17 @@ flutter run
 
 ```
 lib/
-├── blocs/              # BLoC state management (8 feature BLoCs)
-├── models/             # Data models (33 models)
-├── screens/            # UI screens (42 screens)
-├── services/           # Backend integrations (15 services)
-├── widgets/            # Reusable UI components (12 widgets)
+├── config/             # App configuration & Flavor setup
+├── core/               # Shared utilities, DI, constants
+├── data/               # Data Layer (Repositories impl, Datasources, Models)
+├── domain/             # Domain Layer (Entities, Repository Interfaces, UseCases)
+├── presentation/       # Presentation Layer (BLoCs, Screens, Widgets)
+│   ├── blocs/          # State management
+│   ├── screens/        # UI Screens
+│   └── widgets/        # Reusable components
 ├── router/             # Navigation configuration
-└── main.dart           # App entry point
+├── services/           # External service wrappers
+└── utils/              # Helper functions
 ```
 
 **For complete structure** → See [ARCHITECTURE.md](ARCHITECTURE.md#project-structure)

@@ -51,6 +51,15 @@ class _LoginScreenState extends State<LoginScreen> {
             SnackBar(content: Text(state.message), backgroundColor: Colors.red),
           );
         }
+        // Handle password reset success
+        if (state is AuthPasswordResetSent) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('passwordResetEmailSent'.tr()),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
       },
       builder: (context, state) {
         final isLoading = state is AuthLoading;
@@ -114,7 +123,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: TextButton(
                       onPressed: isLoading
                           ? null
-                          : () async {
+                          : () {
                               if (_emailController.text.isEmpty) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
@@ -123,29 +132,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                 );
                                 return;
                               }
-                              // Note: Password reset still uses AuthService directly
-                              // We can add a PasswordResetRequested event later
-                              try {
-                                // For now, we'll skip password reset in BLoC
-                                // This can be migrated later
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      'Password reset will be implemented',
-                                    ),
-                                  ),
-                                );
-                              } catch (e) {
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        'errorMessage'.tr(args: [e.toString()]),
-                                      ),
-                                    ),
-                                  );
-                                }
-                              }
+                              context.read<AuthBloc>().add(
+                                AuthPasswordResetRequested(
+                                  email: _emailController.text.trim(),
+                                ),
+                              );
                             },
                       child: Text('forgotPassword'.tr()),
                     ),
@@ -202,6 +193,3 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
-
-
-

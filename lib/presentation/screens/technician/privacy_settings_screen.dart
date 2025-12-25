@@ -1,10 +1,15 @@
 // File: lib/screens/technician/privacy_settings_screen.dart
 // Purpose: Privacy and data management settings for technicians
 
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../helpers/auth_helper.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_event.dart';
@@ -201,8 +206,7 @@ class PrivacySettingsScreen extends StatelessWidget {
           .where('technicianId', isEqualTo: userId)
           .get();
 
-      // Create export data object (will be used when file download is implemented)
-      // ignore: unused_local_variable
+      // Create export data object
       final exportData = {
         'exportDate': DateTime.now().toIso8601String(),
         'userId': userId,
@@ -215,22 +219,29 @@ class PrivacySettingsScreen extends StatelessWidget {
       // Close loading dialog
       if (context.mounted) Navigator.pop(context);
 
-      // In a real app, this would generate a downloadable file
-      // For now, we'll show a success message
+      // Convert data to formatted JSON string
+      final jsonEncoder = const JsonEncoder.withIndent('  ');
+      final jsonString = jsonEncoder.convert(exportData);
+
+      // Get the temporary directory and create a file
+      final tempDir = await getTemporaryDirectory();
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final fileName = 'home_repair_data_export_$timestamp.json';
+      final file = File('${tempDir.path}/$fileName');
+
+      // Write the JSON data to the file
+      await file.writeAsString(jsonString);
+
+      // Share the file using share_plus
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('dataExportRequested'.tr()),
-            duration: const Duration(seconds: 4),
+        await SharePlus.instance.share(
+          ShareParams(
+            files: [XFile(file.path)],
+            subject: 'dataExport'.tr(),
+            text: 'dataExportMessage'.tr(),
           ),
         );
       }
-
-      // TODO: Implement actual file download
-      // This would typically involve:
-      // 1. Converting data to JSON/CSV
-      // 2. Using a package like path_provider and share_plus
-      // 3. Saving file locally or sharing it
     } catch (e) {
       // Close loading dialog if still open
       if (context.mounted) Navigator.pop(context);

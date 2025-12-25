@@ -26,6 +26,13 @@ import '../presentation/screens/customer/help_support_screen.dart';
 import '../presentation/screens/customer/about_screen.dart';
 import '../presentation/screens/customer/notifications_screen.dart';
 import '../presentation/screens/customer/order_details_screen.dart';
+import '../presentation/screens/customer/recommendations_screen.dart';
+import '../presentation/screens/customer/referral_screen.dart';
+import '../presentation/screens/customer/service_history_screen.dart';
+import '../presentation/screens/customer/service_details_screen.dart';
+import '../presentation/screens/customer/add_edit_address_screen.dart';
+import '../presentation/screens/customer/add_review_screen.dart';
+import '../presentation/screens/customer/booking/booking_flow_screen.dart';
 import '../presentation/screens/auth/email_verification_screen.dart';
 import '../presentation/screens/technician/technician_home_screen.dart';
 import '../presentation/screens/technician/order_detail_screen.dart';
@@ -33,6 +40,7 @@ import '../presentation/screens/admin/admin_layout.dart';
 import '../services/auth_service.dart';
 import '../services/firestore_service.dart';
 import '../models/order_model.dart';
+import '../models/service_model.dart';
 import '../presentation/screens/chat/chat_list_screen.dart';
 import '../presentation/screens/chat/chat_screen.dart';
 import '../presentation/widgets/async_data_screen.dart';
@@ -195,6 +203,81 @@ class AppRouter {
               builder: (order) => OrderDetailsScreen(order: order.toEntity()),
               errorTitle: 'Error',
               errorMessage: 'Order not found',
+            );
+          },
+        ),
+        GoRoute(
+          path: '/customer/recommendations',
+          builder: (context, state) => const RecommendationsScreen(),
+        ),
+        GoRoute(
+          path: '/customer/referrals',
+          builder: (context, state) {
+            final authState = context.read<AuthBloc>().state;
+            if (authState is AuthAuthenticated) {
+              return ReferralScreen(
+                userId: authState.user.id,
+                userName: authState.user.fullName,
+              );
+            }
+            // Fallback - redirect handled by guards but provide empty screen
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          },
+        ),
+        GoRoute(
+          path: '/customer/service-history',
+          builder: (context, state) => const ServiceHistoryScreen(),
+        ),
+        GoRoute(
+          path: '/customer/service/:serviceId',
+          builder: (context, state) {
+            final serviceId = state.pathParameters['serviceId']!;
+            final firestoreService = context.read<FirestoreService>();
+            return AsyncDataScreen<ServiceModel>(
+              future: firestoreService.getService(serviceId),
+              builder: (service) =>
+                  ServiceDetailsScreen(service: service.toEntity()),
+              errorTitle: 'Error',
+              errorMessage: 'Service not found',
+            );
+          },
+        ),
+        GoRoute(
+          path: '/customer/book/:serviceId',
+          builder: (context, state) {
+            final serviceId = state.pathParameters['serviceId']!;
+            final firestoreService = context.read<FirestoreService>();
+            return AsyncDataScreen<ServiceModel>(
+              future: firestoreService.getService(serviceId),
+              builder: (service) =>
+                  BookingFlowScreen(service: service.toEntity()),
+              errorTitle: 'Error',
+              errorMessage: 'Service not found',
+            );
+          },
+        ),
+        GoRoute(
+          path: '/customer/address/add',
+          builder: (context, state) {
+            final authState = context.read<AuthBloc>().state;
+            if (authState is AuthAuthenticated) {
+              return AddEditAddressScreen(userId: authState.user.id);
+            }
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          },
+        ),
+        GoRoute(
+          path: '/customer/review/:orderId/:technicianId',
+          builder: (context, state) {
+            final orderId = state.pathParameters['orderId']!;
+            final technicianId = state.pathParameters['technicianId']!;
+            return AddReviewScreen(
+              orderId: orderId,
+              technicianId: technicianId,
             );
           },
         ),

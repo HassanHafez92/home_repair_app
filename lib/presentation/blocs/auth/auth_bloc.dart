@@ -59,6 +59,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthLogoutRequested>(_onLogoutRequested);
     on<AuthUserChanged>(_onUserChanged);
     on<AuthRoleUpdateRequested>(_onRoleUpdateRequested);
+    on<AuthPasswordResetRequested>(_onPasswordResetRequested);
 
     // Listen to auth state changes
     _authStateSubscription = _authRepository.authStateChanges.listen((
@@ -223,6 +224,24 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       debugPrint('Error updating role: $e');
       emit(AuthError('Failed to update role: ${e.toString()}'));
     }
+  }
+
+  Future<void> _onPasswordResetRequested(
+    AuthPasswordResetRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(const AuthLoading());
+    final result = await _authRepository.sendPasswordResetEmail(event.email);
+    result.fold(
+      (failure) {
+        emit(AuthError(failure.message));
+        emit(const AuthUnauthenticated());
+      },
+      (_) {
+        emit(const AuthPasswordResetSent());
+        emit(const AuthUnauthenticated());
+      },
+    );
   }
 
   @override
