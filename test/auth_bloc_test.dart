@@ -109,6 +109,7 @@ void main() {
           ).thenAnswer((_) async => const Left(AuthFailure('Login failed')));
         },
         build: createAuthBloc,
+        skip: 1, // Skip the initial AuthUnauthenticated from constructor
         act: (bloc) => bloc.add(
           const AuthLoginRequested(
             email: 'test@test.com',
@@ -131,6 +132,7 @@ void main() {
           ).thenAnswer((_) async => Right(testUser));
         },
         build: createAuthBloc,
+        skip: 1, // Skip the initial AuthUnauthenticated from constructor
         act: (bloc) => bloc.add(
           const AuthLoginRequested(
             email: 'test@test.com',
@@ -148,6 +150,7 @@ void main() {
           when(mockSignOut(any)).thenAnswer((_) async => const Right(null));
         },
         build: createAuthBloc,
+        seed: () => AuthAuthenticated(createTestUser()), // Start authenticated
         act: (bloc) => bloc.add(const AuthLogoutRequested()),
         expect: () => [const AuthUnauthenticated()],
       );
@@ -160,6 +163,7 @@ void main() {
           ).thenAnswer((_) async => const Left(AuthFailure('Logout error')));
         },
         build: createAuthBloc,
+        seed: () => AuthAuthenticated(createTestUser()), // Start authenticated
         act: (bloc) => bloc.add(const AuthLogoutRequested()),
         expect: () => [const AuthUnauthenticated()],
       );
@@ -174,6 +178,7 @@ void main() {
           );
         },
         build: createAuthBloc,
+        skip: 1, // Skip the initial AuthUnauthenticated from constructor
         act: (bloc) => bloc.add(const AuthGoogleSignInRequested()),
         expect: () => [
           const AuthLoading(),
@@ -191,6 +196,7 @@ void main() {
           ).thenAnswer((_) async => Right(testUser));
         },
         build: createAuthBloc,
+        skip: 1, // Skip the initial AuthUnauthenticated from constructor
         act: (bloc) => bloc.add(const AuthGoogleSignInRequested()),
         expect: () => [const AuthLoading(), isA<AuthAuthenticated>()],
       );
@@ -203,6 +209,7 @@ void main() {
           ).thenAnswer((_) async => const Right(null));
         },
         build: createAuthBloc,
+        skip: 1, // Skip the initial AuthUnauthenticated from constructor
         act: (bloc) => bloc.add(const AuthGoogleSignInRequested()),
         expect: () => [
           const AuthLoading(),

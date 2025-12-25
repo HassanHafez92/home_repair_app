@@ -68,3 +68,12 @@ class AuthRoleUpdateRequested extends AuthEvent {
   @override
   List<Object?> get props => [userId, newRole];
 }
+
+class AuthPasswordResetRequested extends AuthEvent {
+  final String email;
+
+  const AuthPasswordResetRequested({required this.email});
+
+  @override
+  List<Object?> get props => [email];
+}

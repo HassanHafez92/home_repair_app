@@ -2,22 +2,40 @@
 // Purpose: Widget tests for OrderDetailScreen
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:easy_localization/easy_localization.dart' as ez;
 import 'package:home_repair_app/presentation/screens/technician/order_detail_screen.dart';
 import 'package:home_repair_app/domain/entities/order_entity.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// A custom asset bundle for testing that loads files from the project root.
+class TestAssetBundle extends CachingAssetBundle {
+  @override
+  Future<String> loadString(String key, {bool cache = true}) async {
+    // Load from rootBundle - this works because flutter_test sets up the asset bundle
+    return rootBundle.loadString(key);
+  }
+
+  @override
+  Future<ByteData> load(String key) async {
+    return rootBundle.load(key);
+  }
+}
+
 void main() async {
   SharedPreferences.setMockInitialValues({});
   await ez.EasyLocalization.ensureInitialized();
 
   Widget createTestWidget(OrderEntity order) {
-    return ez.EasyLocalization(
-      supportedLocales: const [Locale('en')],
-      path: 'assets/translations',
-      fallbackLocale: const Locale('en'),
-      child: MaterialApp(home: OrderDetailScreen(order: order)),
+    return DefaultAssetBundle(
+      bundle: TestAssetBundle(),
+      child: ez.EasyLocalization(
+        supportedLocales: const [Locale('en')],
+        path: 'assets/translations',
+        fallbackLocale: const Locale('en'),
+        child: MaterialApp(home: OrderDetailScreen(order: order)),
+      ),
     );
   }
 

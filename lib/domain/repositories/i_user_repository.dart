@@ -52,4 +52,7 @@ abstract class IUserRepository {
 
   /// Streams technician statistics.
   Stream<TechnicianStatsEntity> streamTechnicianStats(String technicianId);
+
+  /// Streams all users (for admin management).
+  Stream<List<UserEntity>> streamAllUsers();
 }

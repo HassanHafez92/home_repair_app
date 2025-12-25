@@ -41,10 +41,11 @@ class AuthService {
   /// This is called automatically before any Google Sign-In operation.
   Future<void> _ensureGoogleSignInInitialized() async {
     if (!_isGoogleSignInInitialized) {
-      // Initialize GoogleSignIn
-      // Note: serverClientId is usually configured in google-services.json or Info.plist.
-      // If needed, check if initialize() supports it or use other configuration methods.
-      await _googleSignIn.initialize();
+      // Initialize GoogleSignIn with Web Client ID for Android
+      await _googleSignIn.initialize(
+        serverClientId:
+            '970866219192-se866npaf4oh34t2cpumold0v306uu8v.apps.googleusercontent.com',
+      );
       _isGoogleSignInInitialized = true;
     }
   }

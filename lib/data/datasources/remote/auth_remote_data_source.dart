@@ -21,7 +21,10 @@ class AuthRemoteDataSource implements IAuthRemoteDataSource {
   Future<void> _ensureGoogleSignInInitialized() async {
     if (_googleSignIn == null) {
       final instance = GoogleSignIn.instance;
-      await instance.initialize();
+      await instance.initialize(
+        serverClientId:
+            '970866219192-se866npaf4oh34t2cpumold0v306uu8v.apps.googleusercontent.com',
+      );
       _googleSignIn = instance;
     }
   }

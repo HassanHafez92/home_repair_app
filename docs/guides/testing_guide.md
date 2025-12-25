@@ -74,7 +74,7 @@ flutter test --verbose
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:home_repair_app/blocs/auth/auth_bloc.dart';
+import 'package:home_repair_app/presentation/blocs/auth/auth_bloc.dart';
 import 'package:home_repair_app/services/auth_service.dart';
 
 class MockAuthService extends Mock implements AuthService {}

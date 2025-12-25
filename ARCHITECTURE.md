@@ -19,31 +19,37 @@ The Home Repair App is built using **Flutter** with a **Clean Architecture** app
 
 ```mermaid
 graph TB
-    subgraph "Presentation Layer"
+    subgraph "Presentation Layer (UI & Logic)"
         UI[Screens & Widgets]
         BLoC[BLoC Components]
     end
     
-    subgraph "Domain Layer"
-        Models[Data Models]
-        Utils[Utilities & Validators]
+    subgraph "Domain Layer (Business Rules)"
+        Entities[Entities]
+        ReposInterfaces[Repository Interfaces]
+        UseCases[Use Cases]
     end
     
-    subgraph "Data Layer"
-        Services[Services]
-        Providers[Providers]
+    subgraph "Data Layer (Implementation)"
+        ReposImpl[Repository Implementations]
+        DataSources[Data Sources]
+        Models[Data Models (DTOs)]
     end
     
     subgraph "External"
         Firebase[(Firebase Backend)]
+        APIs[External APIs]
     end
     
     UI --> BLoC
-    BLoC --> Services
-    BLoC --> Models
-    Services --> Firebase
-    Services --> Models
-    Providers --> Services
+    BLoC --> UseCases
+    BLoC --> ReposInterfaces
+    UseCases --> ReposInterfaces
+    ReposImpl ..|> ReposInterfaces
+    ReposImpl --> DataSources
+    DataSources --> Firebase
+    DataSources --> Models
+    Models ..|> Entities
 ```
 
 ### Technology Stack
@@ -64,47 +70,47 @@ The app follows **Clean Architecture** principles with three main layers:
 
 ### 1. Presentation Layer
 
-**Location**: `lib/screens/`, `lib/widgets/`
+**Location**: `lib/presentation/`
 
-- **Responsibility**: UI components and user interactions
+- **Responsibility**: UI rendering and state management.
 - **Components**:
-  - **Screens**: Full-page views organized by feature
-  - **Widgets**: Reusable UI components
-- **Pattern**: Uses BLoC for state management, reacts to state changes
+  - **Screens**: `lib/presentation/screens/`
+  - **Widgets**: `lib/presentation/widgets/`
+  - **BLoCs**: `lib/presentation/blocs/` (State Management)
+- **Pattern**: BLoC pattern using `flutter_bloc`.
 
-### 2. Business Logic Layer
+### 2. Domain Layer
 
-**Location**: `lib/blocs/`
+**Location**: `lib/domain/`
 
-- **Responsibility**: Application business logic and state management
+- **Responsibility**: Pure business logic and enterprise rules. Independent of Flutter and external frameworks.
 - **Components**:
-  - **BLoCs**: Process events and emit states
-  - **Events**: User actions or system triggers
-  - **States**: Represent UI state at any point in time
-- **Pattern**: BLoC pattern with flutter_bloc
+  - **Entities**: Core business objects (e.g., `UserEntity`).
+  - **Repositories (Interfaces)**: Contracts for data operations (e.g., `IAuthRepository`).
+  - **Use Cases**: Encapsulate specific business actions (optional/in-progress).
+  - **Failures**: Domain-specific error handling.
 
 ### 3. Data Layer
 
-**Location**: `lib/services/`, `lib/providers/`, `lib/models/`
+**Location**: `lib/data/`
 
-- **Responsibility**: Data access, external service integration
+- **Responsibility**: Data retrieval and transformation.
 - **Components**:
-  - **Services**: Interface with Firebase and external APIs
-  - **Providers**: Manage app-wide state and data
-  - **Models**: Data structures and serialization
-- **Pattern**: Repository pattern (planned - currently direct service access)
+  - **Repositories (Implementation)**: `lib/data/repositories/` (Implements Domain interfaces).
+  - **Data Sources**: `lib/data/datasources/` (Direct access to API/Db).
+  - **Models**: `lib/data/models/` (JSON serialization/DTOs, extends Entities).
+- **Pattern**: Repository Pattern.
 
 ### Supporting Layers
 
-**Domain Layer** (`lib/models/`, `lib/utils/`):
-- Data models with business logic
-- Validators and utility functions
-- Exception handling
+**Core** (`lib/core/`):
+- Dependency Injection (`get_it`, `injectable`)
+- Constants, Utilities, Formatters
 
-**Configuration** (`lib/config/`, `lib/theme/`, `lib/router/`):
-- Firebase configuration
-- App theming
-- Navigation routing
+**Configuration** (`lib/config/`):
+- Flavor-specific configurations (Dev, Stg, Prod)
+- Firebase options
+- Theme & Router
 
 ---
 
@@ -124,14 +130,17 @@ sequenceDiagram
     UI->>BLoC: Dispatch Event (e.g., LoginRequested)
     BLoC->>BLoC: Emit Loading State
     UI->>UI: Show Loading Indicator
-    BLoC->>Service: Call Service Method
-    Service->>Firebase: API Request
-    Firebase-->>Service: Response
-    Service-->>BLoC: Return Data/Error
+    UI->>UI: Show Loading Indicator
+    BLoC->>Repository: Call Repository Method
+    Repository->>DataSource: Request Data
+    DataSource->>Firebase: API Request
+    Firebase-->>DataSource: Response JSON
+    DataSource-->>Repository: Return Model (DTO)
+    Repository-->>BLoC: Return Entity / Failure
     alt Success
         BLoC->>BLoC: Emit Success State
         UI->>UI: Update UI with Data
-    else Error
+    else Failure
         BLoC->>BLoC: Emit Error State
         UI->>UI: Show Error Message
     end
@@ -208,14 +217,14 @@ The app organizes BLoCs by feature:
 
 | BLoC | Purpose | Location |
 |------|---------|----------|
-| **AuthBloc** | User authentication | `lib/blocs/auth/` |
-| **ServiceBloc** | Service catalog browsing | `lib/blocs/service/` |
-| **BookingBloc** | Booking flow management | `lib/blocs/booking/` |
-| **OrderBloc** | Customer order management | `lib/blocs/order/` |
-| **ProfileBloc** | User profile management | `lib/blocs/profile/` |
-| **TechnicianDashboardBloc** | Technician statistics | `lib/blocs/technician_dashboard/` |
-| **AdminBloc** | Admin panel operations | `lib/blocs/admin/` |
-| **AddressBookBloc** | Saved addresses | `lib/blocs/address_book/` |
+| **AuthBloc** | User authentication | `lib/presentation/blocs/auth/` |
+| **ServiceBloc** | Service catalog browsing | `lib/presentation/blocs/service/` |
+| **BookingBloc** | Booking flow management | `lib/presentation/blocs/booking/` |
+| **OrderBloc** | Customer order management | `lib/presentation/blocs/order/` |
+| **ProfileBloc** | User profile management | `lib/presentation/blocs/profile/` |
+| **TechnicianDashboardBloc** | Technician statistics | `lib/presentation/blocs/technician_dashboard/` |
+| **AdminBloc** | Admin panel operations | `lib/presentation/blocs/admin/` |
+| **AddressBookBloc** | Saved addresses | `lib/presentation/blocs/address_book/` |
 
 ---
 
@@ -269,108 +278,49 @@ graph TB
 ## Project Structure
 
 ```
+```
 lib/
-├── blocs/                      # BLoC state management
-│   ├── address_book/          # Saved addresses management
-│   │   ├── address_book_bloc.dart
-│   │   ├── address_book_event.dart
-│   │   └── address_book_state.dart
-│   ├── admin/                 # Admin dashboard logic
-│   ├── auth/                  # Authentication logic
-│   ├── booking/               # Service booking flow
-│   ├── order/                 # Order management (customer & technician)
-│   ├── profile/               # User profile management
-│   ├── service/               # Service catalog browsing
-│   ├── technician_dashboard/  # Technician statistics
-│   └── bloc_observer.dart     # Global BLoC monitoring
-│
 ├── config/                     # App configuration
-│   └── firebase_options.dart  # Firebase platform configs
+│   ├── firebase_options.dart   # Firebase platform configs
+│   ├── routes.dart             
+│   └── theme.dart
 │
 ├── core/                       # Core utilities
-│   ├── constants/             # App constants
-│   ├── errors/                # Error handling
-│   └── injection/             # Dependency injection setup
+│   ├── constants/              # App constants
+│   ├── errors/                 # Failures & Exceptions
+│   └── injection/              # Dependency injection (get_it)
 │
-├── data/                       # Data layer (repositories, DTOs)
-│   ├── datasources/           # Remote and local data sources
-│   ├── models/                # Data transfer objects
-│   └── repositories/          # Repository implementations
+├── data/                       # Data Layer
+│   ├── datasources/            # Remote & Local Data Sources
+│   ├── models/                 # Data Models (DTOs)
+│   └── repositories/           # Repository Implementations
 │
-├── domain/                     # Domain layer (business logic)
-│   ├── entities/              # Business entities
-│   ├── repositories/          # Repository interfaces
-│   └── usecases/              # Use cases
+├── domain/                     # Domain Layer
+│   ├── entities/               # Business Entities
+│   ├── repositories/           # Repository Interfaces
+│   └── usecases/               # Business Logic Use Cases
 │
-├── models/                     # Data models (33 models)
-│   ├── user_model.dart        # User, Customer, Technician
-│   ├── order_model.dart       # Service orders
-│   ├── service_model.dart     # Service catalog
-│   ├── review_model.dart      # Reviews and ratings
-│   ├── chat_model.dart        # Chat conversations
-│   ├── message_model.dart     # Chat messages
-│   ├── payment_model.dart     # Payment records
-│   └── ...                    # 26 more models
+├── presentation/               # Presentation Layer
+│   ├── blocs/                  # BLoC State Management
+│   ├── screens/                # UI Screens
+│   │   ├── auth/
+│   │   ├── customer/
+│   │   ├── technician/
+│   │   └── admin/
+│   └── widgets/                # Reusable UI Components
 │
-├── providers/                  # State providers (legacy, being replaced by BLoC)
-│   ├── order_provider.dart
-│   ├── service_provider.dart
-│   └── theme_provider.dart
+├── router/                     # Navigation
+│   └── app_router.dart         # GoRouter configuration
 │
-├── router/                     # Navigation configuration
-│   └── app_router.dart        # GoRouter setup with all routes
+├── services/                   # External Services Wrapper (Legacy/Utils)
 │
-├── screens/                    # UI screens (42 screens)
-│   ├── admin/                 # Admin panel screens
-│   ├── auth/                  # Login, signup, password reset
-│   ├── customer/              # Customer-facing screens
-│   │   ├── home_screen.dart
-│   │   ├── booking_flow_screen.dart
-│   │   ├── order_list_screen.dart
-│   │   └── ...
-│   ├── technician/            # Technician dashboard screens
-│   ├── shared/                # Shared screens (profile, settings)
-│   └── chat/                  # Chat screens
+├── utils/                      # General Utils (Formatters, Validators)
 │
-├── services/                   # Backend service integrations (15 services)
-│   ├── auth_service.dart      # Firebase Auth wrapper
-│   ├── firestore_service.dart # Firestore operations
-│   ├── storage_service.dart   # Firebase Storage (file uploads)
-│   ├── chat_service.dart      # Real-time chat
-│   ├── review_service.dart    # Reviews and ratings
-│   ├── notification_service.dart # FCM push notifications
-│   ├── analytics_service.dart # Firebase Analytics
-│   ├── performance_service.dart # Performance monitoring
-│   ├── cache_service.dart     # Local data caching
-│   ├── search_service.dart    # Service search functionality
-│   ├── social_service.dart    # Social features (share, invite)
-│   ├── address_service.dart   # Address management
-│   └── ...
-│
-├── theme/                      # App theming
-│   ├── app_theme.dart         # Light and dark themes
-│   └── text_styles.dart       # Typography
-│
-├── utils/                      # Utility functions (9 utilities)
-│   ├── exceptions.dart        # Custom exceptions
-│   ├── validators.dart        # Input validation
-│   ├── responsive_helper.dart # Responsive design utilities
-│   ├── date_formatter.dart    # Date/time formatting
-│   └── ...
-│
-├── widgets/                    # Reusable UI components (12 widgets)
-│   ├── custom_button.dart
-│   ├── custom_text_field.dart
-│   ├── service_card.dart
-│   ├── order_card.dart
-│   ├── map_location_picker.dart
-│   └── ...
-│
-├── firebase_config.dart        # Firebase initialization
-├── main_common.dart            # Shared main app logic
-├── main_dev.dart               # Development entry point
-├── main_prod.dart              # Production entry point
-└── main.dart                   # Default entry point
+├── flavors.dart                # Flavor Definitions
+├── main.dart                   # Default Entry
+├── main_dev.dart               # Dev Entry
+├── main_prod.dart              # Prod Entry
+└── main_stg.dart               # Staging Entry
 ```
 
 ---
@@ -528,8 +478,8 @@ lib/
 **Current State**: Partially implemented
 - ✅ Presentation layer fully separated
 - ✅ Business logic in BLoCs
-- ⚠️ Data layer needs abstraction (direct service usage instead of repository pattern)
-- 🔄 Domain layer being developed (`lib/domain/` created)
+- ✅ Data layer abstraction (Repository managed)
+- ✅ Domain layer defined (Entities & Interfaces)
 
 ### 5. Dependency Injection with get_it + injectable
 
@@ -553,17 +503,17 @@ lib/
 
 **Supported Languages**: English (en), Arabic (ar)
 
-### 7. Multi-Environment Setup
+### 7. Multi-Environment Support (Flavors)
 
 **Structure**:
-- `main_dev.dart` - Development environment
-- `main_prod.dart` - Production environment
-- `main.dart` - Default (development)
+- `main_dev.dart`: Development (separate Firebase project, logging enabled)
+- `main_stg.dart`: Staging (for QA testing)
+- `main_prod.dart`: Production (live data, optimized)
 
 **Benefits**:
-- Separate Firebase projects for dev/prod
-- Different configurations for testing
-- Prevents accidental data corruption in production
+- **Isolation**: Risk-free development and testing.
+- **Configuration**: Different API keys and endpoints per environment.
+- **Parallel Installation**: Can install Dev and Prod apps on the same device.
 
 ---
 
@@ -571,15 +521,10 @@ lib/
 
 Based on `COMPREHENSIVE_ANALYSIS.md`, recommended enhancements:
 
-### 1. Repository Pattern Implementation
-- **Current**: BLoCs call services directly
-- **Target**: BLoCs depend on repository interfaces
-- **Benefits**: Better testability, easier to switch data sources
-
-### 2. Use Cases / Interactors
-- **Current**: Business logic in BLoCs
-- **Target**: Extract complex logic into use cases
-- **Benefits**: Reusable business logic, cleaner BLoCs
+### 1. Use Cases / Interactors
+- **Current**: Business logic in BLoCs calling Repositories directly.
+- **Target**: Extract complex logic into use cases.
+- **Benefits**: Reusable business logic, cleaner BLoCs.
 
 ### 3. Centralized Asset Management
 - **Current**: Asset paths as strings scattered in code

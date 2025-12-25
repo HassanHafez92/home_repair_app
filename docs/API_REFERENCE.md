@@ -4,7 +4,7 @@
 
 This document serves as a central reference for the Home Repair App's APIs, including:
 1.  **Backend API** (Firebase & Cloud Functions)
-2.  **Internal API** (Service Layer)
+2.  **Domain API** (Repository Interfaces)
 3.  **External Integrations**
 
 ---
@@ -15,7 +15,7 @@ The application uses **Firebase** as its backend-as-a-service.
 
 ### Firestore Database
 The database schema, collections, and security rules are documented in detail:
-- [**Firestore Schema Documentation**](FIRESTORE_SCHEMA.md)
+- [**Firestore Schema Documentation**](../FIRESTORE_SCHEMA.md)
 
 ### Cloud Functions
 Server-side logic is implemented using Firebase Cloud Functions.
@@ -29,37 +29,30 @@ Server-side logic is implemented using Firebase Cloud Functions.
 
 ---
 
-## 2. Internal API (Service Layer)
+## 2. Domain API (Internal Interfaces)
 
-The application uses a **Service Layer** pattern to abstract external data sources. All services are located in `lib/services/`.
+Following **Clean Architecture**, the application business logic (BLoCs) interacts with the data layer exclusively through **Repository Interfaces** defined in the **Domain Layer** (`lib/domain/repositories/`).
 
-### Core Services
+### Core Repositories
 
-| Service | Description | Key Methods |
-|---------|-------------|-------------|
-| **AuthService** | Authentication management | `signInWithEmail`, `signUp`, `signOut`, `getCurrentUser` |
-| **FirestoreService** | Database operations | `getUser`, `createOrder`, `getServices`, `updateProfile` |
-| **StorageService** | File storage (images) | `uploadProfilePhoto`, `uploadOrderPhotos`, `deleteFile` |
-| **AnalyticsService** | User behavior tracking | `logEvent`, `setUserProperty`, `logLogin`, `logPurchase` |
+| Repository Interface | Description | Key Methods |
+|----------------------|-------------|-------------|
+| **IAuthRepository** | Authentication management | `signIn`, `signUp`, `signOut`, `getCurrentUser` |
+| **IUserRepository** | User profile data | `getUserProfile`, `updateProfile` |
+| **IServiceRepository**| Service catalog operations | `getServices`, `searchServices`, `getServiceById` |
+| **IOrderRepository** | Order lifecycle management | `createOrder`, `getOrders`, `updateOrderStatus` |
 
-### Feature Services
+### Feature Repositories
 
-| Service | Description | Key Methods |
-|---------|-------------|-------------|
-| **ChatService** | Real-time messaging | `getChat`, `sendMessage`, `markAsRead`, `streamMessages` |
-| **NotificationService** | Push notifications | `initialize`, `getToken`, `sendNotification` |
-| **ReviewService** | Ratings & reviews | `createReview`, `getTechnicianReviews`, `getOrderReview` |
-| **SearchService** | Search functionality | `searchServices`, `searchTechnicians` |
-| **AddressService** | Location & geocoding | `getCurrentLocation`, `getAddressFromCoordinates` |
+| Repository Interface | Description | Key Methods |
+|----------------------|-------------|-------------|
+| **IChatRepository** | Real-time messaging | `getConversations`, `sendMessage`, `streamMessages` |
+| **INotificationRepository** | Push notifications | `initialize`, `getToken`, `sendNotification` |
+| **IReviewRepository** | Ratings & reviews | `submitReview`, `getTechnicianReviews` |
+| **IAddressRepository** | Saved addresses | `getSavedAddresses`, `saveAddress`, `deleteAddress` |
 
-### Utility Services
-
-| Service | Description | Key Methods |
-|---------|-------------|-------------|
-| **CacheService** | Local data caching | `cacheData`, `getCachedData`, `clearCache` |
-| **LoggerService** | Application logging | `logInfo`, `logError`, `logWarning` |
-| **PerformanceService** | Performance monitoring | `startTrace`, `stopTrace` |
-| **SnackbarService** | UI feedback | `showSuccess`, `showError`, `showInfo` |
+### Data Implementation
+The implementations of these interfaces are located in the **Data Layer** (`lib/data/repositories/`). They handle the direct communication with Firebase, Local Storage, or external APIs.
 
 ---
 
@@ -87,27 +80,25 @@ The application uses a **Service Layer** pattern to abstract external data sourc
 
 ## Error Handling
 
-All services throw custom exceptions defined in `lib/utils/exceptions.dart`:
+The Domain Layer defines custom failures in `lib/core/errors/failures.dart` (or similar). Exceptions from the Data Layer are caught and mapped to these failures before returning to the Presentation Layer.
 
-- `AuthException`: Authentication failures
-- `ServerException`: Backend/Network errors
-- `CacheException`: Local storage errors
-- `ValidationException`: Invalid input data
+**Common Failures**:
+- `ServerFailure`: Backend/Network errors
+- `CacheFailure`: Local storage errors
+- `AuthFailure`: Authentication invalid
+- `ValidationFailure`: Invalid input logic
 
-**Example Usage**:
+**Example Usage (BLoC)**:
 ```dart
-try {
-  await authService.signInWithEmail(email, password);
-} on AuthException catch (e) {
-  // Handle specific auth error
-  snackbarService.showError(e.message);
-} catch (e) {
-  // Handle generic error
-  snackbarService.showError('An unexpected error occurred');
-}
+final result = await authRepository.signIn(email, password);
+
+result.fold(
+  (failure) => emit(AuthError(message: failure.message)),
+  (user) => emit(AuthAuthenticated(user: user)),
+);
 ```
 
 ---
 
 **Last Updated**: December 2025
-**Version**: 1.0.0
+**Version**: 1.0.1

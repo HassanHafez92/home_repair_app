@@ -453,4 +453,44 @@ class UserRepositoryImpl implements IUserRepository {
       location: data['location'] as Map<String, dynamic>?,
     );
   }
+
+  @override
+  Stream<List<UserEntity>> streamAllUsers() {
+    return _db
+        .collection('users')
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => _firestoreDataToUserEntity(doc.id, doc.data()))
+              .toList(),
+        );
+  }
+
+  UserEntity _firestoreDataToUserEntity(String id, Map<String, dynamic> data) {
+    return UserEntity(
+      id: id,
+      email: data['email'] ?? '',
+      phoneNumber: data['phoneNumber'],
+      fullName: data['fullName'] ?? data['name'] ?? '',
+      profilePhoto: data['profileImageUrl'] ?? data['profilePhoto'],
+      role: _parseUserRole(data['role']),
+      createdAt: _parseTimestamp(data['createdAt']),
+      updatedAt: _parseTimestamp(data['updatedAt']),
+      lastActive: _parseTimestamp(data['lastActive']),
+      emailVerified: data['emailVerified'] ?? false,
+    );
+  }
+
+  UserRole _parseUserRole(String? role) {
+    switch (role) {
+      case 'admin':
+        return UserRole.admin;
+      case 'technician':
+        return UserRole.technician;
+      case 'customer':
+      default:
+        return UserRole.customer;
+    }
+  }
 }

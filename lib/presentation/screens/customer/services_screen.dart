@@ -4,6 +4,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/foundation.dart';
+import 'package:home_repair_app/utils/seed_data.dart';
 import '../../widgets/service_card.dart';
 import 'package:home_repair_app/domain/entities/service_entity.dart';
 import 'service_details_screen.dart';
@@ -123,6 +125,29 @@ class _ServicesScreenState extends State<ServicesScreen> {
                   return const Center(child: CircularProgressIndicator());
                 } else if (state.status == ServiceStatus.failure) {
                   return Center(child: Text('errorLoadingServices'.tr()));
+                } else if (state.services.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('noServicesAvailable'.tr()),
+                        if (kDebugMode) ...[
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () async {
+                              await SeedData.seedServices();
+                              if (context.mounted) {
+                                context.read<ServiceBloc>().add(
+                                  const ServiceLoadRequested(),
+                                );
+                              }
+                            },
+                            child: const Text('Seed Data (Debug Only)'),
+                          ),
+                        ],
+                      ],
+                    ),
+                  );
                 } else if (state.filteredServices.isEmpty) {
                   return Center(child: Text('noServicesFound'.tr()));
                 }
