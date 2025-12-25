@@ -27,6 +27,10 @@ import 'package:home_repair_app/domain/repositories/i_user_repository.dart';
 import 'package:home_repair_app/domain/repositories/i_order_repository.dart';
 import 'package:home_repair_app/domain/repositories/i_service_repository.dart';
 import 'package:home_repair_app/domain/repositories/i_admin_repository.dart';
+import 'package:home_repair_app/domain/repositories/i_address_repository.dart';
+import 'package:home_repair_app/domain/repositories/i_chat_repository.dart';
+import 'package:home_repair_app/domain/repositories/i_notification_repository.dart';
+import 'package:home_repair_app/domain/repositories/i_review_repository.dart';
 
 // Data - Repository Implementations
 import 'package:home_repair_app/data/repositories/auth_repository_impl.dart';
@@ -34,6 +38,10 @@ import 'package:home_repair_app/data/repositories/user_repository_impl.dart';
 import 'package:home_repair_app/data/repositories/order_repository_impl.dart';
 import 'package:home_repair_app/data/repositories/service_repository_impl.dart';
 import 'package:home_repair_app/data/repositories/admin_repository_impl.dart';
+import 'package:home_repair_app/data/repositories/address_repository_impl.dart';
+import 'package:home_repair_app/data/repositories/chat_repository_impl.dart';
+import 'package:home_repair_app/data/repositories/notification_repository_impl.dart';
+import 'package:home_repair_app/data/repositories/review_repository_impl.dart';
 
 // Domain - Use Cases (Auth)
 import 'package:home_repair_app/domain/usecases/auth/sign_in_with_email.dart';
@@ -41,22 +49,49 @@ import 'package:home_repair_app/domain/usecases/auth/sign_up_with_email.dart';
 import 'package:home_repair_app/domain/usecases/auth/sign_in_with_google.dart';
 import 'package:home_repair_app/domain/usecases/auth/sign_in_with_facebook.dart';
 import 'package:home_repair_app/domain/usecases/auth/sign_out.dart';
+import 'package:home_repair_app/domain/usecases/auth/send_password_reset_email.dart';
 
 // Domain - Use Cases (Order)
 import 'package:home_repair_app/domain/usecases/order/create_order.dart'
     as order_uc;
 import 'package:home_repair_app/domain/usecases/order/update_order_status.dart'
     as order_uc;
+import 'package:home_repair_app/domain/usecases/order/complete_order.dart';
+import 'package:home_repair_app/domain/usecases/order/get_order.dart';
 
 // Domain - Use Cases (User)
 import 'package:home_repair_app/domain/usecases/user/get_user.dart';
 import 'package:home_repair_app/domain/usecases/user/update_user_fields.dart';
+import 'package:home_repair_app/domain/usecases/user/create_user.dart';
+import 'package:home_repair_app/domain/usecases/user/get_technician_stats.dart';
+
+// Domain - Use Cases (Service)
+import 'package:home_repair_app/domain/usecases/service/get_services.dart';
+
+// Domain - Use Cases (Review)
+import 'package:home_repair_app/domain/usecases/review/create_review.dart';
+import 'package:home_repair_app/domain/usecases/review/get_technician_reviews.dart';
+
+// Domain - Use Cases (Chat)
+import 'package:home_repair_app/domain/usecases/chat/get_or_create_order_chat.dart';
+import 'package:home_repair_app/domain/usecases/chat/send_message.dart';
+
+// Domain - Use Cases (Notification)
+import 'package:home_repair_app/domain/usecases/notification/get_user_notifications.dart';
+import 'package:home_repair_app/domain/usecases/notification/mark_notification_as_read.dart';
+
+// Domain - Use Cases (Address)
+import 'package:home_repair_app/domain/usecases/address/get_user_addresses.dart';
+import 'package:home_repair_app/domain/usecases/address/save_address.dart';
+import 'package:home_repair_app/domain/usecases/address/delete_address.dart';
 
 // Services (Legacy)
 import 'package:home_repair_app/services/auth_service.dart';
 import 'package:home_repair_app/services/firestore_service.dart';
 import 'package:home_repair_app/services/storage_service.dart';
 import 'package:home_repair_app/services/address_service.dart';
+import 'package:home_repair_app/services/chat_service.dart';
+import 'package:home_repair_app/services/review_service.dart';
 
 // BLoCs
 import 'package:home_repair_app/presentation/blocs/auth/auth_bloc.dart';
@@ -94,6 +129,8 @@ Future<void> initializeDependencies(SharedPreferences sharedPreferences) async {
   sl.registerLazySingleton<FirestoreService>(() => FirestoreService());
   sl.registerLazySingleton<StorageService>(() => StorageService());
   sl.registerLazySingleton<AddressService>(() => AddressService());
+  sl.registerLazySingleton<ChatService>(() => ChatService());
+  sl.registerLazySingleton<ReviewService>(() => ReviewService());
 
   //============================================================================
   // Data Sources - Remote
@@ -147,6 +184,18 @@ Future<void> initializeDependencies(SharedPreferences sharedPreferences) async {
   sl.registerLazySingleton<IAdminRepository>(
     () => AdminRepositoryImpl(firestore: sl()),
   );
+  sl.registerLazySingleton<IAddressRepository>(
+    () => AddressRepositoryImpl(addressService: sl()),
+  );
+  sl.registerLazySingleton<IChatRepository>(
+    () => ChatRepositoryImpl(chatService: sl()),
+  );
+  sl.registerLazySingleton<INotificationRepository>(
+    () => NotificationRepositoryImpl(firestoreService: sl()),
+  );
+  sl.registerLazySingleton<IReviewRepository>(
+    () => ReviewRepositoryImpl(reviewService: sl()),
+  );
 
   //============================================================================
   // Use Cases - Auth
@@ -157,17 +206,53 @@ Future<void> initializeDependencies(SharedPreferences sharedPreferences) async {
   sl.registerLazySingleton(() => SignInWithFacebook(sl()));
   sl.registerLazySingleton(() => SignOut(sl()));
 
+  sl.registerLazySingleton(() => SendPasswordResetEmail(sl()));
+
   //============================================================================
   // Use Cases - Order
   //============================================================================
   sl.registerLazySingleton(() => order_uc.CreateOrder(sl()));
   sl.registerLazySingleton(() => order_uc.UpdateOrderStatus(sl()));
+  sl.registerLazySingleton(() => CompleteOrder(sl()));
+  sl.registerLazySingleton(() => GetOrder(sl()));
 
   //============================================================================
   // Use Cases - User
   //============================================================================
   sl.registerLazySingleton(() => GetUser(sl()));
   sl.registerLazySingleton(() => UpdateUserFields(sl()));
+  sl.registerLazySingleton(() => CreateUser(sl()));
+  sl.registerLazySingleton(() => GetTechnicianStats(sl()));
+
+  //============================================================================
+  // Use Cases - Service
+  //============================================================================
+  sl.registerLazySingleton(() => GetServices(sl()));
+
+  //============================================================================
+  // Use Cases - Review
+  //============================================================================
+  sl.registerLazySingleton(() => CreateReview(sl()));
+  sl.registerLazySingleton(() => GetTechnicianReviews(sl()));
+
+  //============================================================================
+  // Use Cases - Chat
+  //============================================================================
+  sl.registerLazySingleton(() => GetOrCreateOrderChat(sl()));
+  sl.registerLazySingleton(() => SendMessage(sl()));
+
+  //============================================================================
+  // Use Cases - Notification
+  //============================================================================
+  sl.registerLazySingleton(() => GetUserNotifications(sl()));
+  sl.registerLazySingleton(() => MarkNotificationAsRead(sl()));
+
+  //============================================================================
+  // Use Cases - Address
+  //============================================================================
+  sl.registerLazySingleton(() => GetUserAddresses(sl()));
+  sl.registerLazySingleton(() => SaveAddress(sl()));
+  sl.registerLazySingleton(() => DeleteAddress(sl()));
 
   //============================================================================
   // BLoCs (Factory - create new instance each time)
