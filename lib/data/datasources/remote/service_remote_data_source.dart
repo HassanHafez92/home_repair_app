@@ -1,6 +1,8 @@
 // Service remote data source implementation using Firestore.
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:convert';
+import 'package:flutter/services.dart' show rootBundle;
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/error/exceptions.dart';
@@ -21,11 +23,44 @@ class ServiceRemoteDataSource implements IServiceRemoteDataSource {
   Future<List<ServiceModel>> getAllServices() async {
     try {
       final snapshot = await _servicesCollection.get();
-      return snapshot.docs
-          .map((doc) => ServiceModel.fromJson({...doc.data(), 'id': doc.id}))
-          .toList();
+      if (snapshot.docs.isNotEmpty) {
+        return snapshot.docs
+            .map((doc) => ServiceModel.fromJson({...doc.data(), 'id': doc.id}))
+            .toList();
+      }
+      return _loadLocalServices();
     } catch (e) {
-      throw ServerException('Failed to get services: $e');
+      // Fallback to local data on error or if offline
+      return _loadLocalServices();
+    }
+  }
+
+  Future<List<ServiceModel>> _loadLocalServices() async {
+    try {
+      final jsonString = await rootBundle.loadString(
+        'assets/data/fixawy_services.json',
+      );
+      final List<dynamic> jsonList = json.decode(jsonString);
+      return jsonList.map((json) {
+        return ServiceModel(
+          id: json['id'],
+          name: json['name'],
+          description: json['description'],
+          iconUrl: json['imageUrl'], // Use the high-quality image URL
+          category:
+              json['name'], // Category is the service name itself in this dataset
+          avgPrice: 150.0, // Default values
+          minPrice: 50.0,
+          maxPrice: 300.0,
+          visitFee: 50.0,
+          avgCompletionTimeMinutes: 60,
+          isActive: true,
+          createdAt: DateTime.now(),
+        );
+      }).toList();
+    } catch (e) {
+      // If even local loading fails, return empty list
+      return [];
     }
   }
 
@@ -80,10 +115,13 @@ class ServiceRemoteDataSource implements IServiceRemoteDataSource {
 
   @override
   Stream<List<ServiceModel>> watchServices() {
-    return _servicesCollection.snapshots().map(
-      (snapshot) => snapshot.docs
-          .map((doc) => ServiceModel.fromJson({...doc.data(), 'id': doc.id}))
-          .toList(),
-    );
+    return _servicesCollection.snapshots().asyncMap((snapshot) async {
+      if (snapshot.docs.isNotEmpty) {
+        return snapshot.docs
+            .map((doc) => ServiceModel.fromJson({...doc.data(), 'id': doc.id}))
+            .toList();
+      }
+      return await _loadLocalServices();
+    });
   }
 }

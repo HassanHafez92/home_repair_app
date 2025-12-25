@@ -124,6 +124,7 @@ flutter:
   assets:
     - assets/translations/
     - assets/images/
+    - assets/data/
     - assets/map_styles/
 
   # An image asset can refer to one or more resolution-specific "variants", see
