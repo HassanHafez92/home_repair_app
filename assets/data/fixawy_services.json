@@ -2,73 +2,73 @@
     {
         "id": "ac_maintenance",
         "name": "Air Conditioning",
-        "description": "Expert maintenance and repair services for split and central AC units to ensure optimal cooling.",
-        "imageUrl": "https://images.unsplash.com/photo-1647022528152-52ed9338611d?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0"
+        "description": "Air conditioning maintenance service is a routine process designed to maintain efficiency, enhance performance, and extend the lifespan of the unit.",
+        "imageUrl": "https://fixawy.com/storage/1065/AC---Category.jpg"
     },
     {
         "id": "alumetal",
         "name": "Alumetal",
-        "description": "Custom aluminum windows, doors, and enclosure fabrication and repair services.",
-        "imageUrl": "https://images.unsplash.com/photo-1522195491553-dbda973beac4?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0"
+        "description": "The \"Alumetal\" service is a specialized service that offers solutions for aluminum-based structures, providing durability and aesthetic appeal.",
+        "imageUrl": "https://fixawy.com/storage/829/Alumetal.jpg"
     },
     {
         "id": "appliances",
         "name": "Appliances",
-        "description": "Reliable repair for home appliances including washing machines, refrigerators, and ovens.",
-        "imageUrl": "https://images.unsplash.com/photo-1716193696093-9c54b6a290e5?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0"
+        "description": "At Home Appliances Services, we provide maintenance and repair for various household appliances to ensure they run smoothly.",
+        "imageUrl": "https://fixawy.com/storage/823/Home-Appliences.jpg"
     },
     {
         "id": "buy_ac",
         "name": "Buying Air Condition",
-        "description": "Supply and professional installation of top-brand air conditioning units.",
-        "imageUrl": "https://images.unsplash.com/photo-1757219525975-03b5984bc6e8?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0"
+        "description": "Supply and installation of a wide range of air conditioning units tailored to your space and cooling needs.",
+        "imageUrl": "https://fixawy.com/storage/1156/Capture.PNG"
     },
     {
         "id": "carpentry",
         "name": "Carpentry",
-        "description": "Skilled woodwork services for furniture repair, door installation, and custom cabinetry.",
-        "imageUrl": "https://images.unsplash.com/photo-1725916631418-7c000895345f?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0"
+        "description": "Keep your woodwork in top condition with professional carpentry services, including repairs, installations, and custom work.",
+        "imageUrl": "https://fixawy.com/storage/827/Carpentry.jpg"
     },
     {
         "id": "electrical",
         "name": "Electrical",
-        "description": "Comprehensive electrical services including wiring, troubleshooting, and fixture installation.",
-        "imageUrl": "https://images.unsplash.com/photo-1595831708961-1b13c0dd2422?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0"
+        "description": "Keep your electrical systems safe and functional with expert electrical maintenance and installation services.",
+        "imageUrl": "https://fixawy.com/storage/828/Electricity.jpg"
     },
     {
         "id": "finishing",
         "name": "Finishing",
-        "description": "High-quality interior finishing works to give your space a perfect look.",
-        "imageUrl": "https://images.unsplash.com/photo-1765766601432-edcdc9ae017d?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0"
+        "description": "The finishing service is the final touch for your construction or renovation projects, ensuring high-quality results.",
+        "imageUrl": "https://fixawy.com/storage/1273/finishing.2.PNG"
     },
     {
         "id": "gypsum_board",
         "name": "Gypsum Board",
-        "description": "Modern false ceiling and drywall partition installation with artistic designs.",
-        "imageUrl": "https://images.unsplash.com/photo-1609754449093-484b0fe7f10b?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0"
+        "description": "Gypsum board is a lightweight and versatile material used for creating walls, ceilings, and decorative elements in modern interiors.",
+        "imageUrl": "https://fixawy.com/storage/1126/Capture.-2025.PNG"
     },
     {
         "id": "painting",
         "name": "Painting",
-        "description": "Professional interior and exterior painting services using premium materials.",
-        "imageUrl": "https://images.unsplash.com/photo-1562259949-e8e7689d7828?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0"
+        "description": "The painting service provides professional interior and exterior painting to refresh and protect your property.",
+        "imageUrl": "https://fixawy.com/storage/1133/painting---category.jpeg"
     },
     {
         "id": "plumbing",
         "name": "Plumbing",
-        "description": "Expert plumbing solutions for leak repairs, pipe fitting, and sanitary ware installation.",
-        "imageUrl": "https://images.unsplash.com/photo-1654440122140-f1fc995ddb34?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0"
+        "description": "Keep your plumbing working smoothly with professional plumbing repairs, maintenance, and new installations.",
+        "imageUrl": "https://fixawy.com/storage/826/Plumbing.jpg"
     },
     {
         "id": "satellite",
         "name": "Satellite",
-        "description": "Satellite dish installation, tuning, and maintenance for clear TV reception.",
-        "imageUrl": "https://images.unsplash.com/photo-1622311538967-3aaaeec90346?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0"
+        "description": "The satellite dish service covers installation, alignment, and repair of satellite systems for optimal signal quality.",
+        "imageUrl": "https://fixawy.com/storage/1114/category-satellite.jpg"
     },
     {
         "id": "tiling",
         "name": "Tiling",
-        "description": "Precision floor and wall tiling for bathrooms, kitchens, and living areas.",
-        "imageUrl": "https://images.unsplash.com/photo-1599031628962-1f6755a3b1b5?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0"
+        "description": "Tiling service includes preparation and installation of tiles for floors and walls using high-quality materials.",
+        "imageUrl": "https://fixawy.com/storage/1086/Tiling-category.jpg"
     }
 ]
