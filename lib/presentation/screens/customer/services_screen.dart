@@ -7,6 +7,10 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:home_repair_app/utils/seed_data.dart';
 import '../../widgets/service_card.dart';
+import '../../widgets/fixawy_service_card.dart';
+import '../../widgets/breadcrumb_navigator.dart';
+import '../../utils/responsive_utils.dart';
+import '../../theme/design_tokens.dart';
 import 'package:home_repair_app/domain/entities/service_entity.dart';
 import 'service_details_screen.dart';
 import '../../blocs/service/service_bloc.dart';
@@ -79,6 +83,25 @@ class _ServicesScreenState extends State<ServicesScreen> {
       ),
       body: Column(
         children: [
+          // Breadcrumb Navigation
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(
+              horizontal: DesignTokens.spaceBase,
+              vertical: DesignTokens.spaceXS,
+            ),
+            color: Theme.of(context).colorScheme.surface,
+            child: BreadcrumbNavigator(
+              items: [
+                BreadcrumbItem(
+                  label: 'home'.tr(),
+                  onTap: () => Navigator.of(context).pop(),
+                ),
+                BreadcrumbItem(label: 'allServices'.tr()),
+              ],
+            ),
+          ),
+          const SizedBox(height: DesignTokens.spaceXS),
           // Category Filter
           BlocBuilder<ServiceBloc, ServiceState>(
             buildWhen: (previous, current) =>
@@ -152,44 +175,81 @@ class _ServicesScreenState extends State<ServicesScreen> {
                   return Center(child: Text('noServicesFound'.tr()));
                 }
 
-                return GridView.builder(
-                  padding: const EdgeInsets.all(16),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                    childAspectRatio: 0.85,
-                  ),
-                  itemCount: state.filteredServices.length,
-                  itemBuilder: (context, index) {
-                    final service = state.filteredServices[index];
-
-                    // Create a localized copy of the service
-                    final localizedService = ServiceEntity(
-                      id: service.id,
-                      name: service.name.tr(),
-                      description: service.description,
-                      iconUrl: service.iconUrl,
-                      category: service.category,
-                      avgPrice: service.avgPrice,
-                      minPrice: service.minPrice,
-                      maxPrice: service.maxPrice,
-                      visitFee: service.visitFee,
-                      avgCompletionTimeMinutes:
-                          service.avgCompletionTimeMinutes,
-                      createdAt: service.createdAt,
+                // Responsive grid with Fixawy-style cards
+                return LayoutBuilder(
+                  builder: (context, constraints) {
+                    final crossAxisCount = ResponsiveBreakpoints.getGridColumns(
+                      constraints.maxWidth,
                     );
+                    final aspectRatio =
+                        ResponsiveBreakpoints.getCardAspectRatio(
+                          constraints.maxWidth,
+                        );
 
-                    return ServiceCard(
-                      service: localizedService,
-                      iconData: _getIconForCategory(service.category),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                ServiceDetailsScreen(service: localizedService),
-                          ),
+                    return GridView.builder(
+                      padding: const EdgeInsets.all(16),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: crossAxisCount,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                        childAspectRatio: aspectRatio,
+                      ),
+                      itemCount: state.filteredServices.length,
+                      itemBuilder: (context, index) {
+                        final service = state.filteredServices[index];
+
+                        // Create a localized copy of the service
+                        final localizedService = ServiceEntity(
+                          id: service.id,
+                          name: service.name.tr(),
+                          description: service.description,
+                          iconUrl: service.iconUrl,
+                          category: service.category,
+                          avgPrice: service.avgPrice,
+                          minPrice: service.minPrice,
+                          maxPrice: service.maxPrice,
+                          visitFee: service.visitFee,
+                          avgCompletionTimeMinutes:
+                              service.avgCompletionTimeMinutes,
+                          createdAt: service.createdAt,
+                        );
+
+                        // Use Fixawy card for photo URLs, original for icons
+                        final isPhotoUrl =
+                            service.iconUrl.toLowerCase().contains(
+                              'unsplash',
+                            ) ||
+                            service.iconUrl.toLowerCase().contains('pexels');
+
+                        if (isPhotoUrl) {
+                          return FixawyServiceCard(
+                            service: localizedService,
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => ServiceDetailsScreen(
+                                    service: localizedService,
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                        }
+
+                        return ServiceCard(
+                          service: localizedService,
+                          iconData: _getIconForCategory(service.category),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ServiceDetailsScreen(
+                                  service: localizedService,
+                                ),
+                              ),
+                            );
+                          },
                         );
                       },
                     );

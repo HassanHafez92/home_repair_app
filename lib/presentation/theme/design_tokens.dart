@@ -21,6 +21,12 @@ class DesignTokens {
   static const Color accentGreen = Color(0xFF10B981); // Emerald 500
   static const Color accentRed = Color(0xFFEF4444); // Red 500
 
+  /// Fixawy brand colors - For service category styling
+  static const Color fixawyYellow = Color(0xFFFCB712); // Primary accent
+  static const Color fixawyYellowLight = Color(0xFFFFF3CD); // Light variant
+  static const Color fixawyNavy = Color(0xFF1B2945); // Dark sections/footer
+  static const Color fixawyBackground = Color(0xFFF8F9FA); // Page background
+
   /// Neutral colors - Slate palette for premium feel
   static const Color neutral900 = Color(0xFF0F172A);
   static const Color neutral800 = Color(0xFF1E293B);
