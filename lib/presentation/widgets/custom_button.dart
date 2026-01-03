@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../theme/design_tokens.dart';
 
 enum ButtonVariant { primary, secondary, outline, text }
 
-class CustomButton extends StatelessWidget {
+class CustomButton extends StatefulWidget {
   final String text;
   final VoidCallback? onPressed;
   final bool isLoading;
@@ -11,6 +12,7 @@ class CustomButton extends StatelessWidget {
   final IconData? icon;
   final double? width;
   final double height;
+  final bool enableHaptic;
 
   const CustomButton({
     super.key,
@@ -21,7 +23,58 @@ class CustomButton extends StatelessWidget {
     this.icon,
     this.width,
     this.height = 56.0,
+    this.enableHaptic = true,
   });
+
+  @override
+  State<CustomButton> createState() => _CustomButtonState();
+}
+
+class _CustomButtonState extends State<CustomButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _scaleController;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _scaleController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 100),
+    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.97).animate(
+      CurvedAnimation(parent: _scaleController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _scaleController.dispose();
+    super.dispose();
+  }
+
+  void _handleTapDown(TapDownDetails details) {
+    if (widget.onPressed != null && !widget.isLoading) {
+      _scaleController.forward();
+    }
+  }
+
+  void _handleTapUp(TapUpDetails details) {
+    _scaleController.reverse();
+  }
+
+  void _handleTapCancel() {
+    _scaleController.reverse();
+  }
+
+  void _handleTap() {
+    if (widget.onPressed != null && !widget.isLoading) {
+      if (widget.enableHaptic) {
+        HapticFeedback.lightImpact();
+      }
+      widget.onPressed!();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,13 +85,11 @@ class CustomButton extends StatelessWidget {
     Color backgroundColor;
     Color foregroundColor;
     BorderSide? borderSide;
-    double elevation = 0;
 
-    switch (variant) {
+    switch (widget.variant) {
       case ButtonVariant.primary:
         backgroundColor = colorScheme.primary;
         foregroundColor = Colors.white;
-        elevation = 0;
         break;
       case ButtonVariant.secondary:
         backgroundColor = colorScheme.secondary;
@@ -56,7 +107,7 @@ class CustomButton extends StatelessWidget {
     }
 
     // Disable colors if onPressed is null (disabled state)
-    if (onPressed == null) {
+    if (widget.onPressed == null) {
       backgroundColor = DesignTokens.neutral200;
       foregroundColor = DesignTokens.neutral400;
       borderSide = null;
@@ -64,58 +115,74 @@ class CustomButton extends StatelessWidget {
 
     return Semantics(
       button: true,
-      enabled: onPressed != null && !isLoading,
-      label: isLoading ? '$text, loading' : text,
-      child: SizedBox(
-        width: width ?? double.infinity,
-        height: height,
-        child: ElevatedButton(
-          onPressed: isLoading ? null : onPressed,
-          style:
-              ElevatedButton.styleFrom(
-                backgroundColor: backgroundColor,
-                foregroundColor: foregroundColor,
-                elevation: elevation,
-                side: borderSide,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: DesignTokens.spaceLG,
-                ),
-                textStyle: theme.textTheme.labelLarge?.copyWith(
-                  fontSize: DesignTokens.fontSizeBase,
-                  fontWeight: DesignTokens.fontWeightSemiBold,
-                  letterSpacing: 0.5,
-                ),
-              ).copyWith(
-                elevation: WidgetStateProperty.resolveWith<double>((states) {
-                  if (variant == ButtonVariant.primary) {
-                    if (states.contains(WidgetState.pressed)) return 0;
-                    if (states.contains(WidgetState.hovered)) return 2;
-                  }
-                  return 0;
-                }),
+      enabled: widget.onPressed != null && !widget.isLoading,
+      label: widget.isLoading ? '${widget.text}, loading' : widget.text,
+      child: GestureDetector(
+        onTapDown: _handleTapDown,
+        onTapUp: _handleTapUp,
+        onTapCancel: _handleTapCancel,
+        onTap: _handleTap,
+        child: AnimatedBuilder(
+          animation: _scaleAnimation,
+          builder: (context, child) {
+            return Transform.scale(scale: _scaleAnimation.value, child: child);
+          },
+          child: SizedBox(
+            width: widget.width ?? double.infinity,
+            height: widget.height,
+            child: Container(
+              decoration: BoxDecoration(
+                color: backgroundColor,
+                borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
+                border: borderSide != null
+                    ? Border.all(
+                        color: borderSide.color,
+                        width: borderSide.width,
+                      )
+                    : null,
+                boxShadow:
+                    widget.variant == ButtonVariant.primary &&
+                        widget.onPressed != null
+                    ? DesignTokens.shadowPrimary
+                    : null,
               ),
-          child: isLoading
-              ? SizedBox(
-                  height: 24,
-                  width: 24,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(foregroundColor),
-                  ),
-                )
-              : Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    if (icon != null) ...[
-                      Icon(icon, size: DesignTokens.iconSizeSM),
-                      const SizedBox(width: DesignTokens.spaceSM),
-                    ],
-                    Text(text),
-                  ],
-                ),
+              child: Center(
+                child: widget.isLoading
+                    ? SizedBox(
+                        height: 24,
+                        width: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            foregroundColor,
+                          ),
+                        ),
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (widget.icon != null) ...[
+                            Icon(
+                              widget.icon,
+                              size: DesignTokens.iconSizeSM,
+                              color: foregroundColor,
+                            ),
+                            const SizedBox(width: DesignTokens.spaceSM),
+                          ],
+                          Text(
+                            widget.text,
+                            style: theme.textTheme.labelLarge?.copyWith(
+                              fontSize: DesignTokens.fontSizeBase,
+                              fontWeight: DesignTokens.fontWeightSemiBold,
+                              letterSpacing: 0.5,
+                              color: foregroundColor,
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
+            ),
+          ),
         ),
       ),
     );

@@ -3,6 +3,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
+import '../theme/design_tokens.dart';
 
 /// Color constants for loading widgets
 class _LoadingColors {
@@ -119,8 +120,8 @@ class LoadingGridShimmer extends StatelessWidget {
   }
 }
 
-/// Empty state widget
-class EmptyState extends StatelessWidget {
+/// Empty state widget with optional animation
+class EmptyState extends StatefulWidget {
   final IconData icon;
   final String title;
   final String? subtitle;
@@ -128,6 +129,7 @@ class EmptyState extends StatelessWidget {
   final String? retryLabel;
   final double iconSize;
   final Color iconColor;
+  final bool animate;
 
   const EmptyState({
     super.key,
@@ -138,38 +140,117 @@ class EmptyState extends StatelessWidget {
     this.retryLabel = 'Retry',
     this.iconSize = _LoadingConstants.defaultIconSize,
     this.iconColor = const Color(0xFFBDBDBD),
+    this.animate = true,
   });
 
   @override
+  State<EmptyState> createState() => _EmptyStateState();
+}
+
+class _EmptyStateState extends State<EmptyState>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _fadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+    _scaleAnimation = Tween<double>(
+      begin: 0.8,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.elasticOut));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
+      ),
+    );
+    if (widget.animate) {
+      _controller.forward();
+    } else {
+      _controller.value = 1.0;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: iconSize, color: iconColor),
-            const SizedBox(height: 24),
-            Text(
-              title,
-              style: Theme.of(context).textTheme.titleLarge,
-              textAlign: TextAlign.center,
-            ),
-            if (subtitle != null) ...[
-              const SizedBox(height: 8),
+        padding: const EdgeInsets.all(DesignTokens.spaceXL),
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) {
+            return Opacity(
+              opacity: _fadeAnimation.value,
+              child: Transform.scale(
+                scale: _scaleAnimation.value,
+                child: child,
+              ),
+            );
+          },
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Animated icon container
+              Container(
+                padding: const EdgeInsets.all(DesignTokens.spaceLG),
+                decoration: BoxDecoration(
+                  color: widget.iconColor.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  widget.icon,
+                  size: widget.iconSize,
+                  color: widget.iconColor,
+                ),
+              ),
+              const SizedBox(height: DesignTokens.spaceLG),
               Text(
-                subtitle!,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
+                widget.title,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: DesignTokens.fontWeightBold,
+                ),
                 textAlign: TextAlign.center,
               ),
+              if (widget.subtitle != null) ...[
+                const SizedBox(height: DesignTokens.spaceSM),
+                Text(
+                  widget.subtitle!,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: DesignTokens.neutral500,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+              if (widget.onRetry != null) ...[
+                const SizedBox(height: DesignTokens.spaceXL),
+                ElevatedButton.icon(
+                  onPressed: widget.onRetry,
+                  icon: const Icon(Icons.refresh_rounded, size: 20),
+                  label: Text(widget.retryLabel!),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: DesignTokens.spaceLG,
+                      vertical: DesignTokens.spaceMD,
+                    ),
+                  ),
+                ),
+              ],
             ],
-            if (onRetry != null) ...[
-              const SizedBox(height: 32),
-              ElevatedButton(onPressed: onRetry, child: Text(retryLabel!)),
-            ],
-          ],
+          ),
         ),
       ),
     );
@@ -304,6 +385,3 @@ class SkeletonCard extends StatelessWidget {
     );
   }
 }
-
-
-

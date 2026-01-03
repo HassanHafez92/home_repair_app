@@ -51,6 +51,24 @@ class DesignTokens {
   static const Color surfaceLight = Color(0xFFFFFFFF);
   static const Color surfaceDark = Color(0xFF1E293B);
 
+  // ========== Glassmorphism ==========
+
+  /// Blur values for glassmorphism effects
+  static const double blurSM = 8.0;
+  static const double blurMD = 16.0;
+  static const double blurLG = 24.0;
+  static const double blurXL = 40.0;
+
+  /// Overlay colors for glass effect
+  static Color glassLight = Colors.white.withValues(alpha: 0.7);
+  static Color glassDark = neutral900.withValues(alpha: 0.6);
+  static Color glassBorder = Colors.white.withValues(alpha: 0.2);
+
+  /// Surface tints for elevation hierarchy
+  static Color surfaceTint1 = primaryBlue.withValues(alpha: 0.02);
+  static Color surfaceTint2 = primaryBlue.withValues(alpha: 0.04);
+  static Color surfaceTint3 = primaryBlue.withValues(alpha: 0.06);
+
   // ========== Typography ==========
 
   /// Font family - Modern, premium font
@@ -129,6 +147,45 @@ class DesignTokens {
     ),
   ];
 
+  /// Lifted shadow - for cards that need emphasis
+  static List<BoxShadow> shadowLifted = [
+    BoxShadow(
+      color: neutral900.withValues(alpha: 0.08),
+      blurRadius: 30,
+      offset: const Offset(0, 12),
+    ),
+    BoxShadow(
+      color: primaryBlue.withValues(alpha: 0.06),
+      blurRadius: 20,
+      offset: const Offset(0, 4),
+    ),
+  ];
+
+  /// Colored shadows for accent elements
+  static List<BoxShadow> shadowPrimary = [
+    BoxShadow(
+      color: primaryBlue.withValues(alpha: 0.25),
+      blurRadius: 20,
+      offset: const Offset(0, 8),
+    ),
+  ];
+
+  static List<BoxShadow> shadowSuccess = [
+    BoxShadow(
+      color: accentGreen.withValues(alpha: 0.25),
+      blurRadius: 20,
+      offset: const Offset(0, 8),
+    ),
+  ];
+
+  static List<BoxShadow> shadowWarning = [
+    BoxShadow(
+      color: accentOrange.withValues(alpha: 0.25),
+      blurRadius: 20,
+      offset: const Offset(0, 8),
+    ),
+  ];
+
   // ========== Icon Sizes ==========
 
   static const double iconSizeXS = 16.0;
@@ -169,6 +226,38 @@ class DesignTokens {
     colors: [Color(0xFFF59E0B), Color(0xFFD97706)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
+  );
+
+  /// Accent gradients for variety
+  static const LinearGradient accentGradientPurple = LinearGradient(
+    colors: [Color(0xFF8B5CF6), Color(0xFF7C3AED)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient accentGradientPink = LinearGradient(
+    colors: [Color(0xFFEC4899), Color(0xFFDB2777)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient accentGradientTeal = LinearGradient(
+    colors: [Color(0xFF14B8A6), Color(0xFF0D9488)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  /// Subtle background gradients
+  static const LinearGradient backgroundGradientLight = LinearGradient(
+    colors: [Color(0xFFF8FAFC), Color(0xFFF1F5F9)],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+  );
+
+  static const LinearGradient backgroundGradientDark = LinearGradient(
+    colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
   );
 
   // ========== Semantic Spacing ==========

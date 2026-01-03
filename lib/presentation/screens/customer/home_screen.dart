@@ -3,9 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:math';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:home_repair_app/utils/seed_data.dart';
 import '../../widgets/service_card.dart';
 import '../../widgets/fixawy_service_card.dart';
+import '../../widgets/skeleton_loader.dart';
 import 'package:home_repair_app/domain/entities/service_entity.dart';
 import '../../widgets/hero_carousel.dart';
 import '../../widgets/testimonials_section.dart';
@@ -13,6 +15,7 @@ import '../../widgets/location_selector.dart';
 import '../../widgets/quick_action_bar.dart';
 import '../../widgets/popular_services_section.dart';
 import '../../utils/responsive_utils.dart';
+import '../../theme/page_transitions.dart';
 import 'services_screen.dart';
 import 'service_details_screen.dart';
 import 'orders_screen.dart';
@@ -376,11 +379,17 @@ class HomeContent extends StatelessWidget {
                 BlocBuilder<ServiceBloc, ServiceState>(
                   builder: (context, state) {
                     if (state.status == ServiceStatus.loading) {
-                      return const Center(
-                        child: Padding(
-                          padding: EdgeInsets.all(DesignTokens.spaceXL),
-                          child: CircularProgressIndicator(),
-                        ),
+                      return LayoutBuilder(
+                        builder: (context, constraints) {
+                          final crossAxisCount =
+                              ResponsiveBreakpoints.getGridColumns(
+                                constraints.maxWidth,
+                              );
+                          return SkeletonServiceGrid(
+                            itemCount: 6,
+                            crossAxisCount: min(crossAxisCount, 3),
+                          );
+                        },
                       );
                     } else if (state.status == ServiceStatus.failure) {
                       return Center(child: Text('errorLoadingServices'.tr()));
@@ -467,10 +476,11 @@ class HomeContent extends StatelessWidget {
                               return FixawyServiceCard(
                                 service: localizedService,
                                 onTap: () {
+                                  HapticFeedback.lightImpact();
                                   Navigator.push(
                                     context,
-                                    MaterialPageRoute(
-                                      builder: (_) => ServiceDetailsScreen(
+                                    FadeScalePageRoute(
+                                      page: ServiceDetailsScreen(
                                         service: localizedService,
                                       ),
                                     ),
@@ -483,10 +493,11 @@ class HomeContent extends StatelessWidget {
                               service: localizedService,
                               iconData: _getIconForCategory(service.category),
                               onTap: () {
+                                HapticFeedback.lightImpact();
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(
-                                    builder: (_) => ServiceDetailsScreen(
+                                  FadeScalePageRoute(
+                                    page: ServiceDetailsScreen(
                                       service: localizedService,
                                     ),
                                   ),
