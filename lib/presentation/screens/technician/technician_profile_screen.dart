@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:go_router/go_router.dart';
 import '../../helpers/auth_helper.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_event.dart';
@@ -15,13 +16,6 @@ import 'package:home_repair_app/services/review_service.dart';
 import 'package:home_repair_app/models/technician_stats.dart';
 import 'package:home_repair_app/models/review_model.dart';
 import '../../widgets/custom_button.dart';
-import 'edit_profile_screen.dart';
-import 'portfolio_screen.dart';
-import 'certifications_screen.dart';
-import 'service_areas_screen.dart';
-import 'account_settings_screen.dart';
-import 'privacy_settings_screen.dart';
-import 'notification_settings_screen.dart';
 
 class TechnicianProfileScreen extends StatefulWidget {
   const TechnicianProfileScreen({super.key});
@@ -214,99 +208,66 @@ class _TechnicianProfileScreenState extends State<TechnicianProfileScreen> {
               ),
               const SizedBox(height: 32),
             ],
-
             // Menu Items
             _buildMenuItem(
               context,
               icon: Icons.person_outline,
               title: 'editProfile'.tr(),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const EditProfileScreen(),
-                  ),
-                );
-              },
+              onTap: () => context.push('/technician/edit-profile'),
             ),
-            // ... other menu items ...
             _buildMenuItem(
               context,
               icon: Icons.work_outline,
               title: 'portfolio'.tr(),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const PortfolioScreen(),
-                  ),
-                );
-              },
+              onTap: () => context.push('/technician/portfolio'),
             ),
             _buildMenuItem(
               context,
               icon: Icons.card_membership,
               title: 'certifications'.tr(),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const CertificationsScreen(),
-                  ),
-                );
-              },
+              onTap: () => context.push('/technician/certifications'),
             ),
             _buildMenuItem(
               context,
               icon: Icons.location_on_outlined,
               title: 'serviceAreas'.tr(),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const ServiceAreasScreen(),
-                  ),
-                );
-              },
+              onTap: () => context.push('/technician/service-areas'),
             ),
             _buildMenuItem(
               context,
               icon: Icons.settings_outlined,
               title: 'settings'.tr(),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const AccountSettingsScreen(),
-                  ),
-                );
-              },
+              onTap: () => context.push('/technician/account-settings'),
             ),
             _buildMenuItem(
               context,
               icon: Icons.notifications_outlined,
               title: 'notifications'.tr(),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const NotificationSettingsScreen(),
-                  ),
-                );
-              },
+              onTap: () => context.push('/technician/notification-settings'),
             ),
             _buildMenuItem(
               context,
               icon: Icons.privacy_tip_outlined,
               title: 'privacy'.tr(),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const PrivacySettingsScreen(),
-                  ),
-                );
-              },
+              onTap: () => context.push('/technician/privacy-settings'),
+            ),
+            _buildMenuItem(
+              context,
+              icon: Icons.bar_chart_outlined,
+              title: 'performance'.tr(),
+              onTap: () => context.push('/technician/performance'),
+            ),
+            _buildMenuItem(
+              context,
+              icon: Icons.build_outlined,
+              title: 'diagnostics'.tr(),
+              onTap: () => context.push('/technician/diagnostics'),
+            ),
+            _buildMenuItem(
+              context,
+              icon: Icons.security_outlined,
+              title: 'appPermissions'.tr(),
+              onTap: () => context.push('/technician/permissions'),
             ),
             const SizedBox(height: 24),
 

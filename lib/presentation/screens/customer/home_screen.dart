@@ -1,20 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'dart:math';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:home_repair_app/utils/seed_data.dart';
-import '../../widgets/service_card.dart';
-import '../../widgets/fixawy_service_card.dart';
-import '../../widgets/skeleton_loader.dart';
 import 'package:home_repair_app/domain/entities/service_entity.dart';
-import '../../widgets/hero_carousel.dart';
-import '../../widgets/testimonials_section.dart';
-import '../../widgets/location_selector.dart';
-import '../../widgets/quick_action_bar.dart';
-import '../../widgets/popular_services_section.dart';
-import '../../utils/responsive_utils.dart';
 import '../../theme/page_transitions.dart';
 import 'services_screen.dart';
 import 'service_details_screen.dart';
@@ -76,74 +66,64 @@ class _HomeScreenState extends State<HomeScreen> {
           color: colorScheme.surface,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
+              color: Colors.black.withValues(alpha: 0.08),
               blurRadius: 20,
               offset: const Offset(0, -5),
             ),
           ],
         ),
-        child: BottomNavigationBar(
-          currentIndex: _currentIndex,
-          onTap: (index) => setState(() => _currentIndex = index),
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: colorScheme.surface,
-          selectedItemColor: colorScheme.primary,
-          unselectedItemColor: DesignTokens.neutral400,
-          selectedLabelStyle: TextStyle(
-            fontWeight: DesignTokens.fontWeightBold,
-            fontSize: 12,
-            fontFamily: DesignTokens.fontFamily,
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: DesignTokens.spaceMD,
+              vertical: DesignTokens.spaceXS,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _AnimatedNavItem(
+                  icon: Icons.home_outlined,
+                  activeIcon: Icons.home_rounded,
+                  label: 'home'.tr(),
+                  isSelected: _currentIndex == 0,
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    setState(() => _currentIndex = 0);
+                  },
+                ),
+                _AnimatedNavItem(
+                  icon: Icons.search_outlined,
+                  activeIcon: Icons.search_rounded,
+                  label: 'search'.tr(),
+                  isSelected: _currentIndex == 1,
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    setState(() => _currentIndex = 1);
+                  },
+                ),
+                _AnimatedNavItem(
+                  icon: Icons.shopping_bag_outlined,
+                  activeIcon: Icons.shopping_bag_rounded,
+                  label: 'orders'.tr(),
+                  isSelected: _currentIndex == 2,
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    setState(() => _currentIndex = 2);
+                  },
+                ),
+                _AnimatedNavItem(
+                  icon: Icons.person_outline_rounded,
+                  activeIcon: Icons.person_rounded,
+                  label: 'profile'.tr(),
+                  isSelected: _currentIndex == 3,
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    setState(() => _currentIndex = 3);
+                  },
+                ),
+              ],
+            ),
           ),
-          unselectedLabelStyle: TextStyle(
-            fontWeight: DesignTokens.fontWeightMedium,
-            fontSize: 12,
-            fontFamily: DesignTokens.fontFamily,
-          ),
-          elevation: 0,
-          items: [
-            BottomNavigationBarItem(
-              icon: Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Icon(
-                  _currentIndex == 0 ? Icons.home_rounded : Icons.home_outlined,
-                ),
-              ),
-              label: 'home'.tr(),
-            ),
-            BottomNavigationBarItem(
-              icon: Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Icon(
-                  _currentIndex == 1
-                      ? Icons.grid_view_rounded
-                      : Icons.grid_view_outlined,
-                ),
-              ),
-              label: 'services'.tr(),
-            ),
-            BottomNavigationBarItem(
-              icon: Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Icon(
-                  _currentIndex == 2
-                      ? Icons.receipt_long_rounded
-                      : Icons.receipt_long_outlined,
-                ),
-              ),
-              label: 'orders'.tr(),
-            ),
-            BottomNavigationBarItem(
-              icon: Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Icon(
-                  _currentIndex == 3
-                      ? Icons.person_rounded
-                      : Icons.person_outline_rounded,
-                ),
-              ),
-              label: 'account'.tr(),
-            ),
-          ],
         ),
       ),
     );
@@ -169,6 +149,10 @@ class HomeContent extends StatelessWidget {
         return Icons.handyman_rounded;
       case 'ac repair':
         return Icons.ac_unit_rounded;
+      case 'pest control':
+        return Icons.pest_control_rounded;
+      case 'appliance':
+        return Icons.kitchen_rounded;
       default:
         return Icons.build_rounded;
     }
@@ -180,217 +164,242 @@ class HomeContent extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: DesignTokens.neutral100,
       body: CustomScrollView(
         slivers: [
-          // Premium Personalized App Bar
-          SliverAppBar(
-            expandedHeight: 120,
-            floating: true,
-            pinned: true,
-            elevation: 0,
-            backgroundColor: theme.scaffoldBackgroundColor,
-            flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: DesignTokens.spaceLG,
+          // House Maintenance Style Header
+          SliverToBoxAdapter(
+            child: Container(
+              decoration: const BoxDecoration(
+                gradient: DesignTokens.headerGradient,
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(DesignTokens.radiusXL),
                 ),
-                child: BlocBuilder<AuthBloc, AuthState>(
-                  builder: (context, authState) {
-                    final userName = authState is AuthAuthenticated
-                        ? authState.user.fullName.split(' ').first
-                        : 'guest'.tr();
-                    return Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'greeting'.tr(namedArgs: {'name': userName}),
-                          style: theme.textTheme.headlineLarge?.copyWith(
-                            fontWeight: DesignTokens.fontWeightBold,
+              ),
+              child: SafeArea(
+                bottom: false,
+                child: Padding(
+                  padding: const EdgeInsets.all(DesignTokens.spaceLG),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Top row with greeting and menu
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          // Greeting
+                          BlocBuilder<AuthBloc, AuthState>(
+                            builder: (context, authState) {
+                              final userName = authState is AuthAuthenticated
+                                  ? authState.user.fullName.split(' ').first
+                                  : 'guest'.tr();
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text(
+                                        'Hello, Welcome ',
+                                        style: TextStyle(
+                                          fontSize: DesignTokens.fontSizeBase,
+                                          color: Colors.white.withValues(
+                                            alpha: 0.9,
+                                          ),
+                                        ),
+                                      ),
+                                      const Text(
+                                        '👋',
+                                        style: TextStyle(fontSize: 18),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    userName,
+                                    style: const TextStyle(
+                                      fontSize: DesignTokens.fontSizeXL,
+                                      fontWeight: DesignTokens.fontWeightBold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                          // User Avatar
+                          GestureDetector(
+                            onTap: () => Scaffold.of(context).openEndDrawer(),
+                            child: Container(
+                              width: 44,
+                              height: 44,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(22),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.1),
+                                    blurRadius: 8,
+                                  ),
+                                ],
+                              ),
+                              child: BlocBuilder<AuthBloc, AuthState>(
+                                builder: (context, state) {
+                                  if (state is AuthAuthenticated &&
+                                      state.user.fullName.isNotEmpty) {
+                                    return Center(
+                                      child: Text(
+                                        state.user.fullName[0].toUpperCase(),
+                                        style: TextStyle(
+                                          fontSize: DesignTokens.fontSizeLG,
+                                          fontWeight:
+                                              DesignTokens.fontWeightBold,
+                                          color: DesignTokens.primaryBlue,
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                  return Icon(
+                                    Icons.person,
+                                    color: DesignTokens.primaryBlue,
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: DesignTokens.spaceLG),
+
+                      // Promotional Banner
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(DesignTokens.spaceMD),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(
+                            DesignTokens.radiusLG,
+                          ),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.2),
                           ),
                         ),
-                        Text(
-                          'howCanWeHelp'.tr(),
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: DesignTokens.neutral500,
-                          ),
+                        child: Row(
+                          children: [
+                            // Banner image
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(
+                                DesignTokens.radiusMD,
+                              ),
+                              child: Image.asset(
+                                'assets/images/promo_banner.png',
+                                width: 80,
+                                height: 80,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(
+                                    width: 80,
+                                    height: 80,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.2,
+                                      ),
+                                      borderRadius: BorderRadius.circular(
+                                        DesignTokens.radiusMD,
+                                      ),
+                                    ),
+                                    child: Icon(
+                                      Icons.engineering,
+                                      color: Colors.white.withValues(
+                                        alpha: 0.8,
+                                      ),
+                                      size: 40,
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: DesignTokens.spaceMD),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'bookOurServicesNow'.tr(),
+                                    style: const TextStyle(
+                                      fontSize: DesignTokens.fontSizeMD,
+                                      fontWeight: DesignTokens.fontWeightBold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'getHomeFixed'.tr(),
+                                    style: TextStyle(
+                                      fontSize: DesignTokens.fontSizeSM,
+                                      color: Colors.white.withValues(
+                                        alpha: 0.8,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: DesignTokens.spaceLG),
-                      ],
-                    );
-                  },
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-            actions: [
-              // Search Button
-              IconButton(
-                onPressed: () => onTabChange(1),
-                icon: Container(
-                  padding: const EdgeInsets.all(DesignTokens.spaceXS),
-                  decoration: BoxDecoration(
-                    color: colorScheme.surface,
-                    borderRadius: BorderRadius.circular(DesignTokens.radiusSM),
-                    border: Border.all(
-                      color: colorScheme.outline.withValues(alpha: 0.5),
-                    ),
-                  ),
-                  child: Icon(
-                    Icons.search_rounded,
-                    color: colorScheme.primary,
-                    size: 20,
-                  ),
-                ),
-              ),
-              // Location Selector
-              const LocationSelector(),
-              const SizedBox(width: DesignTokens.spaceXS),
-              // Menu Button
-              IconButton(
-                onPressed: () {
-                  Scaffold.of(context).openEndDrawer();
-                },
-                icon: Container(
-                  padding: const EdgeInsets.all(DesignTokens.spaceXS),
-                  decoration: BoxDecoration(
-                    color: colorScheme.surface,
-                    borderRadius: BorderRadius.circular(DesignTokens.radiusSM),
-                    border: Border.all(
-                      color: colorScheme.outline.withValues(alpha: 0.5),
-                    ),
-                  ),
-                  child: Icon(
-                    Icons.menu_rounded,
-                    color: colorScheme.onSurface,
-                    size: 24,
-                  ),
-                ),
-              ),
-              const SizedBox(width: DesignTokens.spaceBase),
-            ],
           ),
 
+          // Main content
           SliverPadding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: DesignTokens.spaceLG,
-            ),
+            padding: const EdgeInsets.all(DesignTokens.spaceLG),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
-                const SizedBox(height: DesignTokens.spaceMD),
-
-                // Modern Search Bar
-                GestureDetector(
-                  onTap: () => onTabChange(1),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: DesignTokens.spaceMD,
-                      vertical: DesignTokens.spaceMD,
-                    ),
-                    decoration: BoxDecoration(
-                      color: colorScheme.surface,
-                      borderRadius: BorderRadius.circular(
-                        DesignTokens.radiusMD,
-                      ),
-                      border: Border.all(
-                        color: colorScheme.outline.withValues(alpha: 0.5),
-                      ),
-                      boxShadow: DesignTokens.shadowSoft,
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.search_rounded,
-                          color: colorScheme.primary,
-                          size: 24,
-                        ),
-                        const SizedBox(width: DesignTokens.spaceSM),
-                        Text(
-                          'searchService'.tr(),
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: DesignTokens.neutral400,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: DesignTokens.spaceMD),
-
-                // Quick Action Bar (Emergency / Schedule)
-                const QuickActionBar(),
-
-                const SizedBox(height: DesignTokens.spaceXL),
-
-                // Hero Carousel
-                HeroCarousel.withDefaultSlides(onCtaTap: () => onTabChange(1)),
-
-                const SizedBox(height: DesignTokens.spaceLG),
-
-                // Popular Services Section
-                BlocBuilder<ServiceBloc, ServiceState>(
-                  builder: (context, state) {
-                    if (state.services.isNotEmpty) {
-                      return PopularServicesSection(
-                        services: state.services.take(5).toList(),
-                        onServiceTap: (service) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  ServiceDetailsScreen(service: service),
-                            ),
-                          );
-                        },
-                      );
-                    }
-                    return const SizedBox.shrink();
-                  },
-                ),
-
-                const SizedBox(height: DesignTokens.spaceXL),
-
-                // Categories / Services Section Header
+                // Choose a Service Section
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'What a Service Looking For'.tr(),
+                      'chooseAService'.tr(),
                       style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: DesignTokens.fontWeightBold,
                       ),
                     ),
                     TextButton(
                       onPressed: () => onTabChange(1),
-                      child: Text(
-                        'showAll'.tr(),
-                        style: TextStyle(
-                          color: colorScheme.primary,
-                          fontWeight: DesignTokens.fontWeightBold,
-                        ),
+                      child: Row(
+                        children: [
+                          Text(
+                            'chooseAService'.tr(),
+                            style: TextStyle(
+                              color: colorScheme.primary,
+                              fontWeight: DesignTokens.fontWeightSemiBold,
+                              fontSize: DesignTokens.fontSizeSM,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            size: 12,
+                            color: colorScheme.primary,
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: DesignTokens.spaceBase),
+                const SizedBox(height: DesignTokens.spaceMD),
 
-                // Services Grid
+                // Services Grid - House Maintenance Style
                 BlocBuilder<ServiceBloc, ServiceState>(
                   builder: (context, state) {
                     if (state.status == ServiceStatus.loading) {
-                      return LayoutBuilder(
-                        builder: (context, constraints) {
-                          final crossAxisCount =
-                              ResponsiveBreakpoints.getGridColumns(
-                                constraints.maxWidth,
-                              );
-                          return SkeletonServiceGrid(
-                            itemCount: 6,
-                            crossAxisCount: min(crossAxisCount, 3),
-                          );
-                        },
-                      );
+                      return const _ServiceIconGridSkeleton();
                     } else if (state.status == ServiceStatus.failure) {
                       return Center(child: Text('errorLoadingServices'.tr()));
                     } else if (state.services.isEmpty) {
@@ -419,90 +428,31 @@ class HomeContent extends StatelessWidget {
                     }
 
                     final services = state.services;
+                    final displayServices = services.take(8).toList();
 
-                    // Responsive grid with Fixawy-style cards
-                    return LayoutBuilder(
-                      builder: (context, constraints) {
-                        final crossAxisCount =
-                            ResponsiveBreakpoints.getGridColumns(
-                              constraints.maxWidth,
-                            );
-                        final aspectRatio =
-                            ResponsiveBreakpoints.getCardAspectRatio(
-                              constraints.maxWidth,
-                            );
-
-                        return GridView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: min(
-                                  crossAxisCount,
-                                  3,
-                                ), // Cap at 3 for home
-                                crossAxisSpacing: DesignTokens.spaceMD,
-                                mainAxisSpacing: DesignTokens.spaceMD,
-                                childAspectRatio: aspectRatio,
+                    return GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 4,
+                            crossAxisSpacing: DesignTokens.spaceMD,
+                            mainAxisSpacing: DesignTokens.spaceMD,
+                            childAspectRatio: 0.85,
+                          ),
+                      itemCount: displayServices.length,
+                      itemBuilder: (context, index) {
+                        final service = displayServices[index];
+                        return _ServiceIconCard(
+                          icon: _getIconForCategory(service.category),
+                          label: service.name.tr(),
+                          onTap: () {
+                            HapticFeedback.lightImpact();
+                            Navigator.push(
+                              context,
+                              FadeScalePageRoute(
+                                page: ServiceDetailsScreen(service: service),
                               ),
-                          itemCount: min(services.length, 6),
-                          itemBuilder: (context, index) {
-                            final service = services[index];
-                            final localizedService = ServiceEntity(
-                              id: service.id,
-                              name: service.name.tr(),
-                              description: service.description,
-                              iconUrl: service.iconUrl,
-                              category: service.category,
-                              avgPrice: service.avgPrice,
-                              minPrice: service.minPrice,
-                              maxPrice: service.maxPrice,
-                              visitFee: service.visitFee,
-                              avgCompletionTimeMinutes:
-                                  service.avgCompletionTimeMinutes,
-                              createdAt: service.createdAt,
-                            );
-
-                            // Use Fixawy card for photo URLs, original for icons
-                            final isPhotoUrl =
-                                service.iconUrl.toLowerCase().contains(
-                                  'unsplash',
-                                ) ||
-                                service.iconUrl.toLowerCase().contains(
-                                  'pexels',
-                                );
-
-                            if (isPhotoUrl) {
-                              return FixawyServiceCard(
-                                service: localizedService,
-                                onTap: () {
-                                  HapticFeedback.lightImpact();
-                                  Navigator.push(
-                                    context,
-                                    FadeScalePageRoute(
-                                      page: ServiceDetailsScreen(
-                                        service: localizedService,
-                                      ),
-                                    ),
-                                  );
-                                },
-                              );
-                            }
-
-                            return ServiceCard(
-                              service: localizedService,
-                              iconData: _getIconForCategory(service.category),
-                              onTap: () {
-                                HapticFeedback.lightImpact();
-                                Navigator.push(
-                                  context,
-                                  FadeScalePageRoute(
-                                    page: ServiceDetailsScreen(
-                                      service: localizedService,
-                                    ),
-                                  ),
-                                );
-                              },
                             );
                           },
                         );
@@ -513,29 +463,299 @@ class HomeContent extends StatelessWidget {
 
                 const SizedBox(height: DesignTokens.spaceXL),
 
-                // "View more services" CTA
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton(
-                    onPressed: () => onTabChange(1),
-                    child: Text('viewMoreServices'.tr()),
-                  ),
+                // Most Popular Services in Your Area
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'mostPopularServices'.tr(),
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: DesignTokens.fontWeightBold,
+                      ),
+                    ),
+                  ],
                 ),
+                const SizedBox(height: DesignTokens.spaceMD),
+
+                // Popular Services Horizontal Scroll
+                BlocBuilder<ServiceBloc, ServiceState>(
+                  builder: (context, state) {
+                    if (state.services.isEmpty) {
+                      return const SizedBox.shrink();
+                    }
+
+                    final popularServices = state.services.take(5).toList();
+
+                    return SizedBox(
+                      height: 140,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: popularServices.length,
+                        separatorBuilder: (_, __) =>
+                            const SizedBox(width: DesignTokens.spaceMD),
+                        itemBuilder: (context, index) {
+                          final service = popularServices[index];
+                          return _PopularServiceCard(
+                            service: service,
+                            onTap: () {
+                              HapticFeedback.lightImpact();
+                              Navigator.push(
+                                context,
+                                FadeScalePageRoute(
+                                  page: ServiceDetailsScreen(service: service),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    );
+                  },
+                ),
+
+                const SizedBox(height: DesignTokens.space2XL),
               ]),
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
 
-          // Customer Testimonials Section (outside SliverPadding for proper full-width scroll)
-          SliverToBoxAdapter(
-            child: Column(
-              children: [
-                const SizedBox(height: DesignTokens.spaceXL),
-                const TestimonialsSection(),
-                const SizedBox(height: DesignTokens.space2XL),
-              ],
+/// House Maintenance style service icon card
+class _ServiceIconCard extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _ServiceIconCard({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              color: DesignTokens.primaryBlue.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
+              border: Border.all(
+                color: DesignTokens.primaryBlue.withValues(alpha: 0.2),
+              ),
+            ),
+            child: Icon(icon, color: DesignTokens.primaryBlue, size: 28),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: DesignTokens.fontSizeXS,
+              fontWeight: DesignTokens.fontWeightMedium,
+              color: DesignTokens.neutral700,
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Popular service card with image
+class _PopularServiceCard extends StatelessWidget {
+  final ServiceEntity service;
+  final VoidCallback onTap;
+
+  const _PopularServiceCard({required this.service, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 140,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
+          boxShadow: DesignTokens.shadowSoft,
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Image
+            Container(
+              height: 80,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    DesignTokens.primaryBlue.withValues(alpha: 0.8),
+                    DesignTokens.primaryBlueLight.withValues(alpha: 0.8),
+                  ],
+                ),
+              ),
+              child:
+                  service.iconUrl.isNotEmpty &&
+                      (service.iconUrl.contains('http'))
+                  ? Image.network(
+                      service.iconUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Icon(
+                          Icons.build_rounded,
+                          color: Colors.white.withValues(alpha: 0.7),
+                          size: 40,
+                        );
+                      },
+                    )
+                  : Icon(
+                      Icons.build_rounded,
+                      color: Colors.white.withValues(alpha: 0.7),
+                      size: 40,
+                    ),
+            ),
+            // Label
+            Padding(
+              padding: const EdgeInsets.all(DesignTokens.spaceSM),
+              child: Text(
+                service.name.tr(),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: DesignTokens.fontSizeSM,
+                  fontWeight: DesignTokens.fontWeightSemiBold,
+                  color: DesignTokens.neutral800,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Skeleton loader for service icon grid
+class _ServiceIconGridSkeleton extends StatelessWidget {
+  const _ServiceIconGridSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 4,
+        crossAxisSpacing: DesignTokens.spaceMD,
+        mainAxisSpacing: DesignTokens.spaceMD,
+        childAspectRatio: 0.85,
+      ),
+      itemCount: 8,
+      itemBuilder: (context, index) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: DesignTokens.neutral200,
+                borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              width: 50,
+              height: 12,
+              decoration: BoxDecoration(
+                color: DesignTokens.neutral200,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// Animated navigation item with scale effect
+class _AnimatedNavItem extends StatelessWidget {
+  final IconData icon;
+  final IconData activeIcon;
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _AnimatedNavItem({
+    required this.icon,
+    required this.activeIcon,
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = isSelected
+        ? DesignTokens.primaryBlue
+        : DesignTokens.neutral400;
+
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: DesignTokens.durationFast,
+        curve: Curves.easeOutCubic,
+        padding: EdgeInsets.symmetric(
+          horizontal: isSelected ? DesignTokens.spaceMD : DesignTokens.spaceSM,
+          vertical: DesignTokens.spaceXS,
+        ),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? DesignTokens.primaryBlue.withValues(alpha: 0.1)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(DesignTokens.radiusLG),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedScale(
+              scale: isSelected ? 1.1 : 1.0,
+              duration: DesignTokens.durationFast,
+              child: Icon(
+                isSelected ? activeIcon : icon,
+                color: color,
+                size: DesignTokens.iconSizeMD,
+              ),
+            ),
+            const SizedBox(height: 2),
+            AnimatedDefaultTextStyle(
+              duration: DesignTokens.durationFast,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: isSelected
+                    ? DesignTokens.fontWeightBold
+                    : DesignTokens.fontWeightMedium,
+                fontFamily: DesignTokens.fontFamily,
+                color: color,
+              ),
+              child: Text(label),
+            ),
+          ],
+        ),
       ),
     );
   }

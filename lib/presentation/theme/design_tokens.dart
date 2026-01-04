@@ -11,10 +11,10 @@ class DesignTokens {
 
   // ========== Color Palette ==========
 
-  /// Primary brand colors - Modern Indigo palette
-  static const Color primaryBlue = Color(0xFF4F46E5); // Indigo 600
-  static const Color primaryBlueDark = Color(0xFF4338CA); // Indigo 700
-  static const Color primaryBlueLight = Color(0xFF818CF8); // Indigo 400
+  /// Primary brand colors - House Maintenance palette
+  static const Color primaryBlue = Color(0xFF4158D0); // Deep Blue
+  static const Color primaryBlueDark = Color(0xFF3A4DB8); // Darker Blue
+  static const Color primaryBlueLight = Color(0xFF5D5FEF); // Light Blue/Violet
 
   /// Accent colors
   static const Color accentOrange = Color(0xFFF59E0B); // Amber 500
@@ -211,7 +211,14 @@ class DesignTokens {
   // ========== Custom Gradients ==========
 
   static const LinearGradient primaryGradient = LinearGradient(
-    colors: [primaryBlue, primaryBlueDark],
+    colors: [primaryBlue, Color(0xFF5D5FEF)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  /// House Maintenance header gradient
+  static const LinearGradient headerGradient = LinearGradient(
+    colors: [Color(0xFF4158D0), Color(0xFF5D5FEF), Color(0xFFC850C0)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );

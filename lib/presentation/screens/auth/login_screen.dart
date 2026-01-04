@@ -202,7 +202,7 @@ class _LoginScreenState extends State<LoginScreen>
                               hint: 'enterYourEmail'.tr(),
                               controller: _emailController,
                               keyboardType: TextInputType.emailAddress,
-                              prefixIcon: Icons.email_outlined,
+                              prefixIcon: const Icon(Icons.email_outlined),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return 'pleaseEnterEmail'.tr();
@@ -222,7 +222,9 @@ class _LoginScreenState extends State<LoginScreen>
                               hint: 'enterYourPassword'.tr(),
                               controller: _passwordController,
                               obscureText: true,
-                              prefixIcon: Icons.lock_outline_rounded,
+                              prefixIcon: const Icon(
+                                Icons.lock_outline_rounded,
+                              ),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return 'pleaseEnterPassword'.tr();

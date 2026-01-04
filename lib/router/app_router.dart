@@ -36,6 +36,22 @@ import '../presentation/screens/customer/booking/booking_flow_screen.dart';
 import '../presentation/screens/auth/email_verification_screen.dart';
 import '../presentation/screens/technician/technician_home_screen.dart';
 import '../presentation/screens/technician/order_detail_screen.dart';
+import '../presentation/screens/technician/diagnostics_screen.dart';
+import '../presentation/screens/technician/performance_dashboard.dart';
+import '../presentation/screens/technician/permissions_helper_screen.dart';
+import '../presentation/screens/technician/edit_profile_screen.dart' as tech;
+import '../presentation/screens/technician/portfolio_screen.dart';
+import '../presentation/screens/technician/certifications_screen.dart';
+import '../presentation/screens/technician/service_areas_screen.dart';
+import '../presentation/screens/technician/account_settings_screen.dart';
+import '../presentation/screens/technician/notification_settings_screen.dart';
+import '../presentation/screens/technician/privacy_settings_screen.dart';
+import '../presentation/screens/technician/withdrawal_screen.dart';
+import '../presentation/screens/technician/job_completion_screen.dart';
+import '../presentation/screens/technician/order_action_screen.dart';
+import '../presentation/screens/customer/orders_screen.dart';
+import '../presentation/screens/customer/profile_screen.dart';
+import '../presentation/screens/customer/services_screen.dart';
 import '../presentation/screens/admin/admin_layout.dart';
 import '../services/auth_service.dart';
 import '../services/firestore_service.dart';
@@ -299,6 +315,98 @@ class AppRouter {
               errorMessage: 'Order not found',
             );
           },
+        ),
+        GoRoute(
+          path: '/technician/diagnostics',
+          builder: (context, state) => const DiagnosticsScreen(),
+        ),
+        GoRoute(
+          path: '/technician/performance',
+          builder: (context, state) {
+            final authState = context.read<AuthBloc>().state;
+            if (authState is AuthAuthenticated) {
+              return PerformanceDashboard(technicianId: authState.user.id);
+            }
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          },
+        ),
+        GoRoute(
+          path: '/technician/permissions',
+          builder: (context, state) => const PermissionsHelperScreen(),
+        ),
+        GoRoute(
+          path: '/technician/edit-profile',
+          builder: (context, state) => const tech.EditProfileScreen(),
+        ),
+        GoRoute(
+          path: '/technician/portfolio',
+          builder: (context, state) => const PortfolioScreen(),
+        ),
+        GoRoute(
+          path: '/technician/certifications',
+          builder: (context, state) => const CertificationsScreen(),
+        ),
+        GoRoute(
+          path: '/technician/service-areas',
+          builder: (context, state) => const ServiceAreasScreen(),
+        ),
+        GoRoute(
+          path: '/technician/account-settings',
+          builder: (context, state) => const AccountSettingsScreen(),
+        ),
+        GoRoute(
+          path: '/technician/notification-settings',
+          builder: (context, state) => const NotificationSettingsScreen(),
+        ),
+        GoRoute(
+          path: '/technician/privacy-settings',
+          builder: (context, state) => const PrivacySettingsScreen(),
+        ),
+        GoRoute(
+          path: '/technician/withdrawal',
+          builder: (context, state) => const WithdrawalScreen(),
+        ),
+        GoRoute(
+          path: '/technician/order/:orderId/action',
+          builder: (context, state) {
+            final orderId = state.pathParameters['orderId']!;
+            final firestoreService = context.read<FirestoreService>();
+            return AsyncDataScreen<OrderModel>(
+              future: firestoreService.getOrder(orderId),
+              builder: (order) => OrderActionScreen(order: order.toEntity()),
+              errorTitle: 'Error',
+              errorMessage: 'Order not found',
+            );
+          },
+        ),
+        GoRoute(
+          path: '/technician/order/:orderId/complete',
+          builder: (context, state) {
+            final orderId = state.pathParameters['orderId']!;
+            final firestoreService = context.read<FirestoreService>();
+            return AsyncDataScreen<OrderModel>(
+              future: firestoreService.getOrder(orderId),
+              builder: (order) => JobCompletionScreen(order: order.toEntity()),
+              errorTitle: 'Error',
+              errorMessage: 'Order not found',
+            );
+          },
+        ),
+
+        // Customer Bottom Nav Screens
+        GoRoute(
+          path: '/customer/orders',
+          builder: (context, state) => const OrdersScreen(),
+        ),
+        GoRoute(
+          path: '/customer/profile',
+          builder: (context, state) => const ProfileScreen(),
+        ),
+        GoRoute(
+          path: '/customer/services',
+          builder: (context, state) => const ServicesScreen(),
         ),
 
         // Admin Routes

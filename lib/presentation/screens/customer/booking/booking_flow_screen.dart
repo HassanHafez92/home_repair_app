@@ -1,5 +1,5 @@
 // File: lib/screens/customer/booking/booking_flow_screen.dart
-// Purpose: Multi-step booking process for service orders using BLoC.
+// Purpose: Multi-step booking process with House Maintenance style design.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,6 +7,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:home_repair_app/domain/entities/service_entity.dart';
 import '../../../widgets/custom_text_field.dart';
 import '../../../widgets/media_picker_widget.dart';
+import '../../../widgets/house_maintenance_date_time_picker.dart';
 import '../../../blocs/booking/booking_bloc.dart';
 import '../../../blocs/booking/booking_event.dart';
 import '../../../blocs/booking/booking_state.dart';
@@ -19,6 +20,7 @@ import '../../../blocs/address_book/address_book_bloc.dart';
 import '../../../blocs/address_book/address_book_event.dart';
 import '../../../blocs/address_book/address_book_state.dart';
 import '../../../widgets/map_location_picker.dart';
+import '../../../theme/design_tokens.dart';
 
 class BookingFlowScreen extends StatefulWidget {
   final ServiceEntity service;
@@ -32,6 +34,7 @@ class BookingFlowScreen extends StatefulWidget {
 class _BookingFlowScreenState extends State<BookingFlowScreen> {
   final _descriptionController = TextEditingController();
   final _addressController = TextEditingController();
+  final PageController _pageController = PageController();
 
   @override
   void initState() {
@@ -48,7 +51,16 @@ class _BookingFlowScreenState extends State<BookingFlowScreen> {
   void dispose() {
     _descriptionController.dispose();
     _addressController.dispose();
+    _pageController.dispose();
     super.dispose();
+  }
+
+  void _goToStep(int step) {
+    _pageController.animateToPage(
+      step,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
   }
 
   @override
@@ -65,377 +77,64 @@ class _BookingFlowScreenState extends State<BookingFlowScreen> {
             ),
           );
         } else if (state.status == BookingStatus.success) {
-          // Show success dialog
-          showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (dialogContext) => AlertDialog(
-              title: Row(
-                children: [
-                  const Icon(Icons.check_circle, color: Colors.green, size: 32),
-                  const SizedBox(width: 12),
-                  Flexible(child: Text('bookingConfirmed'.tr())),
-                ],
-              ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('orderCreatedSuccessfully'.tr()),
-                  const SizedBox(height: 8),
-                  if (state.orderId != null)
-                    Text(
-                      'orderNumber'.tr(args: [state.orderId!.substring(0, 8)]),
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(dialogContext);
-                    Navigator.popUntil(context, (route) => route.isFirst);
-                  },
-                  child: Text('backToHome'.tr()),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(dialogContext);
-                    Navigator.popUntil(context, (route) => route.isFirst);
-                    if (state.orderId != null) {
-                      context.push('/customer/order/${state.orderId}');
-                    }
-                  },
-                  child: Text('viewOrder'.tr()),
-                ),
-              ],
-            ),
-          );
+          _showSuccessDialog(state);
         }
       },
       builder: (context, state) {
         return Scaffold(
+          backgroundColor: Colors.white,
           appBar: AppBar(
-            title: Text('bookService'.tr(args: [widget.service.name])),
+            backgroundColor: Colors.white,
+            elevation: 0,
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: DesignTokens.neutral900),
+              onPressed: () {
+                if (state.currentStep > 0) {
+                  context.read<BookingBloc>().add(
+                    BookingStepChanged(state.currentStep - 1),
+                  );
+                  _goToStep(state.currentStep - 1);
+                } else {
+                  Navigator.pop(context);
+                }
+              },
+            ),
+            title: Text(
+              _getStepTitle(state.currentStep),
+              style: TextStyle(
+                color: DesignTokens.neutral900,
+                fontWeight: DesignTokens.fontWeightBold,
+              ),
+            ),
+            actions: [
+              // Progress indicator
+              Padding(
+                padding: const EdgeInsets.only(right: DesignTokens.spaceMD),
+                child: SizedBox(
+                  width: 80,
+                  child: BookingProgressIndicator(
+                    currentStep: state.currentStep,
+                    totalSteps: 3,
+                  ),
+                ),
+              ),
+            ],
           ),
           body: Stack(
             children: [
-              Stepper(
-                currentStep: state.currentStep,
-                onStepContinue: () {
-                  final bookingBloc = context.read<BookingBloc>();
-                  switch (state.currentStep) {
-                    case 0: // Description
-                      if (state.isStep1Valid) {
-                        bookingBloc.add(const BookingStepChanged(1));
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('pleaseDescribeProblem'.tr())),
-                        );
-                      }
-                      break;
-                    case 1: // Location & Time
-                      if (state.isStep2Valid) {
-                        bookingBloc.add(const BookingStepChanged(2));
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('pleaseFillAddressDateTime'.tr()),
-                          ),
-                        );
-                      }
-                      break;
-                    case 2: // Confirmation
-                      final authState = context.read<AuthBloc>().state;
-                      if (authState is AuthAuthenticated) {
-                        // Check email verification before allowing booking
-                        final authService = AuthService();
-                        if (!authService.isEmailVerified) {
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: Text('verificationRequired'.tr()),
-                              content: Text('pleaseVerifyEmailToBook'.tr()),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: Text('cancel'.tr()),
-                                ),
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                    context.go('/email-verification');
-                                  },
-                                  child: Text('verifyNow'.tr()),
-                                ),
-                              ],
-                            ),
-                          );
-                          return;
-                        }
-
-                        bookingBloc.add(BookingSubmitted(authState.user.id));
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('pleaseLoginToBook'.tr())),
-                        );
-                      }
-                      break;
-                  }
+              PageView(
+                controller: _pageController,
+                physics: const NeverScrollableScrollPhysics(),
+                onPageChanged: (index) {
+                  context.read<BookingBloc>().add(BookingStepChanged(index));
                 },
-                onStepCancel: () {
-                  if (state.currentStep > 0) {
-                    context.read<BookingBloc>().add(
-                      BookingStepChanged(state.currentStep - 1),
-                    );
-                  }
-                },
-                steps: [
+                children: [
                   // Step 1: Description
-                  Step(
-                    title: Text('describeProblem'.tr()),
-                    content: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        CustomTextField(
-                          label: 'problemDescription'.tr(),
-                          hint: 'describeWhatNeedsToBeFixed'.tr(),
-                          controller: _descriptionController,
-                          maxLines: 4,
-                          onChanged: (value) {
-                            context.read<BookingBloc>().add(
-                              BookingDescriptionChanged(value),
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        MediaPickerWidget(
-                          mediaFiles: state.mediaFiles,
-                          maxPhotos: 5,
-                          maxVideos: 1,
-                          maxVideoDurationSeconds: 30,
-                          onMediaAdded: (media) {
-                            context.read<BookingBloc>().add(
-                              BookingMediaAdded(media),
-                            );
-                          },
-                          onMediaRemoved: (mediaId) {
-                            context.read<BookingBloc>().add(
-                              BookingMediaRemoved(mediaId),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                    isActive: state.currentStep >= 0,
-                  ),
-                  // Step 2: Location & Schedule
-                  Step(
-                    title: Text('locationTime'.tr()),
-                    content: Column(
-                      children: [
-                        // Saved Addresses
-                        BlocBuilder<AddressBookBloc, AddressBookState>(
-                          builder: (context, addressState) {
-                            if (addressState.addresses.isEmpty) {
-                              return const SizedBox.shrink();
-                            }
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'savedAddresses'.tr(),
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                SizedBox(
-                                  height: 40,
-                                  child: ListView.separated(
-                                    scrollDirection: Axis.horizontal,
-                                    itemCount: addressState.addresses.length,
-                                    separatorBuilder: (context, index) =>
-                                        const SizedBox(width: 8),
-                                    itemBuilder: (context, index) {
-                                      final address =
-                                          addressState.addresses[index];
-                                      return ActionChip(
-                                        avatar: Icon(
-                                          _getIconForLabel(address.label),
-                                          size: 16,
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.primary,
-                                        ),
-                                        label: Text(address.label),
-                                        onPressed: () {
-                                          _addressController.text =
-                                              address.address;
-                                          final lat =
-                                              address.location['latitude']
-                                                  as double;
-                                          final lng =
-                                              address.location['longitude']
-                                                  as double;
-                                          context.read<BookingBloc>().add(
-                                            BookingLocationChanged(
-                                              address.address,
-                                              latitude: lat,
-                                              longitude: lng,
-                                            ),
-                                          );
-                                        },
-                                      );
-                                    },
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                              ],
-                            );
-                          },
-                        ),
-                        // Address display with map picker button
-                        InkWell(
-                          onTap: () async {
-                            // Get current location if available
-                            LatLng? initialLocation;
-                            if (state.latitude != null &&
-                                state.longitude != null) {
-                              initialLocation = LatLng(
-                                state.latitude!,
-                                state.longitude!,
-                              );
-                            }
-
-                            // Open map picker
-                            await showModalBottomSheet(
-                              context: context,
-                              isScrollControlled: true,
-                              backgroundColor: Colors.transparent,
-                              builder: (context) => DraggableScrollableSheet(
-                                initialChildSize: 0.9,
-                                minChildSize: 0.5,
-                                maxChildSize: 0.95,
-                                builder: (_, controller) => MapLocationPicker(
-                                  initialLocation: initialLocation,
-                                  onLocationSelected: (location, address) {
-                                    _addressController.text = address;
-                                    context.read<BookingBloc>().add(
-                                      BookingLocationChanged(
-                                        address,
-                                        latitude: location.latitude,
-                                        longitude: location.longitude,
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                            );
-                          },
-                          child: AbsorbPointer(
-                            child: CustomTextField(
-                              label: 'serviceAddress'.tr(),
-                              hint: 'tapToSelectOnMap'.tr(),
-                              controller: _addressController,
-                              suffixIcon: const Icon(Icons.map),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        CustomTextField(
-                          label: 'preferredDate'.tr(),
-                          hint: 'selectDate'.tr(),
-                          readOnly: true,
-                          onTap: () async {
-                            final date = await showDatePicker(
-                              context: context,
-                              initialDate: DateTime.now(),
-                              firstDate: DateTime.now(),
-                              lastDate: DateTime.now().add(
-                                const Duration(days: 30),
-                              ),
-                            );
-                            if (date != null && context.mounted) {
-                              context.read<BookingBloc>().add(
-                                BookingScheduleChanged(date: date),
-                              );
-                            }
-                          },
-                          controller: TextEditingController(
-                            text: state.scheduledDate != null
-                                ? state.scheduledDate.toString().split(' ')[0]
-                                : '',
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        CustomTextField(
-                          label: 'preferredTime'.tr(),
-                          hint: 'selectTime'.tr(),
-                          readOnly: true,
-                          onTap: () async {
-                            final time = await showTimePicker(
-                              context: context,
-                              initialTime: TimeOfDay.now(),
-                            );
-                            if (time != null && context.mounted) {
-                              context.read<BookingBloc>().add(
-                                BookingScheduleChanged(time: time),
-                              );
-                            }
-                          },
-                          controller: TextEditingController(
-                            text: state.scheduledTime?.format(context) ?? '',
-                          ),
-                        ),
-                      ],
-                    ),
-                    isActive: state.currentStep >= 1,
-                  ),
+                  _buildDescriptionStep(state),
+                  // Step 2: Location & Time
+                  _buildLocationTimeStep(state),
                   // Step 3: Confirmation
-                  Step(
-                    title: Text('confirmation'.tr()),
-                    content: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildSummaryRow('services'.tr(), widget.service.name),
-                        _buildSummaryRow('serviceAddress'.tr(), state.address),
-                        _buildSummaryRow(
-                          'preferredDate'.tr(),
-                          state.scheduledDate != null
-                              ? state.scheduledDate.toString().split(' ')[0]
-                              : '',
-                        ),
-                        _buildSummaryRow(
-                          'preferredTime'.tr(),
-                          state.scheduledTime?.format(context) ?? '',
-                        ),
-                        const Divider(),
-                        _buildSummaryRow(
-                          'serviceFee'.tr(),
-                          '${widget.service.avgPrice.toInt()} EGP',
-                          bold: true,
-                        ),
-                        _buildSummaryRow(
-                          'visitFee'.tr(),
-                          '${widget.service.visitFee.toInt()} EGP',
-                        ),
-                        _buildSummaryRow(
-                          'vat'.tr(),
-                          '${(widget.service.avgPrice * 0.14).toInt()} EGP',
-                        ),
-                        const Divider(),
-                        _buildSummaryRow(
-                          'total'.tr(),
-                          '${(widget.service.avgPrice + widget.service.visitFee + widget.service.avgPrice * 0.14).toInt()} EGP',
-                          bold: true,
-                          color: Colors.blue,
-                        ),
-                      ],
-                    ),
-                    isActive: state.currentStep >= 2,
-                  ),
+                  _buildConfirmationStep(state),
                 ],
               ),
               if (state.status == BookingStatus.submitting)
@@ -445,39 +144,613 @@ class _BookingFlowScreenState extends State<BookingFlowScreen> {
                 ),
             ],
           ),
+          bottomNavigationBar: _buildBottomBar(state),
         );
       },
     );
   }
 
-  Widget _buildSummaryRow(
-    String label,
-    String value, {
-    bool bold = false,
-    Color? color,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  String _getStepTitle(int step) {
+    switch (step) {
+      case 0:
+        return 'describeProblem'.tr();
+      case 1:
+        return 'dateAndTime'.tr();
+      case 2:
+        return 'confirmation'.tr();
+      default:
+        return '';
+    }
+  }
+
+  Widget _buildDescriptionStep(BookingState state) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(DesignTokens.spaceLG),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontWeight: bold ? FontWeight.bold : FontWeight.normal,
-              color: color,
+          // Service info card
+          Container(
+            padding: const EdgeInsets.all(DesignTokens.spaceMD),
+            decoration: BoxDecoration(
+              color: DesignTokens.primaryBlue.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
+              border: Border.all(
+                color: DesignTokens.primaryBlue.withValues(alpha: 0.2),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: DesignTokens.primaryBlue,
+                    borderRadius: BorderRadius.circular(DesignTokens.radiusSM),
+                  ),
+                  child: const Icon(
+                    Icons.build_rounded,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: DesignTokens.spaceMD),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.service.name.tr(),
+                        style: TextStyle(
+                          fontSize: DesignTokens.fontSizeMD,
+                          fontWeight: DesignTokens.fontWeightBold,
+                          color: DesignTokens.neutral900,
+                        ),
+                      ),
+                      Text(
+                        'startingFrom'.tr(
+                          args: ['${widget.service.minPrice.toInt()} EGP'],
+                        ),
+                        style: TextStyle(
+                          fontSize: DesignTokens.fontSizeSM,
+                          color: DesignTokens.neutral600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
+
+          const SizedBox(height: DesignTokens.spaceXL),
+
           Text(
-            value,
+            'whatIsTheProblem'.tr(),
             style: TextStyle(
-              fontWeight: bold ? FontWeight.bold : FontWeight.normal,
-              color: color,
+              fontSize: DesignTokens.fontSizeMD,
+              fontWeight: DesignTokens.fontWeightBold,
+              color: DesignTokens.neutral900,
+            ),
+          ),
+          const SizedBox(height: DesignTokens.spaceMD),
+
+          CustomTextField(
+            label: 'problemDescription'.tr(),
+            hint: 'describeWhatNeedsToBeFixed'.tr(),
+            controller: _descriptionController,
+            maxLines: 4,
+            onChanged: (value) {
+              context.read<BookingBloc>().add(BookingDescriptionChanged(value));
+            },
+          ),
+
+          const SizedBox(height: DesignTokens.spaceXL),
+
+          Text(
+            'addPhotosOrVideos'.tr(),
+            style: TextStyle(
+              fontSize: DesignTokens.fontSizeMD,
+              fontWeight: DesignTokens.fontWeightBold,
+              color: DesignTokens.neutral900,
+            ),
+          ),
+          const SizedBox(height: DesignTokens.spaceSM),
+          Text(
+            'photosHelpUsUnderstand'.tr(),
+            style: TextStyle(
+              fontSize: DesignTokens.fontSizeSM,
+              color: DesignTokens.neutral500,
+            ),
+          ),
+          const SizedBox(height: DesignTokens.spaceMD),
+
+          MediaPickerWidget(
+            mediaFiles: state.mediaFiles,
+            maxPhotos: 5,
+            maxVideos: 1,
+            maxVideoDurationSeconds: 30,
+            onMediaAdded: (media) {
+              context.read<BookingBloc>().add(BookingMediaAdded(media));
+            },
+            onMediaRemoved: (mediaId) {
+              context.read<BookingBloc>().add(BookingMediaRemoved(mediaId));
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLocationTimeStep(BookingState state) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(DesignTokens.spaceLG),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Saved Addresses
+          BlocBuilder<AddressBookBloc, AddressBookState>(
+            builder: (context, addressState) {
+              if (addressState.addresses.isEmpty) {
+                return const SizedBox.shrink();
+              }
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'savedAddresses'.tr(),
+                    style: TextStyle(
+                      fontSize: DesignTokens.fontSizeMD,
+                      fontWeight: DesignTokens.fontWeightBold,
+                      color: DesignTokens.neutral900,
+                    ),
+                  ),
+                  const SizedBox(height: DesignTokens.spaceMD),
+                  SizedBox(
+                    height: 44,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: addressState.addresses.length,
+                      separatorBuilder: (_, __) =>
+                          const SizedBox(width: DesignTokens.spaceSM),
+                      itemBuilder: (context, index) {
+                        final address = addressState.addresses[index];
+                        return _AddressChip(
+                          icon: _getIconForLabel(address.label),
+                          label: address.label,
+                          isSelected:
+                              _addressController.text == address.address,
+                          onTap: () {
+                            _addressController.text = address.address;
+                            final lat = address.location['latitude'] as double;
+                            final lng = address.location['longitude'] as double;
+                            context.read<BookingBloc>().add(
+                              BookingLocationChanged(
+                                address.address,
+                                latitude: lat,
+                                longitude: lng,
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: DesignTokens.spaceXL),
+                ],
+              );
+            },
+          ),
+
+          // Location picker
+          Text(
+            'serviceLocation'.tr(),
+            style: TextStyle(
+              fontSize: DesignTokens.fontSizeMD,
+              fontWeight: DesignTokens.fontWeightBold,
+              color: DesignTokens.neutral900,
+            ),
+          ),
+          const SizedBox(height: DesignTokens.spaceMD),
+
+          InkWell(
+            onTap: () async {
+              LatLng? initialLocation;
+              if (state.latitude != null && state.longitude != null) {
+                initialLocation = LatLng(state.latitude!, state.longitude!);
+              }
+
+              await showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (context) => DraggableScrollableSheet(
+                  initialChildSize: 0.9,
+                  minChildSize: 0.5,
+                  maxChildSize: 0.95,
+                  builder: (_, controller) => MapLocationPicker(
+                    initialLocation: initialLocation,
+                    onLocationSelected: (location, address) {
+                      _addressController.text = address;
+                      context.read<BookingBloc>().add(
+                        BookingLocationChanged(
+                          address,
+                          latitude: location.latitude,
+                          longitude: location.longitude,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              );
+            },
+            child: Container(
+              padding: const EdgeInsets.all(DesignTokens.spaceMD),
+              decoration: BoxDecoration(
+                color: DesignTokens.neutral100,
+                borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
+                border: Border.all(color: DesignTokens.neutral200),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.location_on, color: DesignTokens.primaryBlue),
+                  const SizedBox(width: DesignTokens.spaceMD),
+                  Expanded(
+                    child: Text(
+                      state.address.isNotEmpty
+                          ? state.address
+                          : 'tapToSelectOnMap'.tr(),
+                      style: TextStyle(
+                        color: state.address.isNotEmpty
+                            ? DesignTokens.neutral900
+                            : DesignTokens.neutral400,
+                      ),
+                    ),
+                  ),
+                  Icon(Icons.map_outlined, color: DesignTokens.neutral400),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: DesignTokens.spaceXL),
+
+          // House Maintenance style date/time picker
+          HouseMaintenanceDateTimePicker(
+            selectedDate: state.scheduledDate,
+            selectedTime: state.scheduledTime,
+            onDateSelected: (date) {
+              context.read<BookingBloc>().add(
+                BookingScheduleChanged(date: date),
+              );
+            },
+            onTimeSelected: (time) {
+              context.read<BookingBloc>().add(
+                BookingScheduleChanged(time: time),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildConfirmationStep(BookingState state) {
+    final totalPrice =
+        widget.service.avgPrice +
+        widget.service.visitFee +
+        (widget.service.avgPrice * 0.14);
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(DesignTokens.spaceLG),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'orderSummary'.tr(),
+            style: TextStyle(
+              fontSize: DesignTokens.fontSizeLG,
+              fontWeight: DesignTokens.fontWeightBold,
+              color: DesignTokens.neutral900,
+            ),
+          ),
+          const SizedBox(height: DesignTokens.spaceLG),
+
+          // Summary card
+          Container(
+            padding: const EdgeInsets.all(DesignTokens.spaceMD),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
+              border: Border.all(color: DesignTokens.neutral200),
+              boxShadow: DesignTokens.shadowSoft,
+            ),
+            child: Column(
+              children: [
+                _SummaryRow(
+                  label: 'service'.tr(),
+                  value: widget.service.name.tr(),
+                ),
+                const Divider(height: DesignTokens.spaceLG),
+                _SummaryRow(label: 'location'.tr(), value: state.address),
+                const Divider(height: DesignTokens.spaceLG),
+                _SummaryRow(
+                  label: 'dateTime'.tr(),
+                  value: _formatDateTime(state),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: DesignTokens.spaceXL),
+
+          // Price breakdown
+          Text(
+            'priceBreakdown'.tr(),
+            style: TextStyle(
+              fontSize: DesignTokens.fontSizeMD,
+              fontWeight: DesignTokens.fontWeightBold,
+              color: DesignTokens.neutral900,
+            ),
+          ),
+          const SizedBox(height: DesignTokens.spaceMD),
+
+          Container(
+            padding: const EdgeInsets.all(DesignTokens.spaceMD),
+            decoration: BoxDecoration(
+              color: DesignTokens.neutral50,
+              borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
+            ),
+            child: Column(
+              children: [
+                _PriceRow(
+                  label: 'serviceFee'.tr(),
+                  price: '${widget.service.avgPrice.toInt()} EGP',
+                ),
+                const SizedBox(height: DesignTokens.spaceSM),
+                _PriceRow(
+                  label: 'visitFee'.tr(),
+                  price: '${widget.service.visitFee.toInt()} EGP',
+                ),
+                const SizedBox(height: DesignTokens.spaceSM),
+                _PriceRow(
+                  label: 'vat'.tr(),
+                  price: '${(widget.service.avgPrice * 0.14).toInt()} EGP',
+                ),
+                const Divider(height: DesignTokens.spaceLG),
+                _PriceRow(
+                  label: 'total'.tr(),
+                  price: '${totalPrice.toInt()} EGP',
+                  isTotal: true,
+                ),
+              ],
             ),
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildBottomBar(BookingState state) {
+    final totalPrice =
+        widget.service.avgPrice +
+        widget.service.visitFee +
+        (widget.service.avgPrice * 0.14);
+
+    return Container(
+      padding: const EdgeInsets.all(DesignTokens.spaceMD),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        child: Row(
+          children: [
+            if (state.currentStep == 2) ...[
+              // Price display on confirmation step
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'AED ${totalPrice.toInt()}',
+                    style: TextStyle(
+                      fontSize: DesignTokens.fontSizeLG,
+                      fontWeight: DesignTokens.fontWeightBold,
+                      color: DesignTokens.neutral900,
+                    ),
+                  ),
+                  Text(
+                    'total'.tr(),
+                    style: TextStyle(
+                      fontSize: DesignTokens.fontSizeXS,
+                      color: DesignTokens.neutral500,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(width: DesignTokens.spaceLG),
+            ],
+            Expanded(
+              child: ElevatedButton(
+                onPressed: () => _handleContinue(state),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: DesignTokens.primaryBlue,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    vertical: DesignTokens.spaceMD,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
+                  ),
+                  elevation: 0,
+                ),
+                child: Text(
+                  state.currentStep == 2 ? 'confirmBooking'.tr() : 'next'.tr(),
+                  style: const TextStyle(
+                    fontSize: DesignTokens.fontSizeBase,
+                    fontWeight: DesignTokens.fontWeightSemiBold,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _handleContinue(BookingState state) {
+    final bookingBloc = context.read<BookingBloc>();
+
+    switch (state.currentStep) {
+      case 0:
+        if (state.isStep1Valid) {
+          bookingBloc.add(const BookingStepChanged(1));
+          _goToStep(1);
+        } else {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('pleaseDescribeProblem'.tr())));
+        }
+        break;
+      case 1:
+        if (state.isStep2Valid) {
+          bookingBloc.add(const BookingStepChanged(2));
+          _goToStep(2);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('pleaseFillAddressDateTime'.tr())),
+          );
+        }
+        break;
+      case 2:
+        final authState = context.read<AuthBloc>().state;
+        if (authState is AuthAuthenticated) {
+          final authService = AuthService();
+          if (!authService.isEmailVerified) {
+            _showVerificationDialog();
+            return;
+          }
+          bookingBloc.add(BookingSubmitted(authState.user.id));
+        } else {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('pleaseLoginToBook'.tr())));
+        }
+        break;
+    }
+  }
+
+  void _showVerificationDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('verificationRequired'.tr()),
+        content: Text('pleaseVerifyEmailToBook'.tr()),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('cancel'.tr()),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              context.go('/email-verification');
+            },
+            child: Text('verifyNow'.tr()),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showSuccessDialog(BookingState state) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(DesignTokens.radiusLG),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: DesignTokens.accentGreen.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.check_circle,
+                color: DesignTokens.accentGreen,
+                size: 48,
+              ),
+            ),
+            const SizedBox(height: DesignTokens.spaceLG),
+            Text(
+              'bookingConfirmed'.tr(),
+              style: TextStyle(
+                fontSize: DesignTokens.fontSizeLG,
+                fontWeight: DesignTokens.fontWeightBold,
+              ),
+            ),
+            const SizedBox(height: DesignTokens.spaceSM),
+            Text(
+              'orderCreatedSuccessfully'.tr(),
+              textAlign: TextAlign.center,
+              style: TextStyle(color: DesignTokens.neutral600),
+            ),
+            if (state.orderId != null) ...[
+              const SizedBox(height: DesignTokens.spaceSM),
+              Text(
+                'orderNumber'.tr(args: [state.orderId!.substring(0, 8)]),
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              Navigator.popUntil(context, (route) => route.isFirst);
+            },
+            child: Text('backToHome'.tr()),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              Navigator.popUntil(context, (route) => route.isFirst);
+              if (state.orderId != null) {
+                context.push('/customer/order/${state.orderId}');
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: DesignTokens.primaryBlue,
+            ),
+            child: Text('viewOrder'.tr()),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatDateTime(BookingState state) {
+    if (state.scheduledDate == null) return '-';
+
+    final dateStr = DateFormat.yMMMd().format(state.scheduledDate!);
+    final timeStr = state.scheduledTime?.format(context) ?? '';
+
+    return '$dateStr ${timeStr.isNotEmpty ? 'at $timeStr' : ''}';
   }
 
   IconData _getIconForLabel(String label) {
@@ -492,18 +765,138 @@ class _BookingFlowScreenState extends State<BookingFlowScreen> {
   }
 }
 
-// Helper widget for RadioGroup since it was used in the original code but might be a custom widget
-// Wait, I see `RadioGroup` in the original code. It might be imported or defined elsewhere.
-// I'll assume it's not needed if I configure RadioListTiles correctly.
-// I'll modify the build method to not use RadioGroup wrapper if it's not standard.
-// But to be safe, I'll check if it was imported. It wasn't imported in the original file I read.
-// It might be a typo in my reading or it was defined in the file but I missed it?
-// No, I read the whole file.
-// Ah, `RadioListTile` is standard. `RadioGroup` is NOT standard Flutter widget.
-// It must have been a custom widget or I misread.
-// Let me check the original file content again.
-// Line 279: `content: RadioGroup<String>(`
-// It was there. But no import for it.
-// Maybe it's in `custom_text_field.dart`? Or just a missing import in the original file that worked by accident or global export?
-// Or maybe it was defined in the file and I missed it?
-// I'll check the file content again.
+/// Address chip widget
+class _AddressChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _AddressChip({
+    required this.icon,
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: DesignTokens.spaceMD,
+          vertical: DesignTokens.spaceSM,
+        ),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? DesignTokens.primaryBlue.withValues(alpha: 0.1)
+              : Colors.white,
+          borderRadius: BorderRadius.circular(DesignTokens.radiusFull),
+          border: Border.all(
+            color: isSelected
+                ? DesignTokens.primaryBlue
+                : DesignTokens.neutral200,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 18,
+              color: isSelected
+                  ? DesignTokens.primaryBlue
+                  : DesignTokens.neutral600,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: TextStyle(
+                color: isSelected
+                    ? DesignTokens.primaryBlue
+                    : DesignTokens.neutral700,
+                fontWeight: isSelected
+                    ? DesignTokens.fontWeightSemiBold
+                    : DesignTokens.fontWeightMedium,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Summary row widget
+class _SummaryRow extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _SummaryRow({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: DesignTokens.neutral500,
+            fontSize: DesignTokens.fontSizeSM,
+          ),
+        ),
+        Flexible(
+          child: Text(
+            value,
+            textAlign: TextAlign.end,
+            style: TextStyle(
+              color: DesignTokens.neutral900,
+              fontWeight: DesignTokens.fontWeightMedium,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Price row widget
+class _PriceRow extends StatelessWidget {
+  final String label;
+  final String price;
+  final bool isTotal;
+
+  const _PriceRow({
+    required this.label,
+    required this.price,
+    this.isTotal = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: isTotal ? DesignTokens.neutral900 : DesignTokens.neutral600,
+            fontWeight: isTotal
+                ? DesignTokens.fontWeightBold
+                : FontWeight.normal,
+          ),
+        ),
+        Text(
+          price,
+          style: TextStyle(
+            color: isTotal ? DesignTokens.primaryBlue : DesignTokens.neutral900,
+            fontWeight: DesignTokens.fontWeightSemiBold,
+            fontSize: isTotal ? DesignTokens.fontSizeMD : null,
+          ),
+        ),
+      ],
+    );
+  }
+}
