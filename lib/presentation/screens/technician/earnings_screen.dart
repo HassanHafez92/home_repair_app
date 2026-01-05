@@ -1,9 +1,9 @@
 // File: lib/screens/technician/earnings_screen.dart
-// Purpose: Display earnings overview and transaction history.
+// Purpose: Display earnings overview and transaction history - House Maintenance style
 
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../../widgets/custom_button.dart';
+import '../../theme/design_tokens.dart';
 import 'withdrawal_screen.dart';
 
 class EarningsScreen extends StatelessWidget {
@@ -11,241 +11,422 @@ class EarningsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Mock data - in real app, this would come from Firestore
-    const double totalEarnings = 15240.0;
-    const double pendingPayment = 1850.0;
-    const double availableBalance = 13390.0;
+    // Mock data - in real app would come from BLoC
+    const totalEarnings = 24820.0;
+    const thisMonthEarnings = 3420.0;
+    const pendingAmount = 1250.0;
 
-    final List<Map<String, dynamic>> transactions = [
-      {
-        'date': '2024-11-22',
-        'description': 'AC Repair - Maadi',
-        'amount': 450.0,
-      },
-      {
-        'date': '2024-11-21',
-        'description': 'Plumbing - Downtown',
-        'amount': 320.0,
-      },
-      {
-        'date': '2024-11-20',
-        'description': 'Electrical - Nasr City',
-        'amount': 580.0,
-      },
-      {
-        'date': '2024-11-19',
-        'description': 'Carpentry - Heliopolis',
-        'amount': 500.0,
-      },
+    final transactions = [
+      _Transaction(
+        'AC Repair Service',
+        DateTime.now().subtract(const Duration(hours: 2)),
+        350,
+        true,
+      ),
+      _Transaction(
+        'Plumbing - Leak Fix',
+        DateTime.now().subtract(const Duration(days: 1)),
+        220,
+        true,
+      ),
+      _Transaction(
+        'Electrical Wiring',
+        DateTime.now().subtract(const Duration(days: 2)),
+        480,
+        true,
+      ),
+      _Transaction(
+        'Withdrawal',
+        DateTime.now().subtract(const Duration(days: 3)),
+        1000,
+        false,
+      ),
+      _Transaction(
+        'Painting Service',
+        DateTime.now().subtract(const Duration(days: 4)),
+        650,
+        true,
+      ),
     ];
 
     return Scaffold(
-      appBar: AppBar(title: Text('earningsTitle'.tr())),
-      body: Column(
-        children: [
-          // Earnings Summary
-          Container(
-            margin: const EdgeInsets.all(16),
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Colors.blue, Colors.purple],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+      backgroundColor: DesignTokens.neutral100,
+      body: CustomScrollView(
+        slivers: [
+          // Gradient Header with Total Earnings
+          SliverToBoxAdapter(
+            child: Container(
+              decoration: const BoxDecoration(
+                gradient: DesignTokens.headerGradient,
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(DesignTokens.radiusXL),
+                ),
               ),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'totalEarnings'.tr(),
-                  style: const TextStyle(color: Colors.white70, fontSize: 14),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '${totalEarnings.toInt()} EGP',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
+              child: SafeArea(
+                bottom: false,
+                child: Padding(
+                  padding: const EdgeInsets.all(DesignTokens.spaceLG),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Header
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'earnings'.tr(),
+                            style: const TextStyle(
+                              fontSize: DesignTokens.fontSizeXL,
+                              fontWeight: DesignTokens.fontWeightBold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: IconButton(
+                              onPressed: () => _showFilterDialog(context),
+                              icon: const Icon(
+                                Icons.tune,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: DesignTokens.spaceXL),
+
+                      // Total Earnings
+                      Text(
+                        'totalEarnings'.tr(),
+                        style: TextStyle(
+                          fontSize: DesignTokens.fontSizeSM,
+                          color: Colors.white.withValues(alpha: 0.8),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            '${totalEarnings.toInt()}',
+                            style: const TextStyle(
+                              fontSize: 36,
+                              fontWeight: DesignTokens.fontWeightBold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          const Padding(
+                            padding: EdgeInsets.only(bottom: 6),
+                            child: Text(
+                              'EGP',
+                              style: TextStyle(
+                                fontSize: DesignTokens.fontSizeMD,
+                                fontWeight: DesignTokens.fontWeightMedium,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: DesignTokens.spaceLG),
+
+                      // Stats Row
+                      Row(
+                        children: [
+                          _StatChip(
+                            label: 'thisMonth'.tr(),
+                            value: '${thisMonthEarnings.toInt()} EGP',
+                            icon: Icons.trending_up,
+                          ),
+                          const SizedBox(width: DesignTokens.spaceMD),
+                          _StatChip(
+                            label: 'pending'.tr(),
+                            value: '${pendingAmount.toInt()} EGP',
+                            icon: Icons.hourglass_empty,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: DesignTokens.spaceLG),
+
+                      // Withdraw Button
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const WithdrawalScreen(),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.account_balance_wallet),
+                          label: Text('withdraw'.tr()),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: DesignTokens.primaryBlue,
+                            padding: const EdgeInsets.symmetric(
+                              vertical: DesignTokens.spaceMD,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                DesignTokens.radiusMD,
+                              ),
+                            ),
+                            elevation: 0,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildStatItem(
-                        'pending'.tr(),
-                        '${pendingPayment.toInt()} EGP',
-                      ),
-                    ),
-                    Expanded(
-                      child: _buildStatItem(
-                        'available'.tr(),
-                        '${availableBalance.toInt()} EGP',
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                CustomButton(
-                  text: 'withdraw'.tr(),
-                  variant: ButtonVariant.secondary,
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const WithdrawalScreen(),
-                      ),
-                    );
-                  },
-                ),
-              ],
+              ),
             ),
           ),
 
-          // Filters
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: [
-                Text(
-                  'recentTransactions'.tr(),
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+          // Transactions Section
+          SliverPadding(
+            padding: const EdgeInsets.all(DesignTokens.spaceLG),
+            sliver: SliverToBoxAdapter(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'recentTransactions'.tr(),
+                    style: TextStyle(
+                      fontSize: DesignTokens.fontSizeMD,
+                      fontWeight: DesignTokens.fontWeightBold,
+                      color: DesignTokens.neutral900,
+                    ),
                   ),
-                ),
-                const Spacer(),
-                TextButton(
-                  onPressed: () {
-                    _showFilterDialog(context);
-                  },
-                  child: Text('filter'.tr()),
-                ),
-              ],
+                  TextButton(onPressed: () {}, child: Text('seeAll'.tr())),
+                ],
+              ),
             ),
           ),
 
-          // Transactions List
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: transactions.length,
-              itemBuilder: (context, index) {
+          // Transaction List
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: DesignTokens.spaceLG,
+            ),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate((context, index) {
                 final tx = transactions[index];
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  child: ListTile(
-                    leading: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.green.withValues(alpha: 0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.check_circle,
-                        color: Colors.green,
-                      ),
-                    ),
-                    title: Text(tx['description']),
-                    subtitle: Text(tx['date']),
-                    trailing: Text(
-                      '+${tx['amount'].toInt()} EGP',
-                      style: const TextStyle(
-                        color: Colors.green,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                );
-              },
+                return _TransactionCard(transaction: tx);
+              }, childCount: transactions.length),
             ),
+          ),
+
+          const SliverToBoxAdapter(
+            child: SizedBox(height: DesignTokens.space2XL),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildStatItem(String label, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(color: Colors.white70, fontSize: 12),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ],
-    );
-  }
-
   void _showFilterDialog(BuildContext context) {
     showModalBottomSheet(
       context: context,
+      backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(DesignTokens.radiusLG),
+        ),
       ),
-      builder: (context) => Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(DesignTokens.spaceLG),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'filterTransactions'.tr(),
+                    style: TextStyle(
+                      fontSize: DesignTokens.fontSizeMD,
+                      fontWeight: DesignTokens.fontWeightBold,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close),
+                  ),
+                ],
+              ),
+              const SizedBox(height: DesignTokens.spaceMD),
+              _FilterOption('thisWeek'.tr(), true),
+              _FilterOption('thisMonth'.tr(), false),
+              _FilterOption('last3Months'.tr(), false),
+              _FilterOption('thisYear'.tr(), false),
+              const SizedBox(height: DesignTokens.spaceLG),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _Transaction {
+  final String title;
+  final DateTime date;
+  final double amount;
+  final bool isCredit;
+
+  _Transaction(this.title, this.date, this.amount, this.isCredit);
+}
+
+class _StatChip extends StatelessWidget {
+  final String label;
+  final String value;
+  final IconData icon;
+
+  const _StatChip({
+    required this.label,
+    required this.value,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(DesignTokens.spaceSM),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(DesignTokens.radiusSM),
+        ),
+        child: Row(
           children: [
-            Text(
-              'filterTransactions'.tr(),
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            ListTile(
-              leading: const Icon(Icons.today),
-              title: Text('today'.tr()),
-              onTap: () => Navigator.pop(context),
-            ),
-            ListTile(
-              leading: const Icon(Icons.calendar_view_week),
-              title: Text('thisWeek'.tr()),
-              onTap: () => Navigator.pop(context),
-            ),
-            ListTile(
-              leading: const Icon(Icons.calendar_month),
-              title: Text('thisMonth'.tr()),
-              onTap: () => Navigator.pop(context),
-            ),
-            ListTile(
-              leading: const Icon(Icons.calendar_today),
-              title: Text('thisYear'.tr()),
-              onTap: () => Navigator.pop(context),
-            ),
-            ListTile(
-              leading: const Icon(Icons.date_range),
-              title: Text('customRange'.tr()),
-              onTap: () async {
-                Navigator.pop(context);
-                final picked = await showDateRangePicker(
-                  context: context,
-                  firstDate: DateTime(2020),
-                  lastDate: DateTime.now(),
-                );
-                if (picked != null) {
-                  // Filter transactions by date range
-                  // In a real app, this would update the state
-                }
-              },
+            Icon(icon, color: Colors.white, size: 18),
+            const SizedBox(width: 8),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: DesignTokens.fontSizeXS,
+                    color: Colors.white.withValues(alpha: 0.8),
+                  ),
+                ),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: DesignTokens.fontSizeSM,
+                    fontWeight: DesignTokens.fontWeightBold,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _TransactionCard extends StatelessWidget {
+  final _Transaction transaction;
+
+  const _TransactionCard({required this.transaction});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: DesignTokens.spaceSM),
+      padding: const EdgeInsets.all(DesignTokens.spaceMD),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
+        boxShadow: DesignTokens.shadowSoft,
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: transaction.isCredit
+                  ? DesignTokens.accentGreen.withValues(alpha: 0.1)
+                  : DesignTokens.error.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(DesignTokens.radiusSM),
+            ),
+            child: Icon(
+              transaction.isCredit
+                  ? Icons.arrow_downward_rounded
+                  : Icons.arrow_upward_rounded,
+              color: transaction.isCredit
+                  ? DesignTokens.accentGreen
+                  : DesignTokens.error,
+            ),
+          ),
+          const SizedBox(width: DesignTokens.spaceSM),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  transaction.title,
+                  style: TextStyle(
+                    fontWeight: DesignTokens.fontWeightSemiBold,
+                    color: DesignTokens.neutral900,
+                  ),
+                ),
+                Text(
+                  DateFormat.yMMMd().format(transaction.date),
+                  style: TextStyle(
+                    fontSize: DesignTokens.fontSizeSM,
+                    color: DesignTokens.neutral500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Text(
+            '${transaction.isCredit ? '+' : '-'}${transaction.amount.toInt()} EGP',
+            style: TextStyle(
+              fontWeight: DesignTokens.fontWeightBold,
+              color: transaction.isCredit
+                  ? DesignTokens.accentGreen
+                  : DesignTokens.error,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FilterOption extends StatelessWidget {
+  final String label;
+  final bool isSelected;
+
+  const _FilterOption(this.label, this.isSelected);
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      title: Text(label),
+      trailing: isSelected
+          ? Icon(Icons.check, color: DesignTokens.primaryBlue)
+          : null,
+      onTap: () {
+        Navigator.pop(context);
+      },
     );
   }
 }

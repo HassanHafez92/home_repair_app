@@ -750,5 +750,11 @@
     "noCurrentOrders": "No current orders",
     "noPastOrders": "No past orders",
     "noCancelledOrders": "No cancelled orders",
-    "serviceOrder": "Service Order"
+    "serviceOrder": "Service Order",
+    "activeJobsMap": "Active Jobs Map",
+    "ordersWaiting": "orders waiting for your response",
+    "unavailable": "Unavailable",
+    "noDataAvailable": "No data available",
+    "noRecentActivity": "No recent activity",
+    "hoursAgo": "{} hours ago"
 }

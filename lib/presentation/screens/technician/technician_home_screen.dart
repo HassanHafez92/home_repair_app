@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -6,6 +7,7 @@ import '../../helpers/auth_helper.dart';
 import '../../blocs/technician_dashboard/technician_dashboard_bloc.dart';
 import '../../blocs/order/technician_order_bloc.dart';
 import '../../widgets/order_map_view.dart';
+import '../../theme/design_tokens.dart';
 import 'incoming_orders_screen.dart';
 import 'active_jobs_screen.dart';
 import 'earnings_screen.dart';
@@ -39,36 +41,84 @@ class _TechnicianHomeScreenState extends State<TechnicianHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       body: _screens[_currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.grey,
-        items: [
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.home),
-            label: 'home'.tr(),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 20,
+              offset: const Offset(0, -5),
+            ),
+          ],
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: DesignTokens.spaceMD,
+              vertical: DesignTokens.spaceXS,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _AnimatedNavItem(
+                  icon: Icons.home_outlined,
+                  activeIcon: Icons.home_rounded,
+                  label: 'home'.tr(),
+                  isSelected: _currentIndex == 0,
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    setState(() => _currentIndex = 0);
+                  },
+                ),
+                _AnimatedNavItem(
+                  icon: Icons.inbox_outlined,
+                  activeIcon: Icons.inbox_rounded,
+                  label: 'orders'.tr(),
+                  isSelected: _currentIndex == 1,
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    setState(() => _currentIndex = 1);
+                  },
+                ),
+                _AnimatedNavItem(
+                  icon: Icons.work_outline_rounded,
+                  activeIcon: Icons.work_rounded,
+                  label: 'jobs'.tr(),
+                  isSelected: _currentIndex == 2,
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    setState(() => _currentIndex = 2);
+                  },
+                ),
+                _AnimatedNavItem(
+                  icon: Icons.account_balance_wallet_outlined,
+                  activeIcon: Icons.account_balance_wallet_rounded,
+                  label: 'earnings'.tr(),
+                  isSelected: _currentIndex == 3,
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    setState(() => _currentIndex = 3);
+                  },
+                ),
+                _AnimatedNavItem(
+                  icon: Icons.person_outline_rounded,
+                  activeIcon: Icons.person_rounded,
+                  label: 'profile'.tr(),
+                  isSelected: _currentIndex == 4,
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    setState(() => _currentIndex = 4);
+                  },
+                ),
+              ],
+            ),
           ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.inbox),
-            label: 'orders'.tr(),
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.work),
-            label: 'jobs'.tr(),
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.attach_money),
-            label: 'earnings'.tr(),
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.person),
-            label: 'profile'.tr(),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -87,7 +137,6 @@ class _TechnicianDashboardState extends State<TechnicianDashboard> {
   @override
   void initState() {
     super.initState();
-    // Schedule the BLoC events to run after the first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         final userId = context.userId;
@@ -95,7 +144,6 @@ class _TechnicianDashboardState extends State<TechnicianDashboard> {
           context.read<TechnicianDashboardBloc>().add(
             LoadTechnicianDashboard(userId),
           );
-          // Load orders for the map
           context.read<TechnicianOrderBloc>().add(LoadTechnicianOrders(userId));
         }
       }
@@ -108,22 +156,11 @@ class _TechnicianDashboardState extends State<TechnicianDashboard> {
     final user = context.currentUser;
 
     if (userId == null) {
-      return Scaffold(
-        appBar: AppBar(title: Text('dashboard'.tr())),
-        body: Center(child: Text('pleaseLogin'.tr())),
-      );
+      return Scaffold(body: Center(child: Text('pleaseLogin'.tr())));
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('dashboard'.tr()),
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.notifications_outlined),
-          ),
-        ],
-      ),
+      backgroundColor: DesignTokens.neutral100,
       body: BlocBuilder<TechnicianDashboardBloc, TechnicianDashboardState>(
         builder: (context, dashboardState) {
           if (dashboardState.status == TechnicianDashboardStatus.loading &&
@@ -172,266 +209,608 @@ class _TechnicianDashboardState extends State<TechnicianDashboard> {
                 LoadTechnicianOrders(userId),
               );
             },
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Welcome Header
-                  Row(
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+            child: CustomScrollView(
+              slivers: [
+                // House Maintenance Style Header
+                SliverToBoxAdapter(
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      gradient: DesignTokens.headerGradient,
+                      borderRadius: BorderRadius.vertical(
+                        bottom: Radius.circular(DesignTokens.radiusXL),
+                      ),
+                    ),
+                    child: SafeArea(
+                      bottom: false,
+                      child: Padding(
+                        padding: const EdgeInsets.all(DesignTokens.spaceLG),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Header Row
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                // Welcome
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Text(
+                                          'welcomeBack'.tr(),
+                                          style: TextStyle(
+                                            fontSize: DesignTokens.fontSizeBase,
+                                            color: Colors.white.withValues(
+                                              alpha: 0.9,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 4),
+                                        const Text(
+                                          '👋',
+                                          style: TextStyle(fontSize: 18),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      user?.fullName ?? 'technician'.tr(),
+                                      style: const TextStyle(
+                                        fontSize: DesignTokens.fontSizeXL,
+                                        fontWeight: DesignTokens.fontWeightBold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                // Availability & Notification
+                                Row(
+                                  children: [
+                                    // Availability Toggle
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 6,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: dashboardState.isAvailable
+                                            ? DesignTokens.accentGreen
+                                                  .withValues(alpha: 0.2)
+                                            : Colors.white.withValues(
+                                                alpha: 0.15,
+                                              ),
+                                        borderRadius: BorderRadius.circular(
+                                          DesignTokens.radiusFull,
+                                        ),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Container(
+                                            width: 8,
+                                            height: 8,
+                                            decoration: BoxDecoration(
+                                              color: dashboardState.isAvailable
+                                                  ? DesignTokens.accentGreen
+                                                  : DesignTokens.neutral400,
+                                              shape: BoxShape.circle,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 6),
+                                          Text(
+                                            dashboardState.isAvailable
+                                                ? 'available'.tr()
+                                                : 'unavailable'.tr(),
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: DesignTokens.fontSizeXS,
+                                              fontWeight:
+                                                  DesignTokens.fontWeightMedium,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 4),
+                                          GestureDetector(
+                                            onTap: () {
+                                              context
+                                                  .read<
+                                                    TechnicianDashboardBloc
+                                                  >()
+                                                  .add(
+                                                    ToggleAvailability(
+                                                      technicianId: userId,
+                                                      isAvailable:
+                                                          !dashboardState
+                                                              .isAvailable,
+                                                    ),
+                                                  );
+                                            },
+                                            child: Icon(
+                                              Icons.toggle_on,
+                                              color: dashboardState.isAvailable
+                                                  ? DesignTokens.accentGreen
+                                                  : Colors.white54,
+                                              size: 28,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    // Notification
+                                    Container(
+                                      width: 40,
+                                      height: 40,
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withValues(
+                                          alpha: 0.15,
+                                        ),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: IconButton(
+                                        onPressed: () {},
+                                        icon: const Icon(
+                                          Icons.notifications_outlined,
+                                          color: Colors.white,
+                                          size: 20,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: DesignTokens.spaceLG),
+
+                            // Quick Stats Row
+                            Row(
+                              children: [
+                                _QuickStat(
+                                  icon: Icons.attach_money,
+                                  label: 'todaysEarnings'.tr(),
+                                  value: '${stats.todayEarnings.toInt()} EGP',
+                                ),
+                                const SizedBox(width: DesignTokens.spaceMD),
+                                _QuickStat(
+                                  icon: Icons.check_circle_outline,
+                                  label: 'completed'.tr(),
+                                  value: stats.completedJobsToday.toString(),
+                                ),
+                                const SizedBox(width: DesignTokens.spaceMD),
+                                _QuickStat(
+                                  icon: Icons.star_outline,
+                                  label: 'rating'.tr(),
+                                  value: stats.rating.toStringAsFixed(1),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Main Content
+                SliverPadding(
+                  padding: const EdgeInsets.all(DesignTokens.spaceLG),
+                  sliver: SliverList(
+                    delegate: SliverChildListDelegate([
+                      // Map View for Active Orders
+                      Text(
+                        'activeJobsMap'.tr(),
+                        style: TextStyle(
+                          fontSize: DesignTokens.fontSizeMD,
+                          fontWeight: DesignTokens.fontWeightBold,
+                          color: DesignTokens.neutral900,
+                        ),
+                      ),
+                      const SizedBox(height: DesignTokens.spaceMD),
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(
+                            DesignTokens.radiusMD,
+                          ),
+                          boxShadow: DesignTokens.shadowSoft,
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child:
+                            BlocBuilder<
+                              TechnicianOrderBloc,
+                              TechnicianOrderState
+                            >(
+                              builder: (context, orderState) {
+                                return OrderMapView(
+                                  orders: orderState.activeOrders,
+                                  height: 180,
+                                  onOrderTapped: (order) {
+                                    context.push(
+                                      '/technician/order/${order.id}',
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                      ),
+                      const SizedBox(height: DesignTokens.spaceXL),
+
+                      // Pending Orders Card
+                      _DashboardCard(
+                        icon: Icons.pending_actions,
+                        iconColor: DesignTokens.accentOrange,
+                        title: 'pendingOrders'.tr(),
+                        value: stats.pendingOrders.toString(),
+                        subtitle: 'ordersWaiting'.tr(),
+                        onTap: () => widget.onTabChanged?.call(1),
+                      ),
+                      const SizedBox(height: DesignTokens.spaceMD),
+
+                      // Today's Schedule
+                      Text(
+                        'todaysSchedule'.tr(),
+                        style: TextStyle(
+                          fontSize: DesignTokens.fontSizeMD,
+                          fontWeight: DesignTokens.fontWeightBold,
+                          color: DesignTokens.neutral900,
+                        ),
+                      ),
+                      const SizedBox(height: DesignTokens.spaceMD),
+                      _ScheduleItem(
+                        time: '10:00 AM',
+                        title: 'AC Repair',
+                        location: 'Downtown',
+                        color: DesignTokens.primaryBlue,
+                      ),
+                      _ScheduleItem(
+                        time: '02:00 PM',
+                        title: 'Plumbing',
+                        location: 'Maadi',
+                        color: DesignTokens.accentGreen,
+                      ),
+                      const SizedBox(height: DesignTokens.spaceXL),
+
+                      // Quick Actions
+                      Text(
+                        'quickActions'.tr(),
+                        style: TextStyle(
+                          fontSize: DesignTokens.fontSizeMD,
+                          fontWeight: DesignTokens.fontWeightBold,
+                          color: DesignTokens.neutral900,
+                        ),
+                      ),
+                      const SizedBox(height: DesignTokens.spaceMD),
+                      Row(
                         children: [
-                          Text('welcomeBack'.tr()),
-                          Text(
-                            user?.fullName ?? 'technician'.tr(),
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
+                          Expanded(
+                            child: _ActionButton(
+                              icon: Icons.inbox_rounded,
+                              label: 'viewOrders'.tr(),
+                              onTap: () => widget.onTabChanged?.call(1),
+                            ),
+                          ),
+                          const SizedBox(width: DesignTokens.spaceMD),
+                          Expanded(
+                            child: _ActionButton(
+                              icon: Icons.work_rounded,
+                              label: 'activeJobs'.tr(),
+                              onTap: () => widget.onTabChanged?.call(2),
                             ),
                           ),
                         ],
                       ),
-                      const Spacer(),
-                      // Availability Toggle
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            'available'.tr(),
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                          Switch(
-                            value: dashboardState.isAvailable,
-                            onChanged: (value) {
-                              context.read<TechnicianDashboardBloc>().add(
-                                ToggleAvailability(
-                                  technicianId: userId,
-                                  isAvailable: value,
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ],
+                      const SizedBox(height: DesignTokens.space2XL),
+                    ]),
                   ),
-                  const SizedBox(height: 24),
-
-                  // Map View for Active Orders
-                  Text(
-                    'activeJobsMap'.tr(),
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  BlocBuilder<TechnicianOrderBloc, TechnicianOrderState>(
-                    builder: (context, orderState) {
-                      return OrderMapView(
-                        orders: orderState.activeOrders,
-                        height: 200,
-                        onOrderTapped: (order) {
-                          context.push('/technician/order/${order.id}');
-                        },
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Statistics Cards
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildStatCard(
-                          'todaysEarnings'.tr(),
-                          '${stats.todayEarnings.toInt()} EGP',
-                          Icons.attach_money,
-                          Colors.green,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: _buildStatCard(
-                          'completedJobs'.tr(),
-                          stats.completedJobsToday.toString(),
-                          Icons.check_circle,
-                          Colors.blue,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildStatCard(
-                          'rating'.tr(),
-                          stats.rating.toStringAsFixed(1),
-                          Icons.star,
-                          Colors.amber,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: _buildStatCard(
-                          'pendingOrders'.tr(),
-                          stats.pendingOrders.toString(),
-                          Icons.pending,
-                          Colors.orange,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Today's Schedule
-                  Text(
-                    'todaysSchedule'.tr(),
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildScheduleItem(
-                    '10:00 AM',
-                    'AC Repair - Downtown',
-                    'Customer: Ahmed Mohamed',
-                    Colors.blue,
-                  ),
-                  _buildScheduleItem(
-                    '02:00 PM',
-                    'Plumbing - Maadi',
-                    'Customer: Sara Ali',
-                    Colors.green,
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Quick Actions
-                  Text(
-                    'quickActions'.tr(),
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildActionButton(
-                          'viewOrders'.tr(),
-                          Icons.inbox,
-                          () {
-                            widget.onTabChanged?.call(1);
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: _buildActionButton(
-                          'activeJobs'.tr(),
-                          Icons.work,
-                          () {
-                            widget.onTabChanged?.call(2);
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           );
         },
       ),
     );
   }
+}
 
-  Widget _buildStatCard(
-    String title,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: color, size: 28),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: color,
+/// Quick stat widget for header
+class _QuickStat extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+
+  const _QuickStat({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(DesignTokens.spaceSM),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(DesignTokens.radiusSM),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: Colors.white, size: 18),
+            const SizedBox(height: 6),
+            Text(
+              value,
+              style: const TextStyle(
+                fontSize: DesignTokens.fontSizeMD,
+                fontWeight: DesignTokens.fontWeightBold,
+                color: Colors.white,
+              ),
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(title, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-        ],
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: DesignTokens.fontSizeXS,
+                color: Colors.white.withValues(alpha: 0.8),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
+}
 
-  Widget _buildScheduleItem(
-    String time,
-    String title,
-    String subtitle,
-    Color color,
-  ) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        leading: Container(
-          width: 60,
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Center(
+/// Dashboard card widget
+class _DashboardCard extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final String title;
+  final String value;
+  final String subtitle;
+  final VoidCallback? onTap;
+
+  const _DashboardCard({
+    required this.icon,
+    required this.iconColor,
+    required this.title,
+    required this.value,
+    required this.subtitle,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(DesignTokens.spaceMD),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
+          boxShadow: DesignTokens.shadowSoft,
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: iconColor.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(DesignTokens.radiusSM),
+              ),
+              child: Icon(icon, color: iconColor, size: 24),
+            ),
+            const SizedBox(width: DesignTokens.spaceMD),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: DesignTokens.fontSizeSM,
+                      color: DesignTokens.neutral500,
+                    ),
+                  ),
+                  Text(
+                    value,
+                    style: TextStyle(
+                      fontSize: DesignTokens.fontSizeLG,
+                      fontWeight: DesignTokens.fontWeightBold,
+                      color: DesignTokens.neutral900,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right, color: DesignTokens.neutral400),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Schedule item widget
+class _ScheduleItem extends StatelessWidget {
+  final String time;
+  final String title;
+  final String location;
+  final Color color;
+
+  const _ScheduleItem({
+    required this.time,
+    required this.title,
+    required this.location,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: DesignTokens.spaceSM),
+      padding: const EdgeInsets.all(DesignTokens.spaceMD),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
+        boxShadow: DesignTokens.shadowSoft,
+        border: Border(left: BorderSide(color: color, width: 4)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(DesignTokens.radiusSM),
+            ),
             child: Text(
               time,
               style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
+                fontSize: DesignTokens.fontSizeXS,
+                fontWeight: DesignTokens.fontWeightBold,
                 color: color,
               ),
             ),
           ),
-        ),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Text(subtitle),
-        trailing: const Icon(Icons.chevron_right),
+          const SizedBox(width: DesignTokens.spaceMD),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontWeight: DesignTokens.fontWeightSemiBold,
+                    color: DesignTokens.neutral900,
+                  ),
+                ),
+                Text(
+                  location,
+                  style: TextStyle(
+                    fontSize: DesignTokens.fontSizeSM,
+                    color: DesignTokens.neutral500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Icon(Icons.chevron_right, color: DesignTokens.neutral400),
+        ],
       ),
     );
   }
+}
 
-  Widget _buildActionButton(String label, IconData icon, VoidCallback onTap) {
-    return InkWell(
-      onTap: onTap,
+/// Action button widget
+class _ActionButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _ActionButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.lightImpact();
+        onTap();
+      },
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(DesignTokens.spaceMD),
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey[300]!),
-          borderRadius: BorderRadius.circular(12),
+          color: DesignTokens.primaryBlue.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
+          border: Border.all(
+            color: DesignTokens.primaryBlue.withValues(alpha: 0.2),
+          ),
         ),
         child: Column(
           children: [
-            Icon(icon, size: 32, color: Colors.blue),
+            Icon(icon, size: 28, color: DesignTokens.primaryBlue),
             const SizedBox(height: 8),
-            Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text(
+              label,
+              style: TextStyle(
+                fontWeight: DesignTokens.fontWeightSemiBold,
+                color: DesignTokens.primaryBlue,
+                fontSize: DesignTokens.fontSizeSM,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Animated navigation item
+class _AnimatedNavItem extends StatelessWidget {
+  final IconData icon;
+  final IconData activeIcon;
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _AnimatedNavItem({
+    required this.icon,
+    required this.activeIcon,
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = isSelected
+        ? DesignTokens.primaryBlue
+        : DesignTokens.neutral400;
+
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: DesignTokens.durationFast,
+        curve: Curves.easeOutCubic,
+        padding: EdgeInsets.symmetric(
+          horizontal: isSelected ? DesignTokens.spaceMD : DesignTokens.spaceSM,
+          vertical: DesignTokens.spaceXS,
+        ),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? DesignTokens.primaryBlue.withValues(alpha: 0.1)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(DesignTokens.radiusLG),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedScale(
+              scale: isSelected ? 1.1 : 1.0,
+              duration: DesignTokens.durationFast,
+              child: Icon(
+                isSelected ? activeIcon : icon,
+                color: color,
+                size: DesignTokens.iconSizeMD,
+              ),
+            ),
+            const SizedBox(height: 2),
+            AnimatedDefaultTextStyle(
+              duration: DesignTokens.durationFast,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: isSelected
+                    ? DesignTokens.fontWeightBold
+                    : DesignTokens.fontWeightMedium,
+                fontFamily: DesignTokens.fontFamily,
+                color: color,
+              ),
+              child: Text(label),
+            ),
           ],
         ),
       ),

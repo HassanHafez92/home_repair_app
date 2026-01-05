@@ -1,5 +1,5 @@
 // File: lib/screens/admin/admin_dashboard_screen.dart
-// Purpose: High-level statistics and activity feed for admin using BLoC.
+// Purpose: High-level statistics and activity feed for admin - House Maintenance style
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,6 +7,7 @@ import 'package:easy_localization/easy_localization.dart';
 import '../../blocs/admin/admin_bloc.dart';
 import '../../blocs/admin/admin_event.dart';
 import '../../blocs/admin/admin_state.dart';
+import '../../theme/design_tokens.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -25,6 +26,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: DesignTokens.neutral100,
       body: BlocBuilder<AdminBloc, AdminState>(
         builder: (context, state) {
           if (state.status == AdminStatus.loading) {
@@ -54,7 +56,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           final stats = state.stats;
           final recentActivity = state.recentActivity;
 
-          // If stats is null, show error or empty state
           if (stats == null) {
             return Center(child: Text('noDataAvailable'.tr()));
           }
@@ -69,6 +70,59 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Welcome Card
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(DesignTokens.spaceLG),
+                    decoration: BoxDecoration(
+                      gradient: DesignTokens.headerGradient,
+                      borderRadius: BorderRadius.circular(
+                        DesignTokens.radiusLG,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: DesignTokens.primaryBlue.withValues(
+                            alpha: 0.3,
+                          ),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Welcome back, Admin! 👋',
+                                style: TextStyle(
+                                  fontSize: DesignTokens.fontSizeXL,
+                                  fontWeight: DesignTokens.fontWeightBold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Here\'s what\'s happening with your platform today.',
+                                style: TextStyle(
+                                  color: Colors.white.withValues(alpha: 0.9),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Icon(
+                          Icons.insights_rounded,
+                          size: 64,
+                          color: Colors.white.withValues(alpha: 0.3),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
                   // Stats Grid
                   GridView.count(
                     crossAxisCount: 5,
@@ -76,51 +130,67 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     mainAxisSpacing: 16,
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    childAspectRatio: 1.5,
+                    childAspectRatio: 1.4,
                     children: [
-                      _buildStatCard(
-                        'totalUsers'.tr(),
-                        stats.totalUsers.toString(),
-                        Icons.people,
-                        Colors.blue,
+                      _StatCard(
+                        title: 'totalUsers'.tr(),
+                        value: stats.totalUsers.toString(),
+                        icon: Icons.people_rounded,
+                        color: DesignTokens.primaryBlue,
+                        trend: '+12%',
+                        trendUp: true,
                       ),
-                      _buildStatCard(
-                        'activeOrders'.tr(),
-                        stats.activeOrders.toString(),
-                        Icons.shopping_bag,
-                        Colors.orange,
+                      _StatCard(
+                        title: 'activeOrders'.tr(),
+                        value: stats.activeOrders.toString(),
+                        icon: Icons.shopping_bag_rounded,
+                        color: DesignTokens.accentOrange,
+                        trend: '+5%',
+                        trendUp: true,
                       ),
-                      _buildStatCard(
-                        'revenue'.tr(),
-                        '${stats.totalRevenue.toInt()} EGP',
-                        Icons.attach_money,
-                        Colors.green,
+                      _StatCard(
+                        title: 'revenue'.tr(),
+                        value: '${stats.totalRevenue.toInt()} EGP',
+                        icon: Icons.attach_money_rounded,
+                        color: DesignTokens.accentGreen,
+                        trend: '+18%',
+                        trendUp: true,
                       ),
-                      _buildStatCard(
-                        'pendingApprovals'.tr(),
-                        stats.pendingApprovals.toString(),
-                        Icons.verified_user,
-                        Colors.red,
+                      _StatCard(
+                        title: 'pendingApprovals'.tr(),
+                        value: stats.pendingApprovals.toString(),
+                        icon: Icons.verified_user_rounded,
+                        color: DesignTokens.error,
+                        trend: '-3',
+                        trendUp: false,
                       ),
-                      _buildStatCard(
-                        'unverifiedUsers'.tr(),
-                        stats.unverifiedUsers.toString(),
-                        Icons.email_outlined,
-                        Colors.purple,
+                      _StatCard(
+                        title: 'unverifiedUsers'.tr(),
+                        value: stats.unverifiedUsers.toString(),
+                        icon: Icons.email_outlined,
+                        color: const Color(0xFF9333EA),
                       ),
                     ],
                   ),
                   const SizedBox(height: 32),
 
                   // Recent Activity
-                  Text(
-                    'recentActivity'.tr(),
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'recentActivity'.tr(),
+                        style: TextStyle(
+                          fontSize: DesignTokens.fontSizeMD,
+                          fontWeight: DesignTokens.fontWeightBold,
+                          color: DesignTokens.neutral900,
+                        ),
+                      ),
+                      TextButton(onPressed: () {}, child: Text('viewAll'.tr())),
+                    ],
                   ),
                   const SizedBox(height: 16),
+
                   if (recentActivity.isEmpty)
                     Center(
                       child: Padding(
@@ -129,7 +199,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       ),
                     )
                   else
-                    Card(
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(
+                          DesignTokens.radiusMD,
+                        ),
+                        boxShadow: DesignTokens.shadowSoft,
+                      ),
                       child: ListView.separated(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
@@ -157,16 +234,38 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           }
 
                           return ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor: Colors.grey[200],
-                              child: const Icon(
-                                Icons.notifications,
-                                color: Colors.grey,
+                            leading: Container(
+                              width: 44,
+                              height: 44,
+                              decoration: BoxDecoration(
+                                color: DesignTokens.primaryBlue.withValues(
+                                  alpha: 0.1,
+                                ),
+                                borderRadius: BorderRadius.circular(
+                                  DesignTokens.radiusSM,
+                                ),
+                              ),
+                              child: Icon(
+                                Icons.notifications_rounded,
+                                color: DesignTokens.primaryBlue,
                               ),
                             ),
-                            title: Text('newOrderCreated'.tr(args: [order.id])),
-                            subtitle: Text(timeString),
-                            trailing: const Icon(Icons.chevron_right),
+                            title: Text(
+                              'newOrderCreated'.tr(
+                                args: [order.id.substring(0, 8)],
+                              ),
+                              style: TextStyle(
+                                fontWeight: DesignTokens.fontWeightSemiBold,
+                              ),
+                            ),
+                            subtitle: Text(
+                              timeString,
+                              style: TextStyle(color: DesignTokens.neutral500),
+                            ),
+                            trailing: Icon(
+                              Icons.chevron_right,
+                              color: DesignTokens.neutral400,
+                            ),
                           );
                         },
                       ),
@@ -179,46 +278,117 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       ),
     );
   }
+}
 
-  Widget _buildStatCard(
-    String title,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
-    return Card(
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Row(
-              children: [
-                Icon(icon, color: color, size: 32),
-                const Spacer(),
-                Text(
-                  value,
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: color,
+class _StatCard extends StatelessWidget {
+  final String title;
+  final String value;
+  final IconData icon;
+  final Color color;
+  final String? trend;
+  final bool? trendUp;
+
+  const _StatCard({
+    required this.title,
+    required this.value,
+    required this.icon,
+    required this.color,
+    this.trend,
+    this.trendUp,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(DesignTokens.spaceMD),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
+        boxShadow: DesignTokens.shadowSoft,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(DesignTokens.radiusSM),
+                ),
+                child: Icon(icon, color: color, size: 22),
+              ),
+              if (trend != null)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color:
+                        (trendUp == true
+                                ? DesignTokens.accentGreen
+                                : DesignTokens.error)
+                            .withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(
+                      DesignTokens.radiusFull,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        trendUp == true
+                            ? Icons.trending_up
+                            : Icons.trending_down,
+                        size: 14,
+                        color: trendUp == true
+                            ? DesignTokens.accentGreen
+                            : DesignTokens.error,
+                      ),
+                      const SizedBox(width: 2),
+                      Text(
+                        trend!,
+                        style: TextStyle(
+                          fontSize: DesignTokens.fontSizeXS,
+                          fontWeight: DesignTokens.fontWeightSemiBold,
+                          color: trendUp == true
+                              ? DesignTokens.accentGreen
+                              : DesignTokens.error,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              title,
-              style: const TextStyle(color: Colors.grey, fontSize: 14),
-            ),
-          ],
-        ),
+            ],
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: DesignTokens.fontSizeLG,
+                  fontWeight: DesignTokens.fontWeightBold,
+                  color: DesignTokens.neutral900,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: DesignTokens.fontSizeSM,
+                  color: DesignTokens.neutral500,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 }
-
-
-
