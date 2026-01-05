@@ -311,7 +311,7 @@ class _BookingFlowScreenState extends State<BookingFlowScreen> {
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
                       itemCount: addressState.addresses.length,
-                      separatorBuilder: (_, __) =>
+                      separatorBuilder: (_, _) =>
                           const SizedBox(width: DesignTokens.spaceSM),
                       itemBuilder: (context, index) {
                         final address = addressState.addresses[index];

@@ -69,7 +69,7 @@ class ServiceDetailsScreen extends StatelessWidget {
                         CachedNetworkImage(
                           imageUrl: service.iconUrl,
                           fit: BoxFit.cover,
-                          placeholder: (_, _a) => Container(
+                          placeholder: (_, a) => Container(
                             color: colorScheme.primaryContainer,
                             child: Center(
                               child: Icon(
@@ -79,7 +79,7 @@ class ServiceDetailsScreen extends StatelessWidget {
                               ),
                             ),
                           ),
-                          errorWidget: (_, _a, _b) =>
+                          errorWidget: (_, a, b) =>
                               _buildPlaceholderHero(colorScheme),
                         )
                       else

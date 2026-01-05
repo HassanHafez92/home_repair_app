@@ -491,7 +491,7 @@ class HomeContent extends StatelessWidget {
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
                         itemCount: popularServices.length,
-                        separatorBuilder: (_, __) =>
+                        separatorBuilder: (_, _) =>
                             const SizedBox(width: DesignTokens.spaceMD),
                         itemBuilder: (context, index) {
                           final service = popularServices[index];

@@ -118,7 +118,7 @@ class _HouseMaintenanceDateTimePickerState
             controller: _dateScrollController,
             scrollDirection: Axis.horizontal,
             itemCount: _availableDates.length,
-            separatorBuilder: (_, __) =>
+            separatorBuilder: (_, _) =>
                 const SizedBox(width: DesignTokens.spaceSM),
             itemBuilder: (context, index) {
               final date = _availableDates[index];
