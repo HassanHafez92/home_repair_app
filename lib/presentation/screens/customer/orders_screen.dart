@@ -7,6 +7,7 @@ import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_state.dart';
 import '../../blocs/order/customer_order_bloc.dart';
 import '../../theme/design_tokens.dart';
+import '../../widgets/wrappers.dart';
 
 class OrdersScreen extends StatefulWidget {
   const OrdersScreen({super.key});
@@ -81,105 +82,110 @@ class _OrdersScreenState extends State<OrdersScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: DesignTokens.neutral100,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: Text(
-          'myOrders'.tr(),
-          style: TextStyle(
-            color: DesignTokens.neutral900,
-            fontWeight: DesignTokens.fontWeightBold,
-          ),
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(48),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border(
-                bottom: BorderSide(color: DesignTokens.neutral200, width: 1),
-              ),
-            ),
-            child: TabBar(
-              controller: _tabController,
-              labelColor: DesignTokens.primaryBlue,
-              unselectedLabelColor: DesignTokens.neutral500,
-              indicatorColor: DesignTokens.primaryBlue,
-              indicatorWeight: 3,
-              labelStyle: TextStyle(
-                fontWeight: DesignTokens.fontWeightSemiBold,
-                fontSize: DesignTokens.fontSizeBase,
-              ),
-              unselectedLabelStyle: TextStyle(
-                fontWeight: DesignTokens.fontWeightMedium,
-                fontSize: DesignTokens.fontSizeBase,
-              ),
-              tabs: [
-                Tab(text: 'currentOrders'.tr()),
-                Tab(text: 'pastOrders'.tr()),
-                Tab(text: 'cancelled'.tr()),
-              ],
+    return PerformanceMonitorWrapper(
+      screenName: 'OrdersScreen',
+      child: Scaffold(
+        backgroundColor: DesignTokens.neutral100,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          title: Text(
+            'myOrders'.tr(),
+            style: TextStyle(
+              color: DesignTokens.neutral900,
+              fontWeight: DesignTokens.fontWeightBold,
             ),
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              // Could navigate to all orders or filter
-            },
-            child: Row(
-              children: [
-                Text(
-                  'seeAll'.tr(),
-                  style: TextStyle(
-                    color: DesignTokens.primaryBlue,
-                    fontWeight: DesignTokens.fontWeightSemiBold,
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(48),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border(
+                  bottom: BorderSide(color: DesignTokens.neutral200, width: 1),
+                ),
+              ),
+              child: TabBar(
+                controller: _tabController,
+                labelColor: DesignTokens.primaryBlue,
+                unselectedLabelColor: DesignTokens.neutral500,
+                indicatorColor: DesignTokens.primaryBlue,
+                indicatorWeight: 3,
+                labelStyle: TextStyle(
+                  fontWeight: DesignTokens.fontWeightSemiBold,
+                  fontSize: DesignTokens.fontSizeBase,
+                ),
+                unselectedLabelStyle: TextStyle(
+                  fontWeight: DesignTokens.fontWeightMedium,
+                  fontSize: DesignTokens.fontSizeBase,
+                ),
+                tabs: [
+                  Tab(text: 'currentOrders'.tr()),
+                  Tab(text: 'pastOrders'.tr()),
+                  Tab(text: 'cancelled'.tr()),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                // Could navigate to all orders or filter
+              },
+              child: Row(
+                children: [
+                  Text(
+                    'seeAll'.tr(),
+                    style: TextStyle(
+                      color: DesignTokens.primaryBlue,
+                      fontWeight: DesignTokens.fontWeightSemiBold,
+                    ),
                   ),
+                  const SizedBox(width: 4),
+                  Icon(
+                    Icons.arrow_forward,
+                    size: 16,
+                    color: DesignTokens.primaryBlue,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        body: BlocBuilder<CustomerOrderBloc, CustomerOrderState>(
+          builder: (context, state) {
+            if (state.status == CustomerOrderStatus.loading) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (state.status == CustomerOrderStatus.failure) {
+              return Center(
+                child: Text(
+                  'errorMessage'.tr(args: [state.errorMessage ?? '']),
                 ),
-                const SizedBox(width: 4),
-                Icon(
-                  Icons.arrow_forward,
-                  size: 16,
-                  color: DesignTokens.primaryBlue,
+              );
+            }
+
+            return TabBarView(
+              controller: _tabController,
+              children: [
+                _buildOrdersList(
+                  _getFilteredOrders(state.orders, 0),
+                  state.hasMore,
+                  'noCurrentOrders'.tr(),
+                ),
+                _buildOrdersList(
+                  _getFilteredOrders(state.orders, 1),
+                  false,
+                  'noPastOrders'.tr(),
+                ),
+                _buildOrdersList(
+                  _getFilteredOrders(state.orders, 2),
+                  false,
+                  'noCancelledOrders'.tr(),
                 ),
               ],
-            ),
-          ),
-        ],
-      ),
-      body: BlocBuilder<CustomerOrderBloc, CustomerOrderState>(
-        builder: (context, state) {
-          if (state.status == CustomerOrderStatus.loading) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (state.status == CustomerOrderStatus.failure) {
-            return Center(
-              child: Text('errorMessage'.tr(args: [state.errorMessage ?? ''])),
             );
-          }
-
-          return TabBarView(
-            controller: _tabController,
-            children: [
-              _buildOrdersList(
-                _getFilteredOrders(state.orders, 0),
-                state.hasMore,
-                'noCurrentOrders'.tr(),
-              ),
-              _buildOrdersList(
-                _getFilteredOrders(state.orders, 1),
-                false,
-                'noPastOrders'.tr(),
-              ),
-              _buildOrdersList(
-                _getFilteredOrders(state.orders, 2),
-                false,
-                'noCancelledOrders'.tr(),
-              ),
-            ],
-          );
-        },
+          },
+        ),
       ),
     );
   }

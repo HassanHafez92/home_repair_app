@@ -16,6 +16,7 @@ import 'service_details_screen.dart';
 import '../../blocs/service/service_bloc.dart';
 import '../../blocs/service/service_event.dart';
 import '../../blocs/service/service_state.dart';
+import '../../widgets/wrappers.dart';
 
 class ServicesScreen extends StatefulWidget {
   const ServicesScreen({super.key});
@@ -54,176 +55,199 @@ class _ServicesScreenState extends State<ServicesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('allServices'.tr()),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(60),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'searchServices'.tr(),
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
+    return PerformanceMonitorWrapper(
+      screenName: 'ServicesScreen',
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('allServices'.tr()),
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(60),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: 'searchServices'.tr(),
+                  prefixIcon: const Icon(Icons.search),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 0),
                 ),
-                filled: true,
-                fillColor: Colors.white,
-                contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                onChanged: (value) {
+                  context.read<ServiceBloc>().add(ServiceSearchChanged(value));
+                },
               ),
-              onChanged: (value) {
-                context.read<ServiceBloc>().add(ServiceSearchChanged(value));
-              },
             ),
           ),
         ),
-      ),
-      body: Column(
-        children: [
-          // Breadcrumb Navigation
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(
-              horizontal: DesignTokens.spaceBase,
-              vertical: DesignTokens.spaceXS,
+        body: Column(
+          children: [
+            // Breadcrumb Navigation
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(
+                horizontal: DesignTokens.spaceBase,
+                vertical: DesignTokens.spaceXS,
+              ),
+              color: Theme.of(context).colorScheme.surface,
+              child: BreadcrumbNavigator(
+                items: [
+                  BreadcrumbItem(
+                    label: 'home'.tr(),
+                    onTap: () => Navigator.of(context).pop(),
+                  ),
+                  BreadcrumbItem(label: 'allServices'.tr()),
+                ],
+              ),
             ),
-            color: Theme.of(context).colorScheme.surface,
-            child: BreadcrumbNavigator(
-              items: [
-                BreadcrumbItem(
-                  label: 'home'.tr(),
-                  onTap: () => Navigator.of(context).pop(),
-                ),
-                BreadcrumbItem(label: 'allServices'.tr()),
-              ],
-            ),
-          ),
-          const SizedBox(height: DesignTokens.spaceXS),
-          // Category Filter
-          BlocBuilder<ServiceBloc, ServiceState>(
-            buildWhen: (previous, current) =>
-                previous.categories != current.categories ||
-                previous.selectedCategory != current.selectedCategory,
-            builder: (context, state) {
-              if (state.categories.isEmpty) return const SizedBox.shrink();
-
-              return SizedBox(
-                height: 50,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: state.categories.length + 1,
-                  itemBuilder: (context, index) {
-                    final isAll = index == 0;
-                    final category = isAll ? null : state.categories[index - 1];
-                    final isSelected = state.selectedCategory == category;
-
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: ChoiceChip(
-                        label: Text(isAll ? 'all'.tr() : category!),
-                        selected: isSelected,
-                        onSelected: (selected) {
-                          context.read<ServiceBloc>().add(
-                            ServiceCategorySelected(selected ? category : null),
-                          );
-                        },
-                      ),
-                    );
-                  },
-                ),
-              );
-            },
-          ),
-          const SizedBox(height: 8),
-
-          // Services Grid
-          Expanded(
-            child: BlocBuilder<ServiceBloc, ServiceState>(
+            const SizedBox(height: DesignTokens.spaceXS),
+            // Category Filter
+            BlocBuilder<ServiceBloc, ServiceState>(
+              buildWhen: (previous, current) =>
+                  previous.categories != current.categories ||
+                  previous.selectedCategory != current.selectedCategory,
               builder: (context, state) {
-                if (state.status == ServiceStatus.loading) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (state.status == ServiceStatus.failure) {
-                  return Center(child: Text('errorLoadingServices'.tr()));
-                } else if (state.services.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('noServicesAvailable'.tr()),
-                        if (kDebugMode) ...[
-                          const SizedBox(height: 16),
-                          ElevatedButton(
-                            onPressed: () async {
-                              await SeedData.seedServices();
-                              if (context.mounted) {
-                                context.read<ServiceBloc>().add(
-                                  const ServiceLoadRequested(),
-                                );
-                              }
-                            },
-                            child: const Text('Seed Data (Debug Only)'),
-                          ),
+                if (state.categories.isEmpty) return const SizedBox.shrink();
+
+                return SizedBox(
+                  height: 50,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: state.categories.length + 1,
+                    itemBuilder: (context, index) {
+                      final isAll = index == 0;
+                      final category = isAll
+                          ? null
+                          : state.categories[index - 1];
+                      final isSelected = state.selectedCategory == category;
+
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: ChoiceChip(
+                          label: Text(isAll ? 'all'.tr() : category!),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            context.read<ServiceBloc>().add(
+                              ServiceCategorySelected(
+                                selected ? category : null,
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 8),
+
+            // Services Grid
+            Expanded(
+              child: BlocBuilder<ServiceBloc, ServiceState>(
+                builder: (context, state) {
+                  if (state.status == ServiceStatus.loading) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (state.status == ServiceStatus.failure) {
+                    return Center(child: Text('errorLoadingServices'.tr()));
+                  } else if (state.services.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('noServicesAvailable'.tr()),
+                          if (kDebugMode) ...[
+                            const SizedBox(height: 16),
+                            ElevatedButton(
+                              onPressed: () async {
+                                await SeedData.seedServices();
+                                if (context.mounted) {
+                                  context.read<ServiceBloc>().add(
+                                    const ServiceLoadRequested(),
+                                  );
+                                }
+                              },
+                              child: const Text('Seed Data (Debug Only)'),
+                            ),
+                          ],
                         ],
-                      ],
-                    ),
-                  );
-                } else if (state.filteredServices.isEmpty) {
-                  return Center(child: Text('noServicesFound'.tr()));
-                }
-
-                // Responsive grid with Fixawy-style cards
-                return LayoutBuilder(
-                  builder: (context, constraints) {
-                    final crossAxisCount = ResponsiveBreakpoints.getGridColumns(
-                      constraints.maxWidth,
-                    );
-                    final aspectRatio =
-                        ResponsiveBreakpoints.getCardAspectRatio(
-                          constraints.maxWidth,
-                        );
-
-                    return GridView.builder(
-                      padding: const EdgeInsets.all(16),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: crossAxisCount,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 16,
-                        childAspectRatio: aspectRatio,
                       ),
-                      itemCount: state.filteredServices.length,
-                      itemBuilder: (context, index) {
-                        final service = state.filteredServices[index];
+                    );
+                  } else if (state.filteredServices.isEmpty) {
+                    return Center(child: Text('noServicesFound'.tr()));
+                  }
 
-                        // Create a localized copy of the service
-                        final localizedService = ServiceEntity(
-                          id: service.id,
-                          name: service.name.tr(),
-                          description: service.description,
-                          iconUrl: service.iconUrl,
-                          category: service.category,
-                          avgPrice: service.avgPrice,
-                          minPrice: service.minPrice,
-                          maxPrice: service.maxPrice,
-                          visitFee: service.visitFee,
-                          avgCompletionTimeMinutes:
-                              service.avgCompletionTimeMinutes,
-                          createdAt: service.createdAt,
-                        );
+                  // Responsive grid with Fixawy-style cards
+                  return LayoutBuilder(
+                    builder: (context, constraints) {
+                      final crossAxisCount =
+                          ResponsiveBreakpoints.getGridColumns(
+                            constraints.maxWidth,
+                          );
+                      final aspectRatio =
+                          ResponsiveBreakpoints.getCardAspectRatio(
+                            constraints.maxWidth,
+                          );
 
-                        // Use Fixawy card for photo URLs, original for icons
-                        final isPhotoUrl =
-                            service.iconUrl.toLowerCase().contains(
-                              'unsplash',
-                            ) ||
-                            service.iconUrl.toLowerCase().contains('pexels');
+                      return GridView.builder(
+                        padding: const EdgeInsets.all(16),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: crossAxisCount,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                          childAspectRatio: aspectRatio,
+                        ),
+                        itemCount: state.filteredServices.length,
+                        itemBuilder: (context, index) {
+                          final service = state.filteredServices[index];
 
-                        if (isPhotoUrl) {
-                          return FixawyServiceCard(
+                          // Create a localized copy of the service
+                          final localizedService = ServiceEntity(
+                            id: service.id,
+                            name: service.name.tr(),
+                            description: service.description,
+                            iconUrl: service.iconUrl,
+                            category: service.category,
+                            avgPrice: service.avgPrice,
+                            minPrice: service.minPrice,
+                            maxPrice: service.maxPrice,
+                            visitFee: service.visitFee,
+                            avgCompletionTimeMinutes:
+                                service.avgCompletionTimeMinutes,
+                            createdAt: service.createdAt,
+                          );
+
+                          // Use Fixawy card for photo URLs, original for icons
+                          final isPhotoUrl =
+                              service.iconUrl.toLowerCase().contains(
+                                'unsplash',
+                              ) ||
+                              service.iconUrl.toLowerCase().contains('pexels');
+
+                          if (isPhotoUrl) {
+                            return FixawyServiceCard(
+                              service: localizedService,
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => ServiceDetailsScreen(
+                                      service: localizedService,
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                          }
+
+                          return ServiceCard(
                             service: localizedService,
+                            iconData: _getIconForCategory(service.category),
                             onTap: () {
                               Navigator.push(
                                 context,
@@ -235,30 +259,15 @@ class _ServicesScreenState extends State<ServicesScreen> {
                               );
                             },
                           );
-                        }
-
-                        return ServiceCard(
-                          service: localizedService,
-                          iconData: _getIconForCategory(service.category),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => ServiceDetailsScreen(
-                                  service: localizedService,
-                                ),
-                              ),
-                            );
-                          },
-                        );
-                      },
-                    );
-                  },
-                );
-              },
+                        },
+                      );
+                    },
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

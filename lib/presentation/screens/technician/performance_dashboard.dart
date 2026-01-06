@@ -3,6 +3,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../../widgets/wrappers.dart';
 
 class PerformanceDashboard extends StatefulWidget {
   final String technicianId;
@@ -453,57 +454,60 @@ class _PerformanceDashboardState extends State<PerformanceDashboard> {
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('performance'.tr()),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.date_range),
-            onPressed: _showDateRangeFilter,
-            tooltip: 'selectDateRange'.tr(),
-          ),
-        ],
-      ),
-      body: RefreshIndicator(
-        onRefresh: _loadData,
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Earnings header
-              _buildEarningsHeader(theme),
+    return PerformanceMonitorWrapper(
+      screenName: 'PerformanceDashboard',
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('performance'.tr()),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.date_range),
+              onPressed: _showDateRangeFilter,
+              tooltip: 'selectDateRange'.tr(),
+            ),
+          ],
+        ),
+        body: RefreshIndicator(
+          onRefresh: _loadData,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Earnings header
+                _buildEarningsHeader(theme),
 
-              // Stats grid
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: _buildStatsGrid(theme),
-              ),
+                // Stats grid
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: _buildStatsGrid(theme),
+                ),
 
-              // Monthly earnings chart
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: _buildEarningsChart(theme),
-              ),
+                // Monthly earnings chart
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: _buildEarningsChart(theme),
+                ),
 
-              const SizedBox(height: 24),
+                const SizedBox(height: 24),
 
-              // Category breakdown
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: _buildCategoryBreakdown(theme),
-              ),
+                // Category breakdown
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: _buildCategoryBreakdown(theme),
+                ),
 
-              const SizedBox(height: 24),
+                const SizedBox(height: 24),
 
-              // Recent reviews
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: _buildRecentReviews(theme),
-              ),
+                // Recent reviews
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: _buildRecentReviews(theme),
+                ),
 
-              const SizedBox(height: 24),
-            ],
+                const SizedBox(height: 24),
+              ],
+            ),
           ),
         ),
       ),

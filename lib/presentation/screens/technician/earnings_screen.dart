@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../../theme/design_tokens.dart';
 import 'withdrawal_screen.dart';
+import '../../widgets/wrappers.dart';
 
 class EarningsScreen extends StatelessWidget {
   const EarningsScreen({super.key});
@@ -49,186 +50,189 @@ class EarningsScreen extends StatelessWidget {
       ),
     ];
 
-    return Scaffold(
-      backgroundColor: DesignTokens.neutral100,
-      body: CustomScrollView(
-        slivers: [
-          // Gradient Header with Total Earnings
-          SliverToBoxAdapter(
-            child: Container(
-              decoration: const BoxDecoration(
-                gradient: DesignTokens.headerGradient,
-                borderRadius: BorderRadius.vertical(
-                  bottom: Radius.circular(DesignTokens.radiusXL),
-                ),
-              ),
-              child: SafeArea(
-                bottom: false,
-                child: Padding(
-                  padding: const EdgeInsets.all(DesignTokens.spaceLG),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Header
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'earnings'.tr(),
-                            style: const TextStyle(
-                              fontSize: DesignTokens.fontSizeXL,
-                              fontWeight: DesignTokens.fontWeightBold,
-                              color: Colors.white,
-                            ),
-                          ),
-                          Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: IconButton(
-                              onPressed: () => _showFilterDialog(context),
-                              icon: const Icon(
-                                Icons.tune,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: DesignTokens.spaceXL),
-
-                      // Total Earnings
-                      Text(
-                        'totalEarnings'.tr(),
-                        style: TextStyle(
-                          fontSize: DesignTokens.fontSizeSM,
-                          color: Colors.white.withValues(alpha: 0.8),
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            '${totalEarnings.toInt()}',
-                            style: const TextStyle(
-                              fontSize: 36,
-                              fontWeight: DesignTokens.fontWeightBold,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          const Padding(
-                            padding: EdgeInsets.only(bottom: 6),
-                            child: Text(
-                              'EGP',
-                              style: TextStyle(
-                                fontSize: DesignTokens.fontSizeMD,
-                                fontWeight: DesignTokens.fontWeightMedium,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: DesignTokens.spaceLG),
-
-                      // Stats Row
-                      Row(
-                        children: [
-                          _StatChip(
-                            label: 'thisMonth'.tr(),
-                            value: '${thisMonthEarnings.toInt()} EGP',
-                            icon: Icons.trending_up,
-                          ),
-                          const SizedBox(width: DesignTokens.spaceMD),
-                          _StatChip(
-                            label: 'pending'.tr(),
-                            value: '${pendingAmount.toInt()} EGP',
-                            icon: Icons.hourglass_empty,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: DesignTokens.spaceLG),
-
-                      // Withdraw Button
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const WithdrawalScreen(),
-                              ),
-                            );
-                          },
-                          icon: const Icon(Icons.account_balance_wallet),
-                          label: Text('withdraw'.tr()),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: DesignTokens.primaryBlue,
-                            padding: const EdgeInsets.symmetric(
-                              vertical: DesignTokens.spaceMD,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                DesignTokens.radiusMD,
-                              ),
-                            ),
-                            elevation: 0,
-                          ),
-                        ),
-                      ),
-                    ],
+    return PerformanceMonitorWrapper(
+      screenName: 'EarningsScreen',
+      child: Scaffold(
+        backgroundColor: DesignTokens.neutral100,
+        body: CustomScrollView(
+          slivers: [
+            // Gradient Header with Total Earnings
+            SliverToBoxAdapter(
+              child: Container(
+                decoration: const BoxDecoration(
+                  gradient: DesignTokens.headerGradient,
+                  borderRadius: BorderRadius.vertical(
+                    bottom: Radius.circular(DesignTokens.radiusXL),
                   ),
                 ),
-              ),
-            ),
-          ),
+                child: SafeArea(
+                  bottom: false,
+                  child: Padding(
+                    padding: const EdgeInsets.all(DesignTokens.spaceLG),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Header
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'earnings'.tr(),
+                              style: const TextStyle(
+                                fontSize: DesignTokens.fontSizeXL,
+                                fontWeight: DesignTokens.fontWeightBold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: IconButton(
+                                onPressed: () => _showFilterDialog(context),
+                                icon: const Icon(
+                                  Icons.tune,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: DesignTokens.spaceXL),
 
-          // Transactions Section
-          SliverPadding(
-            padding: const EdgeInsets.all(DesignTokens.spaceLG),
-            sliver: SliverToBoxAdapter(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'recentTransactions'.tr(),
-                    style: TextStyle(
-                      fontSize: DesignTokens.fontSizeMD,
-                      fontWeight: DesignTokens.fontWeightBold,
-                      color: DesignTokens.neutral900,
+                        // Total Earnings
+                        Text(
+                          'totalEarnings'.tr(),
+                          style: TextStyle(
+                            fontSize: DesignTokens.fontSizeSM,
+                            color: Colors.white.withValues(alpha: 0.8),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              '${totalEarnings.toInt()}',
+                              style: const TextStyle(
+                                fontSize: 36,
+                                fontWeight: DesignTokens.fontWeightBold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            const Padding(
+                              padding: EdgeInsets.only(bottom: 6),
+                              child: Text(
+                                'EGP',
+                                style: TextStyle(
+                                  fontSize: DesignTokens.fontSizeMD,
+                                  fontWeight: DesignTokens.fontWeightMedium,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: DesignTokens.spaceLG),
+
+                        // Stats Row
+                        Row(
+                          children: [
+                            _StatChip(
+                              label: 'thisMonth'.tr(),
+                              value: '${thisMonthEarnings.toInt()} EGP',
+                              icon: Icons.trending_up,
+                            ),
+                            const SizedBox(width: DesignTokens.spaceMD),
+                            _StatChip(
+                              label: 'pending'.tr(),
+                              value: '${pendingAmount.toInt()} EGP',
+                              icon: Icons.hourglass_empty,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: DesignTokens.spaceLG),
+
+                        // Withdraw Button
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const WithdrawalScreen(),
+                                ),
+                              );
+                            },
+                            icon: const Icon(Icons.account_balance_wallet),
+                            label: Text('withdraw'.tr()),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: DesignTokens.primaryBlue,
+                              padding: const EdgeInsets.symmetric(
+                                vertical: DesignTokens.spaceMD,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                  DesignTokens.radiusMD,
+                                ),
+                              ),
+                              elevation: 0,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  TextButton(onPressed: () {}, child: Text('seeAll'.tr())),
-                ],
+                ),
               ),
             ),
-          ),
 
-          // Transaction List
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: DesignTokens.spaceLG,
+            // Transactions Section
+            SliverPadding(
+              padding: const EdgeInsets.all(DesignTokens.spaceLG),
+              sliver: SliverToBoxAdapter(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'recentTransactions'.tr(),
+                      style: TextStyle(
+                        fontSize: DesignTokens.fontSizeMD,
+                        fontWeight: DesignTokens.fontWeightBold,
+                        color: DesignTokens.neutral900,
+                      ),
+                    ),
+                    TextButton(onPressed: () {}, child: Text('seeAll'.tr())),
+                  ],
+                ),
+              ),
             ),
-            sliver: SliverList(
-              delegate: SliverChildBuilderDelegate((context, index) {
-                final tx = transactions[index];
-                return _TransactionCard(transaction: tx);
-              }, childCount: transactions.length),
-            ),
-          ),
 
-          const SliverToBoxAdapter(
-            child: SizedBox(height: DesignTokens.space2XL),
-          ),
-        ],
+            // Transaction List
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: DesignTokens.spaceLG,
+              ),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final tx = transactions[index];
+                  return _TransactionCard(transaction: tx);
+                }, childCount: transactions.length),
+              ),
+            ),
+
+            const SliverToBoxAdapter(
+              child: SizedBox(height: DesignTokens.space2XL),
+            ),
+          ],
+        ),
       ),
     );
   }

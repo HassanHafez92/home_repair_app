@@ -16,6 +16,8 @@ import 'services/notification_service.dart';
 import 'services/address_service.dart';
 import 'package:home_repair_app/services/snackbar_service.dart';
 import 'core/di/injection_container.dart';
+import 'core/services/service_integration.dart';
+import 'services/performance_monitoring_service.dart';
 import 'domain/repositories/i_auth_repository.dart';
 import 'domain/repositories/i_user_repository.dart';
 import 'domain/repositories/i_order_repository.dart';
@@ -34,7 +36,7 @@ import 'presentation/blocs/profile/profile_bloc.dart';
 import 'presentation/blocs/admin/admin_bloc.dart';
 import 'presentation/blocs/address_book/address_book_bloc.dart';
 import 'presentation/blocs/bloc_observer.dart';
-import 'presentation/theme/app_theme.dart';
+import 'presentation/theme/app_theme_v2.dart';
 import 'router/app_router.dart';
 
 Future<void> mainCommon(AppConfig config) async {
@@ -94,6 +96,19 @@ Future<void> mainCommon(AppConfig config) async {
   // Initialize SharedPreferences and then all dependencies via DI container
   final sharedPreferences = await SharedPreferences.getInstance();
   await initializeDependencies(sharedPreferences);
+
+  // Phase 1: Initialize all Phase 1 services (performance, logging, error handling, etc.)
+  await ServiceIntegration().initialize(
+    continueOnError: true, // Don't block app startup on service failures
+    onProgress: (serviceName, status) {
+      if (config.enableLogs) {
+        debugPrint('📦 Service: $serviceName - $status');
+      }
+    },
+  );
+
+  // Mark app as ready for performance tracking
+  PerformanceMonitoringService().markAppReady();
 
   runApp(
     EasyLocalization(
@@ -196,8 +211,8 @@ class MyApp extends StatelessWidget {
           return MaterialApp.router(
             scaffoldMessengerKey: SnackBarService().scaffoldMessengerKey,
             title: config.appTitle,
-            theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
+            theme: AppThemeV2.lightTheme,
+            darkTheme: AppThemeV2.darkTheme,
             themeMode: ThemeMode.system,
             localizationsDelegates: context.localizationDelegates,
             supportedLocales: context.supportedLocales,

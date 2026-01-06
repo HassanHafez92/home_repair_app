@@ -6,6 +6,7 @@ import '../../helpers/auth_helper.dart';
 import '../../theme/design_tokens.dart';
 import 'order_action_screen.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/wrappers.dart';
 
 class IncomingOrdersScreen extends StatefulWidget {
   const IncomingOrdersScreen({super.key});
@@ -36,90 +37,95 @@ class _IncomingOrdersScreenState extends State<IncomingOrdersScreen> {
       return Scaffold(body: Center(child: Text('pleaseLogin'.tr())));
     }
 
-    return Scaffold(
-      backgroundColor: DesignTokens.neutral100,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: Text(
-          'incomingOrders'.tr(),
-          style: TextStyle(
-            color: DesignTokens.neutral900,
-            fontWeight: DesignTokens.fontWeightBold,
+    return PerformanceMonitorWrapper(
+      screenName: 'IncomingOrdersScreen',
+      child: Scaffold(
+        backgroundColor: DesignTokens.neutral100,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          title: Text(
+            'incomingOrders'.tr(),
+            style: TextStyle(
+              color: DesignTokens.neutral900,
+              fontWeight: DesignTokens.fontWeightBold,
+            ),
           ),
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.refresh, color: DesignTokens.neutral600),
-            onPressed: () {
-              context.read<TechnicianOrderBloc>().add(
-                LoadTechnicianOrders(userId),
-              );
-            },
-          ),
-        ],
-      ),
-      body: BlocBuilder<TechnicianOrderBloc, TechnicianOrderState>(
-        builder: (context, state) {
-          if (state.status == TechnicianOrderStatus.loading &&
-              state.incomingOrders.isEmpty) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (state.status == TechnicianOrderStatus.failure) {
-            return Center(
-              child: Text('errorMessage'.tr(args: [state.errorMessage ?? ''])),
-            );
-          }
-
-          final orders = state.incomingOrders;
-
-          if (orders.isEmpty) {
-            return EmptyState(
-              title: 'noIncomingOrders'.tr(),
-              message: 'waitingForRequests'.tr(),
-              icon: Icons.inbox,
-            );
-          }
-
-          return RefreshIndicator(
-            onRefresh: () async {
-              context.read<TechnicianOrderBloc>().add(
-                LoadTechnicianOrders(userId),
-              );
-            },
-            child: ListView.builder(
-              padding: const EdgeInsets.all(DesignTokens.spaceMD),
-              itemCount: orders.length,
-              itemBuilder: (context, index) {
-                final order = orders[index];
-                return _OrderCard(
-                  serviceName: order.serviceName ?? 'Service',
-                  customerName: order.customerName ?? 'Customer',
-                  address: order.address,
-                  date: order.dateScheduled,
-                  estimatedPrice: order.initialEstimate,
-                  onAccept: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => OrderActionScreen(order: order),
-                      ),
-                    );
-                  },
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => OrderActionScreen(order: order),
-                      ),
-                    );
-                  },
+          actions: [
+            IconButton(
+              icon: Icon(Icons.refresh, color: DesignTokens.neutral600),
+              onPressed: () {
+                context.read<TechnicianOrderBloc>().add(
+                  LoadTechnicianOrders(userId),
                 );
               },
             ),
-          );
-        },
+          ],
+        ),
+        body: BlocBuilder<TechnicianOrderBloc, TechnicianOrderState>(
+          builder: (context, state) {
+            if (state.status == TechnicianOrderStatus.loading &&
+                state.incomingOrders.isEmpty) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (state.status == TechnicianOrderStatus.failure) {
+              return Center(
+                child: Text(
+                  'errorMessage'.tr(args: [state.errorMessage ?? '']),
+                ),
+              );
+            }
+
+            final orders = state.incomingOrders;
+
+            if (orders.isEmpty) {
+              return EmptyState(
+                title: 'noIncomingOrders'.tr(),
+                message: 'waitingForRequests'.tr(),
+                icon: Icons.inbox,
+              );
+            }
+
+            return RefreshIndicator(
+              onRefresh: () async {
+                context.read<TechnicianOrderBloc>().add(
+                  LoadTechnicianOrders(userId),
+                );
+              },
+              child: ListView.builder(
+                padding: const EdgeInsets.all(DesignTokens.spaceMD),
+                itemCount: orders.length,
+                itemBuilder: (context, index) {
+                  final order = orders[index];
+                  return _OrderCard(
+                    serviceName: order.serviceName ?? 'Service',
+                    customerName: order.customerName ?? 'Customer',
+                    address: order.address,
+                    date: order.dateScheduled,
+                    estimatedPrice: order.initialEstimate,
+                    onAccept: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => OrderActionScreen(order: order),
+                        ),
+                      );
+                    },
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => OrderActionScreen(order: order),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            );
+          },
+        ),
       ),
     );
   }

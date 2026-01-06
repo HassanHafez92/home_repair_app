@@ -18,6 +18,7 @@ import '../../blocs/service/service_state.dart';
 import '../../blocs/service/service_event.dart';
 import '../../theme/design_tokens.dart';
 import '../../widgets/app_drawer.dart';
+import '../../widgets/wrappers.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -52,76 +53,79 @@ class _HomeScreenState extends State<HomeScreen> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return Scaffold(
-      body: _screens[_currentIndex],
-      endDrawer: AppDrawer(
-        onNavigate: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-      ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: colorScheme.surface,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              blurRadius: 20,
-              offset: const Offset(0, -5),
-            ),
-          ],
+    return PerformanceMonitorWrapper(
+      screenName: 'HomeScreen',
+      child: Scaffold(
+        body: _screens[_currentIndex],
+        endDrawer: AppDrawer(
+          onNavigate: (index) {
+            setState(() {
+              _currentIndex = index;
+            });
+          },
         ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: DesignTokens.spaceMD,
-              vertical: DesignTokens.spaceXS,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _AnimatedNavItem(
-                  icon: Icons.home_outlined,
-                  activeIcon: Icons.home_rounded,
-                  label: 'home'.tr(),
-                  isSelected: _currentIndex == 0,
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    setState(() => _currentIndex = 0);
-                  },
-                ),
-                _AnimatedNavItem(
-                  icon: Icons.search_outlined,
-                  activeIcon: Icons.search_rounded,
-                  label: 'search'.tr(),
-                  isSelected: _currentIndex == 1,
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    setState(() => _currentIndex = 1);
-                  },
-                ),
-                _AnimatedNavItem(
-                  icon: Icons.shopping_bag_outlined,
-                  activeIcon: Icons.shopping_bag_rounded,
-                  label: 'orders'.tr(),
-                  isSelected: _currentIndex == 2,
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    setState(() => _currentIndex = 2);
-                  },
-                ),
-                _AnimatedNavItem(
-                  icon: Icons.person_outline_rounded,
-                  activeIcon: Icons.person_rounded,
-                  label: 'profile'.tr(),
-                  isSelected: _currentIndex == 3,
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    setState(() => _currentIndex = 3);
-                  },
-                ),
-              ],
+        bottomNavigationBar: Container(
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.08),
+                blurRadius: 20,
+                offset: const Offset(0, -5),
+              ),
+            ],
+          ),
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: DesignTokens.spaceMD,
+                vertical: DesignTokens.spaceXS,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _AnimatedNavItem(
+                    icon: Icons.home_outlined,
+                    activeIcon: Icons.home_rounded,
+                    label: 'home'.tr(),
+                    isSelected: _currentIndex == 0,
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      setState(() => _currentIndex = 0);
+                    },
+                  ),
+                  _AnimatedNavItem(
+                    icon: Icons.search_outlined,
+                    activeIcon: Icons.search_rounded,
+                    label: 'search'.tr(),
+                    isSelected: _currentIndex == 1,
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      setState(() => _currentIndex = 1);
+                    },
+                  ),
+                  _AnimatedNavItem(
+                    icon: Icons.shopping_bag_outlined,
+                    activeIcon: Icons.shopping_bag_rounded,
+                    label: 'orders'.tr(),
+                    isSelected: _currentIndex == 2,
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      setState(() => _currentIndex = 2);
+                    },
+                  ),
+                  _AnimatedNavItem(
+                    icon: Icons.person_outline_rounded,
+                    activeIcon: Icons.person_rounded,
+                    label: 'profile'.tr(),
+                    isSelected: _currentIndex == 3,
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      setState(() => _currentIndex = 3);
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
         ),

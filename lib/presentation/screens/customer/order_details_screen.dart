@@ -11,6 +11,7 @@ import 'package:home_repair_app/core/di/injection_container.dart';
 import 'package:home_repair_app/services/chat_service.dart';
 import '../../helpers/auth_helper.dart';
 import 'add_review_screen.dart';
+import '../../widgets/wrappers.dart';
 
 class OrderDetailsScreen extends StatelessWidget {
   final OrderEntity order;
@@ -80,119 +81,122 @@ class OrderDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('orderNumber'.tr(args: [order.id.substring(0, 8)])),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Status Timeline
-            _buildStatusTimeline(),
-            const SizedBox(height: 32),
+    return PerformanceMonitorWrapper(
+      screenName: 'OrderDetailsScreen',
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('orderNumber'.tr(args: [order.id.substring(0, 8)])),
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Status Timeline
+              _buildStatusTimeline(),
+              const SizedBox(height: 32),
 
-            // Order Details
-            _buildSectionTitle('orderDetails'.tr()),
-            const SizedBox(height: 16),
-            _buildDetailRow('description'.tr(), order.description),
-            _buildDetailRow('serviceAddress'.tr(), order.address),
-            if (order.dateScheduled != null)
-              _buildDetailRow(
-                'scheduled'.tr(),
-                order.dateScheduled.toString().split('.')[0],
-              ),
-            const SizedBox(height: 24),
+              // Order Details
+              _buildSectionTitle('orderDetails'.tr()),
+              const SizedBox(height: 16),
+              _buildDetailRow('description'.tr(), order.description),
+              _buildDetailRow('serviceAddress'.tr(), order.address),
+              if (order.dateScheduled != null)
+                _buildDetailRow(
+                  'scheduled'.tr(),
+                  order.dateScheduled.toString().split('.')[0],
+                ),
+              const SizedBox(height: 24),
 
-            // Pricing
-            _buildSectionTitle('Pricing'),
-            const SizedBox(height: 16),
-            if (order.initialEstimate != null)
+              // Pricing
+              _buildSectionTitle('Pricing'),
+              const SizedBox(height: 16),
+              if (order.initialEstimate != null)
+                _buildDetailRow(
+                  'estimatedFee'.tr(),
+                  '${order.initialEstimate!.toInt()} EGP',
+                ),
+              if (order.finalPrice != null)
+                _buildDetailRow(
+                  'finalPrice'.tr(),
+                  '${order.finalPrice!.toInt()} EGP',
+                ),
+              _buildDetailRow('visitFee'.tr(), '${order.visitFee.toInt()} EGP'),
+              _buildDetailRow('vat'.tr(), '${order.vat.toInt()} EGP'),
+              const Divider(),
               _buildDetailRow(
-                'estimatedFee'.tr(),
-                '${order.initialEstimate!.toInt()} EGP',
+                'total'.tr(),
+                '${((order.finalPrice ?? order.initialEstimate ?? 0) + order.visitFee + order.vat).toInt()} EGP',
+                bold: true,
               ),
-            if (order.finalPrice != null)
-              _buildDetailRow(
-                'finalPrice'.tr(),
-                '${order.finalPrice!.toInt()} EGP',
-              ),
-            _buildDetailRow('visitFee'.tr(), '${order.visitFee.toInt()} EGP'),
-            _buildDetailRow('vat'.tr(), '${order.vat.toInt()} EGP'),
-            const Divider(),
-            _buildDetailRow(
-              'total'.tr(),
-              '${((order.finalPrice ?? order.initialEstimate ?? 0) + order.visitFee + order.vat).toInt()} EGP',
-              bold: true,
-            ),
-            const SizedBox(height: 32),
+              const SizedBox(height: 32),
 
-            // Actions
-            if (order.status == OrderStatus.pending)
-              CustomButton(
-                text: 'cancelOrder'.tr(),
-                variant: ButtonVariant.outline,
-                onPressed: () => _cancelOrder(context),
-              ),
-            if (order.status == OrderStatus.accepted ||
-                order.status == OrderStatus.traveling ||
-                order.status == OrderStatus.working)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16.0),
-                child: CustomButton(
-                  text: 'chatWithTechnician'.tr(),
+              // Actions
+              if (order.status == OrderStatus.pending)
+                CustomButton(
+                  text: 'cancelOrder'.tr(),
                   variant: ButtonVariant.outline,
-                  icon: Icons.chat_bubble_outline,
-                  onPressed: () async {
-                    if (order.technicianId == null) return;
+                  onPressed: () => _cancelOrder(context),
+                ),
+              if (order.status == OrderStatus.accepted ||
+                  order.status == OrderStatus.traveling ||
+                  order.status == OrderStatus.working)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),
+                  child: CustomButton(
+                    text: 'chatWithTechnician'.tr(),
+                    variant: ButtonVariant.outline,
+                    icon: Icons.chat_bubble_outline,
+                    onPressed: () async {
+                      if (order.technicianId == null) return;
 
-                    final chatService = ChatService();
-                    final userId = context.userId;
+                      final chatService = ChatService();
+                      final userId = context.userId;
 
-                    if (userId == null) return;
+                      if (userId == null) return;
 
-                    try {
-                      final chatId = await chatService.getChatIdForOrder(
-                        order.id,
-                        [userId, order.technicianId!],
-                      );
-
-                      if (context.mounted) {
-                        context.push(
-                          '/chat/$chatId',
-                          extra: {
-                            'otherUserName': 'Technician',
-                            'otherUserId': order.technicianId,
-                          },
+                      try {
+                        final chatId = await chatService.getChatIdForOrder(
+                          order.id,
+                          [userId, order.technicianId!],
                         );
+
+                        if (context.mounted) {
+                          context.push(
+                            '/chat/$chatId',
+                            extra: {
+                              'otherUserName': 'Technician',
+                              'otherUserId': order.technicianId,
+                            },
+                          );
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('failedToStartChat'.tr())),
+                          );
+                        }
                       }
-                    } catch (e) {
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('failedToStartChat'.tr())),
-                        );
-                      }
-                    }
+                    },
+                  ),
+                ),
+              if (order.status == OrderStatus.completed)
+                CustomButton(
+                  text: 'leaveReview'.tr(),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => AddReviewScreen(
+                          orderId: order.id,
+                          technicianId: order.technicianId!,
+                        ),
+                      ),
+                    );
                   },
                 ),
-              ),
-            if (order.status == OrderStatus.completed)
-              CustomButton(
-                text: 'leaveReview'.tr(),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => AddReviewScreen(
-                        orderId: order.id,
-                        technicianId: order.technicianId!,
-                      ),
-                    ),
-                  );
-                },
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );

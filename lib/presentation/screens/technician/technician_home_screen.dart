@@ -12,6 +12,7 @@ import 'incoming_orders_screen.dart';
 import 'active_jobs_screen.dart';
 import 'earnings_screen.dart';
 import 'technician_profile_screen.dart';
+import '../../widgets/wrappers.dart';
 
 class TechnicianHomeScreen extends StatefulWidget {
   const TechnicianHomeScreen({super.key});
@@ -43,79 +44,82 @@ class _TechnicianHomeScreenState extends State<TechnicianHomeScreen> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Scaffold(
-      body: _screens[_currentIndex],
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: colorScheme.surface,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              blurRadius: 20,
-              offset: const Offset(0, -5),
-            ),
-          ],
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: DesignTokens.spaceMD,
-              vertical: DesignTokens.spaceXS,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _AnimatedNavItem(
-                  icon: Icons.home_outlined,
-                  activeIcon: Icons.home_rounded,
-                  label: 'home'.tr(),
-                  isSelected: _currentIndex == 0,
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    setState(() => _currentIndex = 0);
-                  },
-                ),
-                _AnimatedNavItem(
-                  icon: Icons.inbox_outlined,
-                  activeIcon: Icons.inbox_rounded,
-                  label: 'orders'.tr(),
-                  isSelected: _currentIndex == 1,
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    setState(() => _currentIndex = 1);
-                  },
-                ),
-                _AnimatedNavItem(
-                  icon: Icons.work_outline_rounded,
-                  activeIcon: Icons.work_rounded,
-                  label: 'jobs'.tr(),
-                  isSelected: _currentIndex == 2,
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    setState(() => _currentIndex = 2);
-                  },
-                ),
-                _AnimatedNavItem(
-                  icon: Icons.account_balance_wallet_outlined,
-                  activeIcon: Icons.account_balance_wallet_rounded,
-                  label: 'earnings'.tr(),
-                  isSelected: _currentIndex == 3,
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    setState(() => _currentIndex = 3);
-                  },
-                ),
-                _AnimatedNavItem(
-                  icon: Icons.person_outline_rounded,
-                  activeIcon: Icons.person_rounded,
-                  label: 'profile'.tr(),
-                  isSelected: _currentIndex == 4,
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    setState(() => _currentIndex = 4);
-                  },
-                ),
-              ],
+    return PerformanceMonitorWrapper(
+      screenName: 'TechnicianHomeScreen',
+      child: Scaffold(
+        body: _screens[_currentIndex],
+        bottomNavigationBar: Container(
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.08),
+                blurRadius: 20,
+                offset: const Offset(0, -5),
+              ),
+            ],
+          ),
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: DesignTokens.spaceMD,
+                vertical: DesignTokens.spaceXS,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _AnimatedNavItem(
+                    icon: Icons.home_outlined,
+                    activeIcon: Icons.home_rounded,
+                    label: 'home'.tr(),
+                    isSelected: _currentIndex == 0,
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      setState(() => _currentIndex = 0);
+                    },
+                  ),
+                  _AnimatedNavItem(
+                    icon: Icons.inbox_outlined,
+                    activeIcon: Icons.inbox_rounded,
+                    label: 'orders'.tr(),
+                    isSelected: _currentIndex == 1,
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      setState(() => _currentIndex = 1);
+                    },
+                  ),
+                  _AnimatedNavItem(
+                    icon: Icons.work_outline_rounded,
+                    activeIcon: Icons.work_rounded,
+                    label: 'jobs'.tr(),
+                    isSelected: _currentIndex == 2,
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      setState(() => _currentIndex = 2);
+                    },
+                  ),
+                  _AnimatedNavItem(
+                    icon: Icons.account_balance_wallet_outlined,
+                    activeIcon: Icons.account_balance_wallet_rounded,
+                    label: 'earnings'.tr(),
+                    isSelected: _currentIndex == 3,
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      setState(() => _currentIndex = 3);
+                    },
+                  ),
+                  _AnimatedNavItem(
+                    icon: Icons.person_outline_rounded,
+                    activeIcon: Icons.person_rounded,
+                    label: 'profile'.tr(),
+                    isSelected: _currentIndex == 4,
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      setState(() => _currentIndex = 4);
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
         ),
