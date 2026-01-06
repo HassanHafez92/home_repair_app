@@ -499,6 +499,15 @@ class MockIUserRepository extends _i1.Mock implements _i7.IUserRepository {
                 _i4.Stream<_i9.TechnicianStatsEntity>.empty(),
           )
           as _i4.Stream<_i9.TechnicianStatsEntity>);
+
+  @override
+  _i4.Stream<List<_i5.UserEntity>> streamAllUsers() =>
+      (super.noSuchMethod(
+            Invocation.method(#streamAllUsers, []),
+            returnValue: _i4.Stream<List<_i5.UserEntity>>.empty(),
+            returnValueForMissingStub: _i4.Stream<List<_i5.UserEntity>>.empty(),
+          )
+          as _i4.Stream<List<_i5.UserEntity>>);
 }
 
 /// A class which mocks [SignInWithEmail].

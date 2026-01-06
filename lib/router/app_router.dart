@@ -60,6 +60,7 @@ import '../models/service_model.dart';
 import '../presentation/screens/chat/chat_list_screen.dart';
 import '../presentation/screens/chat/chat_screen.dart';
 import '../presentation/widgets/async_data_screen.dart';
+import '../presentation/screens/customer/promo_landing_screen.dart';
 
 // Helper class to convert BLoC stream to ChangeNotifier for GoRouter
 class GoRouterRefreshStream extends ChangeNotifier {
@@ -159,6 +160,14 @@ class AppRouter {
       },
       routes: [
         GoRoute(path: '/', builder: (context, state) => const SplashScreen()),
+        // Marketing deep links
+        GoRoute(
+          path: '/promo/:code',
+          builder: (context, state) {
+            final code = state.pathParameters['code'];
+            return PromoLandingScreen(promoCode: code);
+          },
+        ),
         GoRoute(
           path: '/welcome',
           builder: (context, state) => const WelcomeScreen(),

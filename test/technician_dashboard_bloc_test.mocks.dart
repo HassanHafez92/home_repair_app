@@ -196,4 +196,12 @@ class MockIUserRepository extends _i1.Mock implements _i3.IUserRepository {
             returnValue: _i4.Stream<_i8.TechnicianStatsEntity>.empty(),
           )
           as _i4.Stream<_i8.TechnicianStatsEntity>);
+
+  @override
+  _i4.Stream<List<_i6.UserEntity>> streamAllUsers() =>
+      (super.noSuchMethod(
+            Invocation.method(#streamAllUsers, []),
+            returnValue: _i4.Stream<List<_i6.UserEntity>>.empty(),
+          )
+          as _i4.Stream<List<_i6.UserEntity>>);
 }

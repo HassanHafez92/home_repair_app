@@ -8,6 +8,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:home_repair_app/config/app_config.dart';
+import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'firebase_config.dart';
 import 'services/auth_service.dart';
 import 'services/firestore_service.dart';
@@ -42,6 +43,13 @@ import 'router/app_router.dart';
 Future<void> mainCommon(AppConfig config) async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Enable high refresh rate (120Hz) on supported devices
+  try {
+    await FlutterDisplayMode.setHighRefreshRate();
+  } catch (_) {
+    // Silently fail on unsupported devices
+  }
+
   // Initialize Firebase (only once - auto-initialization is disabled in AndroidManifest)
   try {
     await Firebase.initializeApp(
@@ -70,6 +78,10 @@ Future<void> mainCommon(AppConfig config) async {
     // ignore: deprecated_member_use
     appleProvider: AppleProvider.debug,
   );
+
+  // Configure image cache size limits for memory optimization
+  PaintingBinding.instance.imageCache.maximumSize = 100; // Max 100 images
+  PaintingBinding.instance.imageCache.maximumSizeBytes = 50 << 20; // 50 MB
 
   // Initialize localization
   await EasyLocalization.ensureInitialized();

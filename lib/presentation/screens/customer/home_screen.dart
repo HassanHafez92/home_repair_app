@@ -30,22 +30,36 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
   late final List<Widget> _screens;
+  late final PageController _pageController;
 
   @override
   void initState() {
     super.initState();
+    _pageController = PageController();
     _screens = [
       HomeContent(
         onTabChange: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
+          _navigateToPage(index);
         },
       ),
       const ServicesScreen(),
       const OrdersScreen(),
       const ProfileScreen(),
     ];
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _navigateToPage(int index) {
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
   }
 
   @override
@@ -56,12 +70,17 @@ class _HomeScreenState extends State<HomeScreen> {
     return PerformanceMonitorWrapper(
       screenName: 'HomeScreen',
       child: Scaffold(
-        body: _screens[_currentIndex],
+        body: PageView(
+          controller: _pageController,
+          onPageChanged: (index) {
+            HapticFeedback.selectionClick();
+            setState(() => _currentIndex = index);
+          },
+          children: _screens,
+        ),
         endDrawer: AppDrawer(
           onNavigate: (index) {
-            setState(() {
-              _currentIndex = index;
-            });
+            _navigateToPage(index);
           },
         ),
         bottomNavigationBar: Container(
@@ -91,7 +110,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     isSelected: _currentIndex == 0,
                     onTap: () {
                       HapticFeedback.lightImpact();
-                      setState(() => _currentIndex = 0);
+                      _navigateToPage(0);
                     },
                   ),
                   _AnimatedNavItem(
@@ -101,7 +120,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     isSelected: _currentIndex == 1,
                     onTap: () {
                       HapticFeedback.lightImpact();
-                      setState(() => _currentIndex = 1);
+                      _navigateToPage(1);
                     },
                   ),
                   _AnimatedNavItem(
@@ -111,7 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     isSelected: _currentIndex == 2,
                     onTap: () {
                       HapticFeedback.lightImpact();
-                      setState(() => _currentIndex = 2);
+                      _navigateToPage(2);
                     },
                   ),
                   _AnimatedNavItem(
@@ -121,7 +140,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     isSelected: _currentIndex == 3,
                     onTap: () {
                       HapticFeedback.lightImpact();
-                      setState(() => _currentIndex = 3);
+                      _navigateToPage(3);
                     },
                   ),
                 ],
@@ -400,13 +419,19 @@ class HomeContent extends StatelessWidget {
                 const SizedBox(height: DesignTokens.spaceMD),
 
                 // Services Grid - House Maintenance Style
-                BlocBuilder<ServiceBloc, ServiceState>(
-                  builder: (context, state) {
-                    if (state.status == ServiceStatus.loading) {
+                BlocSelector<
+                  ServiceBloc,
+                  ServiceState,
+                  (ServiceStatus, List<ServiceEntity>)
+                >(
+                  selector: (state) => (state.status, state.services),
+                  builder: (context, data) {
+                    final (status, services) = data;
+                    if (status == ServiceStatus.loading) {
                       return const _ServiceIconGridSkeleton();
-                    } else if (state.status == ServiceStatus.failure) {
+                    } else if (status == ServiceStatus.failure) {
                       return Center(child: Text('errorLoadingServices'.tr()));
-                    } else if (state.services.isEmpty) {
+                    } else if (services.isEmpty) {
                       return Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -431,7 +456,6 @@ class HomeContent extends StatelessWidget {
                       );
                     }
 
-                    final services = state.services;
                     final displayServices = services.take(8).toList();
 
                     return GridView.builder(

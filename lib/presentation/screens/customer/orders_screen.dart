@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:home_repair_app/domain/entities/order_entity.dart';
+import 'package:home_repair_app/services/in_app_review_service.dart';
 import 'order_details_screen.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_state.dart';
 import '../../blocs/order/customer_order_bloc.dart';
 import '../../theme/design_tokens.dart';
 import '../../widgets/wrappers.dart';
+
+/// Service for triggering in-app reviews
+final _reviewService = InAppReviewService();
 
 class OrdersScreen extends StatefulWidget {
   const OrdersScreen({super.key});
@@ -176,6 +180,7 @@ class _OrdersScreenState extends State<OrdersScreen>
                   _getFilteredOrders(state.orders, 1),
                   false,
                   'noPastOrders'.tr(),
+                  isCompletedOrders: true, // Trigger review for completed
                 ),
                 _buildOrdersList(
                   _getFilteredOrders(state.orders, 2),
@@ -193,8 +198,17 @@ class _OrdersScreenState extends State<OrdersScreen>
   Widget _buildOrdersList(
     List<OrderEntity> orders,
     bool hasMore,
-    String emptyMessage,
-  ) {
+    String emptyMessage, {
+    bool isCompletedOrders = false,
+  }) {
+    // Trigger in-app review check when viewing completed orders
+    if (isCompletedOrders && orders.isNotEmpty) {
+      // Use addPostFrameCallback to avoid calling during build
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _reviewService.requestReviewIfEligible();
+      });
+    }
+
     if (orders.isEmpty) {
       return Center(
         child: Column(

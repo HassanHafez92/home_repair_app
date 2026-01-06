@@ -9,8 +9,43 @@ import 'package:home_repair_app/models/referral_model.dart';
 class ReferralService {
   final FirebaseFirestore _firestore;
 
+  /// Tiered reward tiers based on completed referrals
+  static const Map<int, double> _rewardTiers = {
+    10: 50.0, // Platinum: 10+ referrals = $50 per referral
+    5: 30.0, // Gold: 5-9 referrals = $30 per referral
+    3: 20.0, // Silver: 3-4 referrals = $20 per referral
+    0: 10.0, // Bronze: 0-2 referrals = $10 per referral
+  };
+
   ReferralService({FirebaseFirestore? firestore})
     : _firestore = firestore ?? FirebaseFirestore.instance;
+
+  /// Calculate reward amount based on tiered system
+  /// Returns reward amount for the referrer based on their completed referrals
+  double calculateTieredReward(int completedReferrals) {
+    for (final entry in _rewardTiers.entries) {
+      if (completedReferrals >= entry.key) {
+        return entry.value;
+      }
+    }
+    return _rewardTiers.values.last;
+  }
+
+  /// Get the user's current reward tier name
+  String getRewardTierName(int completedReferrals) {
+    if (completedReferrals >= 10) return 'Platinum';
+    if (completedReferrals >= 5) return 'Gold';
+    if (completedReferrals >= 3) return 'Silver';
+    return 'Bronze';
+  }
+
+  /// Get referrals needed to reach next tier
+  int referralsToNextTier(int completedReferrals) {
+    if (completedReferrals >= 10) return 0; // Already at max
+    if (completedReferrals >= 5) return 10 - completedReferrals;
+    if (completedReferrals >= 3) return 5 - completedReferrals;
+    return 3 - completedReferrals;
+  }
 
   /// Generate a unique referral code for a user
   Future<String> generateReferralCode(String userId, String userName) async {

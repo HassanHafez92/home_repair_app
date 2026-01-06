@@ -2,7 +2,7 @@ name: home_repair_app
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -59,32 +59,32 @@ dependencies:
   # Dependency Injection
   get_it: ^7.6.4
   injectable: ^2.3.2
-  
+
   # Phase 1: Analytics & Monitoring
   firebase_analytics: ^12.0.4
   firebase_crashlytics: ^5.0.5
-  
+
   # Phase 1: Push Notifications
   firebase_messaging: ^16.0.4
   flutter_local_notifications: ^19.5.0
-  
+
   # Phase 1: Performance & UI
   cached_network_image: ^3.3.0
   shimmer: ^3.0.0
   firebase_app_check: ^0.4.1+2
   flutter_rating_bar: ^4.0.1
   uuid: ^4.5.2
-  
+
   # Maps & Location
   google_maps_flutter: ^2.10.0
   geocoding: ^2.2.1
   geolocator: ^13.0.2
   flutter_image_compress: ^2.3.0
   path_provider: ^2.1.5
-  
+
   # Permissions
   permission_handler: ^11.3.1
-  
+
   # Diagnostics
   connectivity_plus: ^6.1.2
   package_info_plus: ^8.1.2
@@ -93,6 +93,10 @@ dependencies:
   rxdart: ^0.28.0
   flutter_secure_storage: ^9.2.4
 
+  # Enhancement Phases
+  flutter_displaymode: ^0.6.0 # 120Hz refresh rate support
+  lottie: ^3.1.0 # Empty state animations
+  in_app_review: ^2.0.9 # App store review prompts
 
 dev_dependencies:
   flutter_test:
@@ -116,7 +120,6 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
