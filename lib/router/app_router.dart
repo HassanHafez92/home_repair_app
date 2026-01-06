@@ -52,7 +52,9 @@ import '../presentation/screens/technician/order_action_screen.dart';
 import '../presentation/screens/customer/orders_screen.dart';
 import '../presentation/screens/customer/profile_screen.dart';
 import '../presentation/screens/customer/services_screen.dart';
-import '../presentation/screens/admin/admin_layout.dart';
+// Deferred loading for admin module to reduce initial app load time
+import '../presentation/screens/admin/admin_layout.dart'
+    deferred as admin_module;
 import '../services/auth_service.dart';
 import '../services/firestore_service.dart';
 import '../models/order_model.dart';
@@ -418,10 +420,22 @@ class AppRouter {
           builder: (context, state) => const ServicesScreen(),
         ),
 
-        // Admin Routes
+        // Admin Routes (deferred loading for performance)
         GoRoute(
           path: '/admin/dashboard',
-          builder: (context, state) => const AdminLayout(),
+          builder: (context, state) {
+            return FutureBuilder(
+              future: admin_module.loadLibrary(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  return admin_module.AdminLayout();
+                }
+                return const Scaffold(
+                  body: Center(child: CircularProgressIndicator()),
+                );
+              },
+            );
+          },
         ),
         // Chat Routes
         GoRoute(
