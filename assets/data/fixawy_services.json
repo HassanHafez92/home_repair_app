@@ -2,73 +2,97 @@
     {
         "id": "ac_maintenance",
         "name": "Air Conditioning",
+        "nameAr": "تكييف الهواء",
         "description": "Air conditioning maintenance service is a routine process designed to maintain efficiency, enhance performance, and extend the lifespan of the unit.",
+        "descriptionAr": "خدمة صيانة التكييف هي عملية روتينية مصممة للحفاظ على الكفاءة وتحسين الأداء وإطالة عمر الوحدة.",
         "imageUrl": "https://fixawy.com/storage/1065/AC---Category.jpg"
     },
     {
         "id": "alumetal",
         "name": "Alumetal",
+        "nameAr": "ألوميتال",
         "description": "The \"Alumetal\" service is a specialized service that offers solutions for aluminum-based structures, providing durability and aesthetic appeal.",
+        "descriptionAr": "خدمة الألوميتال هي خدمة متخصصة تقدم حلولاً للهياكل القائمة على الألومنيوم، توفر المتانة والجاذبية الجمالية.",
         "imageUrl": "https://fixawy.com/storage/829/Alumetal.jpg"
     },
     {
         "id": "appliances",
         "name": "Appliances",
+        "nameAr": "الأجهزة المنزلية",
         "description": "At Home Appliances Services, we provide maintenance and repair for various household appliances to ensure they run smoothly.",
+        "descriptionAr": "نقدم خدمات صيانة وإصلاح الأجهزة المنزلية المختلفة لضمان عملها بسلاسة.",
         "imageUrl": "https://fixawy.com/storage/823/Home-Appliences.jpg"
     },
     {
         "id": "buy_ac",
         "name": "Buying Air Condition",
+        "nameAr": "شراء تكييف",
         "description": "Supply and installation of a wide range of air conditioning units tailored to your space and cooling needs.",
+        "descriptionAr": "توريد وتركيب مجموعة واسعة من وحدات التكييف المصممة لتناسب مساحتك واحتياجات التبريد.",
         "imageUrl": "https://fixawy.com/storage/1156/Capture.PNG"
     },
     {
         "id": "carpentry",
         "name": "Carpentry",
+        "nameAr": "النجارة",
         "description": "Keep your woodwork in top condition with professional carpentry services, including repairs, installations, and custom work.",
+        "descriptionAr": "حافظ على أعمالك الخشبية في أفضل حالة مع خدمات النجارة المحترفة، بما في ذلك الإصلاحات والتركيبات والأعمال المخصصة.",
         "imageUrl": "https://fixawy.com/storage/827/Carpentry.jpg"
     },
     {
         "id": "electrical",
         "name": "Electrical",
+        "nameAr": "الكهرباء",
         "description": "Keep your electrical systems safe and functional with expert electrical maintenance and installation services.",
+        "descriptionAr": "حافظ على أنظمتك الكهربائية آمنة وفعالة مع خدمات الصيانة والتركيب الكهربائية المتخصصة.",
         "imageUrl": "https://fixawy.com/storage/828/Electricity.jpg"
     },
     {
         "id": "finishing",
         "name": "Finishing",
+        "nameAr": "التشطيبات",
         "description": "The finishing service is the final touch for your construction or renovation projects, ensuring high-quality results.",
+        "descriptionAr": "خدمة التشطيب هي اللمسة الأخيرة لمشاريع البناء أو التجديد، لضمان نتائج عالية الجودة.",
         "imageUrl": "https://fixawy.com/storage/1273/finishing.2.PNG"
     },
     {
         "id": "gypsum_board",
         "name": "Gypsum Board",
+        "nameAr": "ألواح الجبس",
         "description": "Gypsum board is a lightweight and versatile material used for creating walls, ceilings, and decorative elements in modern interiors.",
+        "descriptionAr": "ألواح الجبس هي مادة خفيفة ومتعددة الاستخدامات تُستخدم لإنشاء الجدران والأسقف والعناصر الزخرفية في التصميمات الداخلية الحديثة.",
         "imageUrl": "https://fixawy.com/storage/1126/Capture.-2025.PNG"
     },
     {
         "id": "painting",
         "name": "Painting",
+        "nameAr": "الدهانات",
         "description": "The painting service provides professional interior and exterior painting to refresh and protect your property.",
+        "descriptionAr": "تقدم خدمة الدهانات دهانات داخلية وخارجية احترافية لتجديد وحماية ممتلكاتك.",
         "imageUrl": "https://fixawy.com/storage/1133/painting---category.jpeg"
     },
     {
         "id": "plumbing",
         "name": "Plumbing",
+        "nameAr": "السباكة",
         "description": "Keep your plumbing working smoothly with professional plumbing repairs, maintenance, and new installations.",
+        "descriptionAr": "حافظ على عمل السباكة بسلاسة مع خدمات الإصلاح والصيانة والتركيبات الجديدة المحترفة.",
         "imageUrl": "https://fixawy.com/storage/826/Plumbing.jpg"
     },
     {
         "id": "satellite",
         "name": "Satellite",
+        "nameAr": "الدش والستلايت",
         "description": "The satellite dish service covers installation, alignment, and repair of satellite systems for optimal signal quality.",
+        "descriptionAr": "تغطي خدمة الدش تركيب وضبط وإصلاح أنظمة الاستقبال للحصول على جودة إشارة مثالية.",
         "imageUrl": "https://fixawy.com/storage/1114/category-satellite.jpg"
     },
     {
         "id": "tiling",
         "name": "Tiling",
+        "nameAr": "البلاط والسيراميك",
         "description": "Tiling service includes preparation and installation of tiles for floors and walls using high-quality materials.",
+        "descriptionAr": "تشمل خدمة البلاط إعداد وتركيب البلاط للأرضيات والجدران باستخدام مواد عالية الجودة.",
         "imageUrl": "https://fixawy.com/storage/1086/Tiling-category.jpg"
     }
 ]

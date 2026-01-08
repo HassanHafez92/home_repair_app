@@ -7,6 +7,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import '../../../core/constants/app_constants.dart';
 import '../../../core/error/exceptions.dart';
 import '../../../models/service_model.dart';
+import '../../../services/locale_provider.dart';
 import 'i_service_remote_data_source.dart';
 
 /// Implementation of [IServiceRemoteDataSource] using Firestore.
@@ -20,7 +21,7 @@ class ServiceRemoteDataSource implements IServiceRemoteDataSource {
       _firestore.collection(FirestoreCollections.services);
 
   @override
-  Future<List<ServiceModel>> getAllServices() async {
+  Future<List<ServiceModel>> getAllServices({String? languageCode}) async {
     try {
       final snapshot = await _servicesCollection.get();
       if (snapshot.docs.isNotEmpty) {
@@ -28,27 +29,40 @@ class ServiceRemoteDataSource implements IServiceRemoteDataSource {
             .map((doc) => ServiceModel.fromJson({...doc.data(), 'id': doc.id}))
             .toList();
       }
-      return _loadLocalServices();
+      return _loadLocalServices(languageCode: languageCode);
     } catch (e) {
       // Fallback to local data on error or if offline
-      return _loadLocalServices();
+      return _loadLocalServices(languageCode: languageCode);
     }
   }
 
-  Future<List<ServiceModel>> _loadLocalServices() async {
+  Future<List<ServiceModel>> _loadLocalServices({String? languageCode}) async {
     try {
       final jsonString = await rootBundle.loadString(
         'assets/data/fixawy_services.json',
       );
       final List<dynamic> jsonList = json.decode(jsonString);
+
+      // Auto-detect locale if not provided - use LocaleProvider for app locale
+      final effectiveLocale =
+          languageCode ?? LocaleProvider.currentLanguageCode;
+      final isArabic = effectiveLocale == 'ar';
+
       return jsonList.map((json) {
+        // Use Arabic name/description if available and locale is Arabic
+        final name = isArabic && json['nameAr'] != null
+            ? json['nameAr']
+            : json['name'];
+        final description = isArabic && json['descriptionAr'] != null
+            ? json['descriptionAr']
+            : json['description'];
+
         return ServiceModel(
           id: json['id'],
-          name: json['name'],
-          description: json['description'],
+          name: name,
+          description: description,
           iconUrl: json['imageUrl'], // Use the high-quality image URL
-          category:
-              json['name'], // Category is the service name itself in this dataset
+          category: name, // Category is the service name itself in this dataset
           avgPrice: 150.0, // Default values
           minPrice: 50.0,
           maxPrice: 300.0,

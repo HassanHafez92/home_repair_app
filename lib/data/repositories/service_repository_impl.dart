@@ -46,6 +46,7 @@ class ServiceRepositoryImpl implements IServiceRepository {
     int limit = 20,
     String? category,
     String? searchQuery,
+    String? languageCode,
   }) async {
     try {
       List<ServiceModel> services;
@@ -55,7 +56,9 @@ class ServiceRepositoryImpl implements IServiceRepository {
       } else if (searchQuery != null && searchQuery.isNotEmpty) {
         services = await _remoteDataSource.searchServices(searchQuery);
       } else {
-        services = await _remoteDataSource.getAllServices();
+        services = await _remoteDataSource.getAllServices(
+          languageCode: languageCode,
+        );
       }
 
       // Apply pagination manually since data source returns all
@@ -90,6 +93,7 @@ class ServiceRepositoryImpl implements IServiceRepository {
   @override
   Future<Either<Failure, List<ServiceEntity>>> getServicesWithCache({
     bool forceRefresh = false,
+    String? languageCode,
   }) async {
     // Offline-first: check cache first
     if (!forceRefresh) {
@@ -116,7 +120,9 @@ class ServiceRepositoryImpl implements IServiceRepository {
 
     // Fetch from remote
     try {
-      final services = await _remoteDataSource.getAllServices();
+      final services = await _remoteDataSource.getAllServices(
+        languageCode: languageCode,
+      );
 
       // Update cache
       await _localDataSource.cacheServices(services);

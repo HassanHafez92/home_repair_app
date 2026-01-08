@@ -5,6 +5,9 @@ import 'package:go_router/go_router.dart';
 import 'package:home_repair_app/presentation/blocs/auth/auth_bloc.dart';
 import 'package:home_repair_app/presentation/blocs/auth/auth_state.dart';
 import 'package:home_repair_app/presentation/blocs/auth/auth_event.dart';
+import 'package:home_repair_app/presentation/blocs/service/service_bloc.dart';
+import 'package:home_repair_app/presentation/blocs/service/service_event.dart';
+import 'package:home_repair_app/services/locale_provider.dart';
 import '../theme/design_tokens.dart';
 
 class AppDrawer extends StatelessWidget {
@@ -159,10 +162,14 @@ class AppDrawer extends StatelessWidget {
             ),
             onTap: () {
               if (context.locale.languageCode == 'en') {
+                LocaleProvider.setLanguageCode('ar');
                 context.setLocale(const Locale('ar'));
               } else {
+                LocaleProvider.setLanguageCode('en');
                 context.setLocale(const Locale('en'));
               }
+              // Reload services with new locale
+              context.read<ServiceBloc>().add(const ServiceLoadRequested());
               Navigator.pop(context);
             },
           ),

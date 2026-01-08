@@ -11,6 +11,7 @@ import '../../blocs/auth/auth_state.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../theme/design_tokens.dart';
+import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -340,6 +341,41 @@ class _LoginScreenState extends State<LoginScreen>
                                         const AuthFacebookSignInRequested(),
                                       );
                                     },
+                            ),
+                            const SizedBox(height: DesignTokens.spaceLG),
+
+                            // Don't have account - Sign up
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'dontHaveAccount'.tr(),
+                                  style: TextStyle(
+                                    color: DesignTokens.neutral600,
+                                    fontSize: DesignTokens.fontSizeBase,
+                                  ),
+                                ),
+                                TextButton(
+                                  onPressed: isLoading
+                                      ? null
+                                      : () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) =>
+                                                  const SignupScreen(),
+                                            ),
+                                          );
+                                        },
+                                  child: Text(
+                                    'signup'.tr(),
+                                    style: const TextStyle(
+                                      color: DesignTokens.primaryBlue,
+                                      fontWeight: DesignTokens.fontWeightBold,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                             const SizedBox(height: DesignTokens.spaceXL),
                           ],

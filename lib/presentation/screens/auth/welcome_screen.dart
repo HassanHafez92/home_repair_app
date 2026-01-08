@@ -3,7 +3,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:home_repair_app/services/locale_provider.dart';
 import 'login_screen.dart';
+import 'signup_screen.dart';
 import 'technician_signup_screen.dart';
 import '../../theme/design_tokens.dart';
 
@@ -167,7 +169,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => const LoginScreen(),
+                                  builder: (_) => const SignupScreen(),
                                 ),
                               );
                             }
@@ -256,7 +258,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                           _LanguageButton(
                             label: 'English',
                             isSelected: context.locale.languageCode == 'en',
-                            onTap: () => context.setLocale(const Locale('en')),
+                            onTap: () {
+                              LocaleProvider.setLanguageCode('en');
+                              context.setLocale(const Locale('en'));
+                            },
                           ),
                           Container(
                             height: 16,
@@ -267,7 +272,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                           _LanguageButton(
                             label: 'العربية',
                             isSelected: context.locale.languageCode == 'ar',
-                            onTap: () => context.setLocale(const Locale('ar')),
+                            onTap: () {
+                              LocaleProvider.setLanguageCode('ar');
+                              context.setLocale(const Locale('ar'));
+                            },
                           ),
                         ],
                       ),

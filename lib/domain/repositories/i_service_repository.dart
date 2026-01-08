@@ -12,16 +12,20 @@ abstract class IServiceRepository {
   Stream<List<ServiceEntity>> getServices();
 
   /// Gets paginated services.
+  /// [languageCode] - Optional language code for localized service names.
   Future<Either<Failure, PaginatedResult<ServiceEntity>>> getServicesPaginated({
     String? startAfterCursor,
     int limit = 20,
     String? category,
     String? searchQuery,
+    String? languageCode,
   });
 
   /// Gets services with optional cache.
+  /// [languageCode] - Optional language code for localized service names.
   Future<Either<Failure, List<ServiceEntity>>> getServicesWithCache({
     bool forceRefresh = false,
+    String? languageCode,
   });
 
   /// Adds a new service.

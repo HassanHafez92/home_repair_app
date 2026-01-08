@@ -63,11 +63,17 @@ class LoadServices extends ServiceEvent {
   final int limit;
   final String? category;
   final String? searchQuery;
+  final String? languageCode;
 
-  const LoadServices({this.limit = 20, this.category, this.searchQuery});
+  const LoadServices({
+    this.limit = 20,
+    this.category,
+    this.searchQuery,
+    this.languageCode,
+  });
 
   @override
-  List<Object?> get props => [limit, category, searchQuery];
+  List<Object?> get props => [limit, category, searchQuery, languageCode];
 }
 
 /// Load more services (next page)

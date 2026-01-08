@@ -79,7 +79,7 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      final button = tester.element(find.byType(ElevatedButton));
+      final _ = tester.element(find.byType(ElevatedButton));
       final size = tester.getSize(find.byType(ElevatedButton));
 
       // Verify minimum touch target size (48x48 per Material guidelines)

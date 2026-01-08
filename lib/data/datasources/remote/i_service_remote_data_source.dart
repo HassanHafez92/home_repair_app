@@ -8,8 +8,9 @@ import '../../../models/service_model.dart';
 abstract class IServiceRemoteDataSource {
   /// Gets all available services.
   ///
+  /// [languageCode] - Optional language code (e.g., 'ar' for Arabic) for localized names.
   /// Throws [ServerException] on Firestore errors.
-  Future<List<ServiceModel>> getAllServices();
+  Future<List<ServiceModel>> getAllServices({String? languageCode});
 
   /// Gets a service by ID.
   ///

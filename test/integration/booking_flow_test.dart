@@ -10,7 +10,6 @@ import 'package:home_repair_app/domain/entities/service_entity.dart';
 import 'package:home_repair_app/domain/repositories/i_service_repository.dart';
 import 'package:home_repair_app/domain/repositories/i_order_repository.dart';
 import 'package:home_repair_app/presentation/blocs/service/service_bloc.dart';
-import 'package:home_repair_app/presentation/blocs/booking/booking_bloc.dart';
 import 'package:home_repair_app/presentation/theme/app_theme_v2.dart';
 
 @GenerateNiceMocks([
@@ -22,7 +21,6 @@ import 'booking_flow_test.mocks.dart';
 void main() {
   group('Booking Flow Integration Tests', () {
     late MockIServiceRepository mockServiceRepository;
-    late MockIOrderRepository mockOrderRepository;
 
     final testService = ServiceEntity(
       id: 'test-service-1',
@@ -40,7 +38,6 @@ void main() {
 
     setUp(() {
       mockServiceRepository = MockIServiceRepository();
-      mockOrderRepository = MockIOrderRepository();
     });
 
     testWidgets('User can view service details', (tester) async {
@@ -108,7 +105,7 @@ void main() {
     testWidgets('Submit button is disabled when form is incomplete', (
       tester,
     ) async {
-      bool isFormComplete = false;
+      bool _ = false;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -119,7 +116,7 @@ void main() {
                 return Column(
                   children: [
                     ElevatedButton(
-                      onPressed: isFormComplete ? () {} : null,
+                      onPressed: null,
                       child: const Text('Submit Booking'),
                     ),
                   ],

@@ -5,11 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
+import 'package:home_repair_app/services/locale_provider.dart';
 import '../../blocs/profile/profile_bloc.dart';
 import '../../blocs/profile/profile_event.dart';
 import '../../blocs/profile/profile_state.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_event.dart';
+import '../../blocs/service/service_bloc.dart';
+import '../../blocs/service/service_event.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/wrappers.dart';
 
@@ -104,10 +107,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         : 'العربية',
                     onTap: () {
                       if (context.locale.languageCode == 'en') {
+                        LocaleProvider.setLanguageCode('ar');
                         context.setLocale(const Locale('ar'));
                       } else {
+                        LocaleProvider.setLanguageCode('en');
                         context.setLocale(const Locale('en'));
                       }
+                      // Reload services with new locale
+                      context.read<ServiceBloc>().add(
+                        const ServiceLoadRequested(),
+                      );
                     },
                   ),
                   _buildMenuItem(

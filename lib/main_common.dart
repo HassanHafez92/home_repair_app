@@ -39,6 +39,7 @@ import 'presentation/blocs/address_book/address_book_bloc.dart';
 import 'presentation/blocs/bloc_observer.dart';
 import 'presentation/theme/app_theme_v2.dart';
 import 'router/app_router.dart';
+import 'services/locale_provider.dart';
 
 Future<void> mainCommon(AppConfig config) async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -108,6 +109,14 @@ Future<void> mainCommon(AppConfig config) async {
   // Initialize SharedPreferences and then all dependencies via DI container
   final sharedPreferences = await SharedPreferences.getInstance();
   await initializeDependencies(sharedPreferences);
+
+  // Initialize LocaleProvider with the saved locale from SharedPreferences
+  // EasyLocalization stores locale in SharedPreferences with key 'locale'
+  final savedLocaleString = sharedPreferences.getString('locale');
+  if (savedLocaleString != null && savedLocaleString.isNotEmpty) {
+    // Format is 'en' or 'ar'
+    LocaleProvider.setLanguageCode(savedLocaleString.split('_').first);
+  }
 
   // Phase 1: Initialize all Phase 1 services (performance, logging, error handling, etc.)
   await ServiceIntegration().initialize(

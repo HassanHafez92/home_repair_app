@@ -55,6 +55,7 @@ class MockIServiceRepository extends _i1.Mock
     int? limit = 20,
     String? category,
     String? searchQuery,
+    String? languageCode,
   }) =>
       (super.noSuchMethod(
             Invocation.method(#getServicesPaginated, [], {
@@ -62,6 +63,7 @@ class MockIServiceRepository extends _i1.Mock
               #limit: limit,
               #category: category,
               #searchQuery: searchQuery,
+              #languageCode: languageCode,
             }),
             returnValue:
                 _i4.Future<
@@ -80,6 +82,7 @@ class MockIServiceRepository extends _i1.Mock
                       #limit: limit,
                       #category: category,
                       #searchQuery: searchQuery,
+                      #languageCode: languageCode,
                     }),
                   ),
                 ),
@@ -100,6 +103,7 @@ class MockIServiceRepository extends _i1.Mock
                       #limit: limit,
                       #category: category,
                       #searchQuery: searchQuery,
+                      #languageCode: languageCode,
                     }),
                   ),
                 ),
@@ -110,10 +114,11 @@ class MockIServiceRepository extends _i1.Mock
 
   @override
   _i4.Future<_i2.Either<_i6.Failure, List<_i5.ServiceEntity>>>
-  getServicesWithCache({bool? forceRefresh = false}) =>
+  getServicesWithCache({bool? forceRefresh = false, String? languageCode}) =>
       (super.noSuchMethod(
             Invocation.method(#getServicesWithCache, [], {
               #forceRefresh: forceRefresh,
+              #languageCode: languageCode,
             }),
             returnValue:
                 _i4.Future<
@@ -123,6 +128,7 @@ class MockIServiceRepository extends _i1.Mock
                     this,
                     Invocation.method(#getServicesWithCache, [], {
                       #forceRefresh: forceRefresh,
+                      #languageCode: languageCode,
                     }),
                   ),
                 ),
@@ -134,6 +140,7 @@ class MockIServiceRepository extends _i1.Mock
                     this,
                     Invocation.method(#getServicesWithCache, [], {
                       #forceRefresh: forceRefresh,
+                      #languageCode: languageCode,
                     }),
                   ),
                 ),

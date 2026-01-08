@@ -188,6 +188,7 @@ class ServiceBloc extends Bloc<ServiceEvent, ServiceState> {
       limit: event.limit,
       category: event.category,
       searchQuery: event.searchQuery,
+      languageCode: event.languageCode,
     );
 
     result.fold(
