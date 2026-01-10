@@ -583,51 +583,55 @@ class _DashboardCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(DesignTokens.spaceMD),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
-          boxShadow: DesignTokens.shadowSoft,
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: iconColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(DesignTokens.radiusSM),
+    return Semantics(
+      button: onTap != null,
+      label: '$title: $value',
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(DesignTokens.spaceMD),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
+            boxShadow: DesignTokens.shadowSoft,
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: iconColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(DesignTokens.radiusSM),
+                ),
+                child: Icon(icon, color: iconColor, size: 24),
               ),
-              child: Icon(icon, color: iconColor, size: 24),
-            ),
-            const SizedBox(width: DesignTokens.spaceMD),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: DesignTokens.fontSizeSM,
-                      color: DesignTokens.neutral500,
+              const SizedBox(width: DesignTokens.spaceMD),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: DesignTokens.fontSizeSM,
+                        color: DesignTokens.neutral500,
+                      ),
                     ),
-                  ),
-                  Text(
-                    value,
-                    style: TextStyle(
-                      fontSize: DesignTokens.fontSizeLG,
-                      fontWeight: DesignTokens.fontWeightBold,
-                      color: DesignTokens.neutral900,
+                    Text(
+                      value,
+                      style: TextStyle(
+                        fontSize: DesignTokens.fontSizeLG,
+                        fontWeight: DesignTokens.fontWeightBold,
+                        color: DesignTokens.neutral900,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            Icon(Icons.chevron_right, color: DesignTokens.neutral400),
-          ],
+              Icon(Icons.chevron_right, color: DesignTokens.neutral400),
+            ],
+          ),
         ),
       ),
     );
@@ -706,7 +710,7 @@ class _ScheduleItem extends StatelessWidget {
 }
 
 /// Action button widget
-class _ActionButton extends StatelessWidget {
+class _ActionButton extends StatefulWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
@@ -718,34 +722,75 @@ class _ActionButton extends StatelessWidget {
   });
 
   @override
+  State<_ActionButton> createState() => _ActionButtonState();
+}
+
+class _ActionButtonState extends State<_ActionButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 100),
+    );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.95,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        HapticFeedback.lightImpact();
-        onTap();
-      },
-      child: Container(
-        padding: const EdgeInsets.all(DesignTokens.spaceMD),
-        decoration: BoxDecoration(
-          color: DesignTokens.primaryBlue.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
-          border: Border.all(
-            color: DesignTokens.primaryBlue.withValues(alpha: 0.2),
-          ),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, size: 28, color: DesignTokens.primaryBlue),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: TextStyle(
-                fontWeight: DesignTokens.fontWeightSemiBold,
-                color: DesignTokens.primaryBlue,
-                fontSize: DesignTokens.fontSizeSM,
+    return Semantics(
+      button: true,
+      label: widget.label,
+      child: GestureDetector(
+        onTapDown: (_) => _controller.forward(),
+        onTapUp: (_) => _controller.reverse(),
+        onTapCancel: () => _controller.reverse(),
+        onTap: () {
+          HapticFeedback.lightImpact();
+          widget.onTap();
+        },
+        child: AnimatedBuilder(
+          animation: _scaleAnimation,
+          builder: (context, child) {
+            return Transform.scale(scale: _scaleAnimation.value, child: child);
+          },
+          child: Container(
+            padding: const EdgeInsets.all(DesignTokens.spaceMD),
+            decoration: BoxDecoration(
+              color: DesignTokens.primaryBlue.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(DesignTokens.radiusMD),
+              border: Border.all(
+                color: DesignTokens.primaryBlue.withValues(alpha: 0.2),
               ),
             ),
-          ],
+            child: Column(
+              children: [
+                Icon(widget.icon, size: 28, color: DesignTokens.primaryBlue),
+                const SizedBox(height: 8),
+                Text(
+                  widget.label,
+                  style: TextStyle(
+                    fontWeight: DesignTokens.fontWeightSemiBold,
+                    color: DesignTokens.primaryBlue,
+                    fontSize: DesignTokens.fontSizeSM,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

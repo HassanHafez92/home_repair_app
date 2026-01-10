@@ -9,6 +9,7 @@ import '../../blocs/auth/auth_state.dart';
 import '../../blocs/order/customer_order_bloc.dart';
 import '../../theme/design_tokens.dart';
 import '../../widgets/wrappers.dart';
+import '../../widgets/skeleton_order_card.dart';
 
 /// Service for triggering in-app reviews
 final _reviewService = InAppReviewService();
@@ -159,7 +160,7 @@ class _OrdersScreenState extends State<OrdersScreen>
         body: BlocBuilder<CustomerOrderBloc, CustomerOrderState>(
           builder: (context, state) {
             if (state.status == CustomerOrderStatus.loading) {
-              return const Center(child: CircularProgressIndicator());
+              return const SkeletonOrderList(itemCount: 4);
             } else if (state.status == CustomerOrderStatus.failure) {
               return Center(
                 child: Text(

@@ -458,29 +458,45 @@ class HomeContent extends StatelessWidget {
 
                     final displayServices = services.take(8).toList();
 
-                    return GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 4,
-                            crossAxisSpacing: DesignTokens.spaceMD,
-                            mainAxisSpacing: DesignTokens.spaceMD,
-                            childAspectRatio: 0.85,
-                          ),
-                      itemCount: displayServices.length,
-                      itemBuilder: (context, index) {
-                        final service = displayServices[index];
-                        return _ServiceIconCard(
-                          icon: _getIconForCategory(service.category),
-                          label: service.name.tr(),
-                          onTap: () {
-                            HapticFeedback.lightImpact();
-                            Navigator.push(
-                              context,
-                              FadeScalePageRoute(
-                                page: ServiceDetailsScreen(service: service),
+                    return LayoutBuilder(
+                      builder: (context, constraints) {
+                        // Responsive: 4 columns phone, 5 tablet portrait, 6 tablet landscape
+                        int crossAxisCount = 4;
+                        if (constraints.maxWidth >
+                            DesignTokens.breakpointTablet) {
+                          crossAxisCount = 6;
+                        } else if (constraints.maxWidth >
+                            DesignTokens.breakpointMobile) {
+                          crossAxisCount = 5;
+                        }
+
+                        return GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: crossAxisCount,
+                                crossAxisSpacing: DesignTokens.spaceMD,
+                                mainAxisSpacing: DesignTokens.spaceMD,
+                                childAspectRatio: 0.85,
                               ),
+                          itemCount: displayServices.length,
+                          itemBuilder: (context, index) {
+                            final service = displayServices[index];
+                            return _ServiceIconCard(
+                              icon: _getIconForCategory(service.category),
+                              label: service.name.tr(),
+                              onTap: () {
+                                HapticFeedback.lightImpact();
+                                Navigator.push(
+                                  context,
+                                  FadeScalePageRoute(
+                                    page: ServiceDetailsScreen(
+                                      service: service,
+                                    ),
+                                  ),
+                                );
+                              },
                             );
                           },
                         );

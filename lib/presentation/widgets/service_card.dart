@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:home_repair_app/domain/entities/service_entity.dart';
 import '../theme/design_tokens.dart';
 
-class ServiceCard extends StatelessWidget {
+class ServiceCard extends StatefulWidget {
   final ServiceEntity service;
   final VoidCallback onTap;
   final IconData? iconData;
@@ -16,8 +17,52 @@ class ServiceCard extends StatelessWidget {
     this.iconData,
   });
 
+  @override
+  State<ServiceCard> createState() => _ServiceCardState();
+}
+
+class _ServiceCardState extends State<ServiceCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _scaleController;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _scaleController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 100),
+    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
+      CurvedAnimation(parent: _scaleController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _scaleController.dispose();
+    super.dispose();
+  }
+
+  void _handleTapDown(TapDownDetails details) {
+    _scaleController.forward();
+  }
+
+  void _handleTapUp(TapUpDetails details) {
+    _scaleController.reverse();
+  }
+
+  void _handleTapCancel() {
+    _scaleController.reverse();
+  }
+
+  void _handleTap() {
+    HapticFeedback.selectionClick();
+    widget.onTap();
+  }
+
   bool get _isPhotoUrl {
-    final url = service.iconUrl.toLowerCase();
+    final url = widget.service.iconUrl.toLowerCase();
     return url.contains('unsplash.com') || url.contains('pexels.com');
   }
 
@@ -25,12 +70,17 @@ class ServiceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
-      label: 'Book ${service.name} service',
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(DesignTokens.radiusLG),
+      label: 'Book ${widget.service.name} service',
+      child: GestureDetector(
+        onTapDown: _handleTapDown,
+        onTapUp: _handleTapUp,
+        onTapCancel: _handleTapCancel,
+        onTap: _handleTap,
+        child: AnimatedBuilder(
+          animation: _scaleAnimation,
+          builder: (context, child) {
+            return Transform.scale(scale: _scaleAnimation.value, child: child);
+          },
           child: _isPhotoUrl
               ? _buildPhotoCard(context)
               : _buildIconCard(context),
@@ -46,7 +96,7 @@ class ServiceCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(DesignTokens.radiusLG),
         boxShadow: DesignTokens.shadowSoft,
         image: DecorationImage(
-          image: CachedNetworkImageProvider(service.iconUrl),
+          image: CachedNetworkImageProvider(widget.service.iconUrl),
           fit: BoxFit.cover,
         ),
       ),
@@ -83,7 +133,9 @@ class ServiceCard extends StatelessWidget {
                 ),
                 child: Text(
                   'fromPrice'.tr(
-                    namedArgs: {'price': service.minPrice.toInt().toString()},
+                    namedArgs: {
+                      'price': widget.service.minPrice.toInt().toString(),
+                    },
                   ),
                   style: const TextStyle(
                     fontSize: 10,
@@ -96,7 +148,7 @@ class ServiceCard extends StatelessWidget {
             const Spacer(),
             // Title
             Text(
-              service.name,
+              widget.service.name,
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
                 fontWeight: DesignTokens.fontWeightBold,
                 color: Colors.white,
@@ -145,7 +197,7 @@ class ServiceCard extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: Icon(
-              iconData ?? Icons.build_rounded,
+              widget.iconData ?? Icons.build_rounded,
               color: Theme.of(context).colorScheme.primary,
               size: DesignTokens.iconSizeMD,
             ),
@@ -165,7 +217,9 @@ class ServiceCard extends StatelessWidget {
             ),
             child: Text(
               'fromPrice'.tr(
-                namedArgs: {'price': service.minPrice.toInt().toString()},
+                namedArgs: {
+                  'price': widget.service.minPrice.toInt().toString(),
+                },
               ),
               style: TextStyle(
                 fontSize: 10,
@@ -177,7 +231,7 @@ class ServiceCard extends StatelessWidget {
           const SizedBox(height: DesignTokens.spaceXXS),
           // Text
           Text(
-            service.name,
+            widget.service.name,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
               fontWeight: DesignTokens.fontWeightBold,
               color: Theme.of(context).colorScheme.onSurface,

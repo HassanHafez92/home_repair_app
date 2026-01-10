@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:home_repair_app/utils/seed_data.dart';
 import '../../widgets/service_card.dart';
 import '../../widgets/fixawy_service_card.dart';
+import '../../widgets/skeleton_loader.dart';
 import '../../widgets/breadcrumb_navigator.dart';
 import '../../utils/responsive_utils.dart';
 import '../../theme/design_tokens.dart';
@@ -152,7 +153,13 @@ class _ServicesScreenState extends State<ServicesScreen> {
               child: BlocBuilder<ServiceBloc, ServiceState>(
                 builder: (context, state) {
                   if (state.status == ServiceStatus.loading) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const Padding(
+                      padding: EdgeInsets.all(16),
+                      child: SkeletonServiceGrid(
+                        itemCount: 9,
+                        crossAxisCount: 3,
+                      ),
+                    );
                   } else if (state.status == ServiceStatus.failure) {
                     return Center(child: Text('errorLoadingServices'.tr()));
                   } else if (state.services.isEmpty) {
